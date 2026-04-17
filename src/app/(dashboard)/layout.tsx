@@ -272,7 +272,10 @@ export default function DashboardLayout({
               priority
             />
           </Link>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserButton afterSignOutUrl="/" />
+          </div>
         </header>
         <main className="mx-auto max-w-3xl p-4 lg:p-8 animate-fade-in">
           <ErrorBoundary>

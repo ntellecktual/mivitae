@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { query, mutation, internalMutation, internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { getUserPlan, getLimits } from "./planLimits";
+import { ensureAuthUser } from "./authHelpers";
 
 export const generateUploadUrl = mutation({
   args: {},
@@ -18,14 +19,7 @@ export const create = mutation({
     fileName: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await ensureAuthUser(ctx);
 
     // Validate file name length
     if (args.fileName.length > 255) throw new Error("File name too long");
@@ -131,14 +125,7 @@ export const startParse = mutation({
     fileType: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await ensureAuthUser(ctx);
 
     // Verify resume belongs to this user
     const resume = await ctx.db.get(args.resumeId);
@@ -186,14 +173,7 @@ export const startTextParse = mutation({
     source: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await ensureAuthUser(ctx);
 
     if (args.text.trim().length < 50) {
       throw new Error("Text too short — paste at least 50 characters");

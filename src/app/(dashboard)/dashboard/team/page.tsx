@@ -87,7 +87,7 @@ export default function TeamPage() {
             <h1 className="text-2xl font-bold tracking-tight">{myTeam.name}</h1>
             <div className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
               <Globe className="h-3.5 w-3.5" />
-              <span className="font-mono">mivitae.io/org/{myTeam.slug}</span>
+              <span className="font-mono">mivitae.org/org/{myTeam.slug}</span>
             </div>
           </div>
         </div>
@@ -176,7 +176,7 @@ const TEAM_BENEFITS = [
   {
     icon: LayoutGrid,
     title: "Shared org page",
-    desc: "One URL — mivitae.io/org/your-team — showing all members' portfolios.",
+    desc: "One URL — mivitae.org/org/your-team — showing all members' portfolios.",
   },
   {
     icon: Users,
@@ -282,7 +282,7 @@ function CreateTeamForm() {
           <div className="rounded-2xl border border-primary/20 bg-primary/5 px-5 py-4 text-sm text-muted-foreground">
             Your team page will live at{" "}
             <span className="font-mono text-foreground">
-              mivitae.io/org/{form.slug || "your-team"}
+              mivitae.org/org/{form.slug || "your-team"}
             </span>
           </div>
         </div>
@@ -313,7 +313,7 @@ function CreateTeamForm() {
               <Label htmlFor="slug">Team URL</Label>
               <div className="flex items-center gap-2">
                 <span className="shrink-0 font-mono text-sm text-muted-foreground">
-                  mivitae.io/org/
+                  mivitae.org/org/
                 </span>
                 <Input
                   id="slug"

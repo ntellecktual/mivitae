@@ -878,7 +878,7 @@ export default function PortfolioRenderer({
 
       <footer className="pf-footer">
         Built with{" "}
-        <a href="https://mivitae.io" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle", marginLeft: "4px" }}>
+        <a href="https://mivitae.org" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle", marginLeft: "4px" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-light.png" alt="mivitae" height={18} style={{ height: "18px", width: "auto", display: "block" }} />
         </a>

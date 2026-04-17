@@ -154,7 +154,7 @@ export default function HomePage() {
               step={3}
               icon={Globe}
               title="Publish & share"
-              description={`Your portfolio goes live at mivitae.io/u/your-name. SEO-optimized, social-share-ready, and always up to date. One URL for every application.`}
+              description={`Your portfolio goes live at mivitae.org/u/your-name. SEO-optimized, social-share-ready, and always up to date. One URL for every application.`}
             />
           </div>
         </div>
@@ -246,7 +246,7 @@ export default function HomePage() {
             <FeatureCard
               icon={Globe}
               title="Public Portfolio Pages"
-              description="Server-rendered portfolio at mivitae.io/u/your-name with hero section, work timeline, education, demos gallery, and floating social share bar."
+              description="Server-rendered portfolio at mivitae.org/u/your-name with hero section, work timeline, education, demos gallery, and floating social share bar."
               whyItMatters="A real URL that replaces the need for a personal website. Always up to date, always accessible."
             />
             <FeatureCard
@@ -374,7 +374,7 @@ export default function HomePage() {
           <div className="mt-12 grid gap-6 sm:grid-cols-3">
             <TeamFeatureCard
               title="Branded Org Page"
-              description={`mivitae.io/org/your-team \u2014 logo, description, social links, and a member grid linking to every individual portfolio.`}
+              description={`mivitae.org/org/your-team \u2014 logo, description, social links, and a member grid linking to every individual portfolio.`}
             />
             <TeamFeatureCard
               title="Team Theme Studio"
@@ -472,7 +472,7 @@ export default function HomePage() {
               description="For agencies, programs, and teams that sell collectively."
               features={[
                 "5 team member seats",
-                "Branded org page (mivitae.io/org/name)",
+                "Branded org page (mivitae.org/org/name)",
                 "Team Theme Studio",
                 "Shared demo library",
                 "Team analytics dashboard",
@@ -532,7 +532,7 @@ export default function HomePage() {
             />
             <FaqItem
               question="What happens to my portfolio if I cancel?"
-              answer="Your public portfolio at mivitae.io/u/yourname stays live on the free plan forever. You keep your profile, work history, and education. Pro features like unlimited demos, analytics, and Theme Studio are paused until you re-subscribe."
+              answer="Your public portfolio at mivitae.org/u/yourname stays live on the free plan forever. You keep your profile, work history, and education. Pro features like unlimited demos, analytics, and Theme Studio are paused until you re-subscribe."
             />
             <FaqItem
               question={`How does the AI r\u00e9sum\u00e9 parsing work?`}

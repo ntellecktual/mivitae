@@ -1083,7 +1083,7 @@ function PublishStep({ onBack }: { onBack: () => void }) {
         <div className="space-y-2">
           <Label htmlFor="slug">Your Portfolio URL</Label>
           <div className="flex items-center gap-2">
-            <span className="shrink-0 text-sm text-muted-foreground">mivitae.io/u/</span>
+            <span className="shrink-0 text-sm text-muted-foreground">mivitae.org/u/</span>
             <Input
               id="slug"
               value={slug}

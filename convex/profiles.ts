@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation, internalMutation } from "./_generated/server";
+import { ensureAuthUser } from "./authHelpers";
 
 // Reserved slugs that cannot be used as profile URLs
 const RESERVED_SLUGS = new Set([
@@ -147,14 +148,7 @@ export const upsertSelf = mutation({
     themeConfig: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await ensureAuthUser(ctx);
 
     const existing = await ctx.db
       .query("profiles")
@@ -189,11 +183,13 @@ export const upsertSelf = mutation({
 
     // New profile — generate slug from name
     const baseName =
-      identity.name
-        ?.toLowerCase()
+      [user.firstName, user.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
         .replace(/[^a-z0-9]/g, "-")
         .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "") ?? "user";
+        .replace(/^-|-$/g, "") || "user";
     const slug = validateSlug(args.slug ?? `${baseName}-${Math.floor(Math.random() * 9000) + 1000}`);
 
     const slugTaken = await ctx.db
@@ -219,14 +215,7 @@ export const upsertSelf = mutation({
 export const saveTheme = mutation({
   args: { themeConfig: v.any() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await ensureAuthUser(ctx);
 
     const profile = await ctx.db
       .query("profiles")

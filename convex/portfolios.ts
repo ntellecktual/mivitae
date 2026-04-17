@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation, internalMutation } from "./_generated/server";
+import { ensureAuthUser } from "./authHelpers";
 
 export const getSelf = query({
   args: {},
@@ -24,14 +25,7 @@ export const getSelf = query({
 export const ensureDefault = mutation({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await ensureAuthUser(ctx);
 
     const existing = await ctx.db
       .query("portfolios")

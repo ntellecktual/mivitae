@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation, internalMutation } from "./_generated/server";
 import { getUserPlan, getLimits } from "./planLimits";
+import { ensureAuthUser } from "./authHelpers";
 
 export const getByUserId = query({
   args: { userId: v.id("users") },
@@ -64,14 +65,7 @@ export const createSelf = mutation({
     order: v.number(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await ensureAuthUser(ctx);
 
     const portfolio = await ctx.db
       .query("portfolios")
@@ -145,14 +139,7 @@ export const updateSelf = mutation({
     order: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await ensureAuthUser(ctx);
 
     const section = await ctx.db.get(args.sectionId);
     if (!section || section.userId !== user._id) throw new Error("Not authorized");
@@ -174,14 +161,7 @@ export const updateSelf = mutation({
 export const removeSelf = mutation({
   args: { sectionId: v.id("portfolioSections") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await ensureAuthUser(ctx);
 
     const section = await ctx.db.get(args.sectionId);
     if (!section || section.userId !== user._id) throw new Error("Not authorized");
@@ -196,14 +176,7 @@ export const linkDemo = mutation({
     demoId: v.id("userDemos"),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await ensureAuthUser(ctx);
 
     const section = await ctx.db.get(args.sectionId);
     if (!section || section.userId !== user._id) throw new Error("Not authorized");
@@ -222,14 +195,7 @@ export const unlinkDemo = mutation({
     demoId: v.id("userDemos"),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await ensureAuthUser(ctx);
 
     const section = await ctx.db.get(args.sectionId);
     if (!section || section.userId !== user._id) throw new Error("Not authorized");

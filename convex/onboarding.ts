@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation, internalMutation, internalQuery } from "./_generated/server";
+import { ensureAuthUser } from "./authHelpers";
 
 export const getState = internalQuery({
   args: { userId: v.id("users") },
@@ -100,14 +101,7 @@ export const getSelf = query({
 export const initializeSelf = mutation({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await ensureAuthUser(ctx);
 
     const existing = await ctx.db
       .query("onboardingState")
@@ -127,14 +121,7 @@ export const initializeSelf = mutation({
 export const advanceSelf = mutation({
   args: { completedStep: v.number(), nextStep: v.number() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await ensureAuthUser(ctx);
 
     const state = await ctx.db
       .query("onboardingState")
@@ -156,14 +143,7 @@ export const advanceSelf = mutation({
 export const completeSelf = mutation({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const user = await ensureAuthUser(ctx);
 
     const state = await ctx.db
       .query("onboardingState")

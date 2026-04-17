@@ -14,17 +14,20 @@ const convex = new ConvexReactClient(
 
 /** Syncs the Clerk session into Convex on first authenticated load. */
 function ConvexUserSync() {
+  const { isSignedIn } = useAuth();
   const upsertSelf = useMutation(api.users.upsertSelf);
   const done = useRef(false);
 
   useEffect(() => {
-    if (done.current) return;
-    done.current = true;
-    upsertSelf().catch(() => {
-      // Not authenticated yet — will retry on next render cycle when auth resolves
-      done.current = false;
-    });
-  }, [upsertSelf]);
+    if (!isSignedIn || done.current) return;
+    upsertSelf()
+      .then(() => {
+        done.current = true;
+      })
+      .catch(() => {
+        // Auth token may not have propagated yet — will retry on next render
+      });
+  }, [isSignedIn, upsertSelf]);
 
   return null;
 }

@@ -75,7 +75,7 @@ export default function ReferralsPage() {
   }, [stats, ensureMyCode]);
 
   const referralLink = stats?.code
-    ? `${process.env.NEXT_PUBLIC_APP_URL ?? "https://mivitae.io"}/sign-up?ref=${stats.code}`
+    ? `${process.env.NEXT_PUBLIC_APP_URL ?? "https://mivitae.org"}/sign-up?ref=${stats.code}`
     : null;
 
   function copyLink() {

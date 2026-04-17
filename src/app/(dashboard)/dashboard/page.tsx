@@ -72,7 +72,7 @@ function calcCompletion(profile: ProfileShape | null | undefined): {
 // ── Share Widget ──────────────────────────────────────────────────────────────
 
 function ShareCard({ slug }: { slug: string }) {
-  const url = `https://mivitae.io/u/${slug}`;
+  const url = `https://mivitae.org/u/${slug}`;
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -98,7 +98,7 @@ function ShareCard({ slug }: { slug: string }) {
             </p>
             <div className="mt-3 flex items-center gap-2 rounded-lg border bg-background px-3 py-2">
               <span className="flex-1 truncate font-mono text-xs text-muted-foreground">
-                mivitae.io/u/{slug}
+                mivitae.org/u/{slug}
               </span>
               <button
                 onClick={handleCopy}

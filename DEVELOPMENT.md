@@ -5,7 +5,7 @@
 >
 > A SaaS platform where anyone uploads a résumé and receives an auto-generated,
 > living portfolio: verified work history, education timeline, and industry-specific
-> interactive demo cards — all publicly shareable at `mivitae.io/u/[slug]`.
+> interactive demo cards — all publicly shareable at `mivitae.org/u/[slug]`.
 
 ---
 
@@ -805,7 +805,7 @@ npx convex logs              # View Convex function logs
 >
 > A SaaS platform where anyone uploads a résumé and receives an auto-generated,
 > living portfolio: verified work history, education timeline, and industry-specific
-> interactive demo cards — all publicly shareable at `mivitae.io/u/[slug]`.
+> interactive demo cards — all publicly shareable at `mivitae.org/u/[slug]`.
 
 ---
 
@@ -1554,7 +1554,7 @@ Route: `src/app/u/[slug]/page.tsx`
 │       ├── Title + description
 │       └── "Launch Demo" → interactive content
 │
-└── Footer: "Built with mivitae.io"
+└── Footer: "Built with mivitae.org"
 ```
 
 ### Implementation Notes:
@@ -1730,7 +1730,7 @@ export async function GET(request: Request) {
       <img src={avatarUrl} />
       <h1>{firstName} {lastName}</h1>
       <p>{headline}</p>
-      <p>mivitae.io/u/{slug}</p>
+      <p>mivitae.org/u/{slug}</p>
     </div>,
     { width: 1200, height: 630 }
   )
@@ -1763,22 +1763,22 @@ In Vercel, set `CONVEX_DEPLOY_KEY` environment variable using the key from the C
 
 After Vercel deployment:
 1. Go to clerk.com → your app → Webhooks → Add Endpoint
-2. URL: `https://mivitae.io/api/clerk/webhook`
+2. URL: `https://mivitae.org/api/clerk/webhook`
 3. Events: `user.created`, `user.updated`, `user.deleted`
 4. Copy the signing secret → add as `CLERK_WEBHOOK_SECRET` in Vercel env vars
 
 ### Production Stripe webhook:
 
 1. Go to dashboard.stripe.com → Developers → Webhooks → Add Endpoint
-2. URL: `https://mivitae.io/api/stripe/webhook`
+2. URL: `https://mivitae.org/api/stripe/webhook`
 3. Events: `checkout.session.completed`, `customer.subscription.created`,
    `customer.subscription.updated`, `customer.subscription.deleted`
 4. Copy signing secret → add as `STRIPE_WEBHOOK_SECRET` in Vercel env vars
 
 ### Domain:
 
-1. Buy `mivitae.io` on Namecheap / Cloudflare.
-2. In Vercel: Settings → Domains → Add `mivitae.io`.
+1. Buy `mivitae.org` on Namecheap / Cloudflare.
+2. In Vercel: Settings → Domains → Add `mivitae.org`.
 3. Add the DNS records Vercel provides to your registrar.
 
 ---

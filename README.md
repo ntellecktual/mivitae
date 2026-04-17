@@ -2,7 +2,7 @@
 
 > **mi vitae** (/miː ˈvɪtaɪ/) — Latin: "my life"
 
-A SaaS platform where anyone uploads a résumé and receives an auto-generated, living portfolio: verified work history, education timeline, and industry-specific interactive demo cards — all publicly shareable at `mivitae.io/u/[slug]`.
+A SaaS platform where anyone uploads a résumé and receives an auto-generated, living portfolio: verified work history, education timeline, and industry-specific interactive demo cards — all publicly shareable at `mivitae.org/u/[slug]`.
 
 ---
 

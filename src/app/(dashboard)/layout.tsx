@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
 import {
   LayoutDashboard,
@@ -223,12 +223,65 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const onboardingState = useQuery(api.onboarding.getSelf);
+
+  // Gate: redirect to onboarding if not complete (and not already there)
+  const isOnboarding = pathname === "/dashboard/onboarding";
+  useEffect(() => {
+    if (
+      onboardingState !== undefined &&
+      onboardingState !== null &&
+      !onboardingState.isComplete &&
+      !isOnboarding
+    ) {
+      router.replace("/dashboard/onboarding");
+    }
+    // New users without onboarding state yet — also redirect
+    if (onboardingState === null && !isOnboarding) {
+      router.replace("/dashboard/onboarding");
+    }
+  }, [onboardingState, isOnboarding, router]);
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
+
+  // During onboarding, show a minimal layout without sidebar navigation
+  if (isOnboarding || (onboardingState !== undefined && !onboardingState?.isComplete)) {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border/50 bg-background/80 px-4 backdrop-blur-xl lg:px-6">
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo-light.png"
+              alt="mivitae"
+              width={100}
+              height={30}
+              className="block dark:hidden"
+              priority
+            />
+            <Image
+              src="/logo-dark.png"
+              alt="mivitae"
+              width={100}
+              height={30}
+              className="hidden dark:block"
+              priority
+            />
+          </Link>
+          <ThemeToggle />
+        </header>
+        <main className="mx-auto max-w-3xl p-4 lg:p-8 animate-fade-in">
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen">

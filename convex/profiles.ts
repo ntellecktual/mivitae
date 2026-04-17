@@ -1,0 +1,303 @@
+import { v } from "convex/values";
+import { query, mutation, internalMutation } from "./_generated/server";
+
+// Reserved slugs that cannot be used as profile URLs
+const RESERVED_SLUGS = new Set([
+  "admin", "api", "app", "auth", "billing", "blog", "careers",
+  "dashboard", "docs", "help", "login", "logout", "org", "pricing",
+  "privacy", "profile", "settings", "sign-in", "sign-up", "signup",
+  "signin", "sitemap", "status", "support", "terms", "u", "user",
+  "users", "www", "about", "contact", "demo", "demos", "team",
+  "teams", "referral", "referrals", "upload", "onboarding",
+]);
+
+function validateSlug(slug: string): string {
+  const cleaned = slug
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 50);
+  if (cleaned.length < 3) throw new Error("Slug must be at least 3 characters");
+  if (RESERVED_SLUGS.has(cleaned)) throw new Error(`"${cleaned}" is reserved. Choose another.`);
+  return cleaned;
+}
+
+/** Block javascript: / data: URLs from being stored in profile link fields */
+function validateUrl(url: string | undefined, fieldName: string): void {
+  if (!url) return;
+  if (url.length > 500) throw new Error(`${fieldName} too long (max 500)`);
+  const lower = url.trim().toLowerCase();
+  if (lower.startsWith("javascript:") || lower.startsWith("data:")) {
+    throw new Error(`Invalid ${fieldName}`);
+  }
+}
+
+export const getByUserId = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .unique();
+  },
+});
+
+export const getBySlug = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("profiles")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .unique();
+  },
+});
+
+// Internal-only: used by the Clerk webhook / resume parser
+export const createInternal = internalMutation({
+  args: {
+    userId: v.id("users"),
+    slug: v.string(),
+    headline: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    location: v.optional(v.string()),
+    websiteUrl: v.optional(v.string()),
+    linkedinUrl: v.optional(v.string()),
+    githubUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("profiles")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .unique();
+    if (existing) {
+      throw new Error(`Slug "${args.slug}" is already taken.`);
+    }
+
+    return await ctx.db.insert("profiles", {
+      ...args,
+      isPublic: false,
+    });
+  },
+});
+
+// Internal-only: used by the Clerk webhook / server-side updates
+export const updateInternal = internalMutation({
+  args: {
+    profileId: v.id("profiles"),
+    headline: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    location: v.optional(v.string()),
+    websiteUrl: v.optional(v.string()),
+    linkedinUrl: v.optional(v.string()),
+    githubUrl: v.optional(v.string()),
+    isPublic: v.optional(v.boolean()),
+    avatarUrl: v.optional(v.string()),
+    theme: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { profileId, ...fields } = args;
+    await ctx.db.patch(profileId, fields);
+  },
+});
+
+// ── Auth-aware versions (used by the onboarding wizard UI) ───────────────
+
+export const getSelf = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) return null;
+
+    return await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .unique();
+  },
+});
+
+export const checkSlug = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("profiles")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .unique();
+    return { available: !existing };
+  },
+});
+
+export const upsertSelf = mutation({
+  args: {
+    slug: v.optional(v.string()),
+    headline: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    location: v.optional(v.string()),
+    websiteUrl: v.optional(v.string()),
+    linkedinUrl: v.optional(v.string()),
+    githubUrl: v.optional(v.string()),
+    isPublic: v.optional(v.boolean()),
+    theme: v.optional(v.string()),
+    themeConfig: v.optional(v.any()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) throw new Error("User not found");
+
+    const existing = await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .unique();
+
+    // Validate input lengths
+    if (args.headline && args.headline.length > 200) throw new Error("Headline too long (max 200)");
+    if (args.bio && args.bio.length > 2000) throw new Error("Bio too long (max 2000)");
+    if (args.location && args.location.length > 100) throw new Error("Location too long (max 100)");
+
+    // Validate URLs
+    validateUrl(args.websiteUrl, "Website URL");
+    validateUrl(args.linkedinUrl, "LinkedIn URL");
+    validateUrl(args.githubUrl, "GitHub URL");
+
+    if (existing) {
+      const { slug, ...fields } = args;
+      if (slug && slug !== existing.slug) {
+        const cleanSlug = validateSlug(slug);
+        const slugTaken = await ctx.db
+          .query("profiles")
+          .withIndex("by_slug", (q) => q.eq("slug", cleanSlug))
+          .unique();
+        if (slugTaken) throw new Error(`Slug "${cleanSlug}" is already taken. Choose another.`);
+        await ctx.db.patch(existing._id, { ...fields, slug: cleanSlug });
+      } else {
+        await ctx.db.patch(existing._id, fields);
+      }
+      return existing._id;
+    }
+
+    // New profile — generate slug from name
+    const baseName =
+      identity.name
+        ?.toLowerCase()
+        .replace(/[^a-z0-9]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "") ?? "user";
+    const slug = validateSlug(args.slug ?? `${baseName}-${Math.floor(Math.random() * 9000) + 1000}`);
+
+    const slugTaken = await ctx.db
+      .query("profiles")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .unique();
+    if (slugTaken) throw new Error(`Slug "${slug}" is already taken. Please choose another.`);
+
+    return await ctx.db.insert("profiles", {
+      userId: user._id,
+      slug,
+      headline: args.headline,
+      bio: args.bio,
+      location: args.location,
+      websiteUrl: args.websiteUrl,
+      linkedinUrl: args.linkedinUrl,
+      githubUrl: args.githubUrl,
+      isPublic: args.isPublic ?? false,
+    });
+  },
+});
+
+export const saveTheme = mutation({
+  args: { themeConfig: v.any() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) throw new Error("User not found");
+
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .unique();
+    if (!profile) throw new Error("Profile not found");
+
+    await ctx.db.patch(profile._id, { themeConfig: args.themeConfig });
+  },
+});
+
+export const listPublicSlugs = query({
+  args: {},
+  handler: async (ctx) => {
+    const profiles = await ctx.db.query("profiles").take(10000);
+    return profiles
+      .filter((p) => p.isPublic)
+      .map((p) => ({ slug: p.slug, updatedAt: p._creationTime }));
+  },
+});
+
+export const listPublicGallery = query({
+  args: {},
+  handler: async (ctx) => {
+    const profiles = await ctx.db.query("profiles").take(500);
+    return profiles
+      .filter((p) => p.isPublic && p.headline)
+      .map((p) => ({
+        slug: p.slug,
+        headline: p.headline,
+        bio: p.bio?.slice(0, 120),
+        location: p.location,
+        avatarUrl: p.avatarUrl,
+        viewCount: p.viewCount ?? 0,
+      }))
+      .sort((a, b) => b.viewCount - a.viewCount)
+      .slice(0, 50);
+  },
+});
+
+export const generateAvatarUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const updateAvatar = mutation({
+  args: { storageId: v.id("_storage") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) throw new Error("User not found");
+
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .unique();
+    if (!profile) throw new Error("Profile not found");
+
+    const url = await ctx.storage.getUrl(args.storageId);
+    if (!url) throw new Error("Failed to get storage URL");
+
+    await ctx.db.patch(profile._id, { avatarUrl: url });
+    return url;
+  },
+});

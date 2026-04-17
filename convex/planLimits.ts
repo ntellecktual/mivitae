@@ -1,0 +1,68 @@
+import { MutationCtx, QueryCtx } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
+
+// ── Creator / Superadmin bypass ────────────────────────────────────────────
+// These Clerk user IDs always receive full team-level access regardless of
+// subscription status. Add additional IDs here to grant creator access.
+export const CREATOR_CLERK_IDS = new Set([
+  "user_3CQM2bLQWM1PMcueoShBM22ie1w",
+]);
+
+// ── Plan Limits ────────────────────────────────────────────────────────────
+
+export const PLAN_LIMITS = {
+  free: {
+    maxPortfolioSections: 5,
+    maxEducationEntries: 3,
+    maxDemos: 3,
+    maxResumeParsesPerDay: 2,
+    analyticsAccess: false,
+    customTheme: false,
+  },
+  pro: {
+    maxPortfolioSections: 50,
+    maxEducationEntries: 20,
+    maxDemos: 25,
+    maxResumeParsesPerDay: 10,
+    analyticsAccess: true,
+    customTheme: true,
+  },
+  team: {
+    maxPortfolioSections: 50,
+    maxEducationEntries: 20,
+    maxDemos: 50,
+    maxResumeParsesPerDay: 20,
+    analyticsAccess: true,
+    customTheme: true,
+  },
+} as const;
+
+export type PlanId = keyof typeof PLAN_LIMITS;
+
+// ── Helper: resolve current plan for a user ────────────────────────────────
+
+export async function getUserPlan(
+  ctx: QueryCtx | MutationCtx,
+  userId: Id<"users">
+): Promise<PlanId> {
+  // Creator bypass: always return top-tier plan
+  const userRecord = await ctx.db.get(userId);
+  if (userRecord && CREATOR_CLERK_IDS.has(userRecord.clerkId)) {
+    return "team";
+  }
+
+  const sub = await ctx.db
+    .query("subscriptions")
+    .withIndex("by_userId", (q) => q.eq("userId", userId))
+    .unique();
+
+  if (!sub) return "free";
+  if (sub.status === "active" || sub.status === "trialing") {
+    return (sub.plan as PlanId) ?? "free";
+  }
+  return "free";
+}
+
+export function getLimits(plan: PlanId) {
+  return PLAN_LIMITS[plan] ?? PLAN_LIMITS.free;
+}

@@ -11,7 +11,7 @@ export default function MarketingLayout({
 }) {
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-border/40 bg-background/60 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-border/20 bg-background/40 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 lg:px-6">
           <Link href="/" className="flex items-center transition-opacity hover:opacity-80">
             <Image

@@ -301,6 +301,15 @@
 .animate-orb-1 { animation: orb-float-1 8s ease-in-out infinite; }
 .animate-orb-2 { animation: orb-float-2 10s ease-in-out infinite; }
 
+/* ── Typing cursor blink ──────────────────────────────────────────── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+.animate-blink {
+  animation: blink 0.75s step-end infinite;
+}
+
 /* ── CTA Button Pulse Glow ────────────────────────────────────────── */
 @keyframes btn-glow {
   0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 50%, transparent),

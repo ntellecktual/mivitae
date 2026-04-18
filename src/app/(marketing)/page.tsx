@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { ScrollAnimator } from "@/components/marketing/scroll-animator";
 import { FloatingCTA } from "@/components/marketing/floating-cta";
+import { WordRotator } from "@/components/marketing/word-rotator";
 
 export default function HomePage() {
   return (
@@ -43,11 +44,10 @@ export default function HomePage() {
       <FloatingCTA />
       {/* Hero */}
       <section className="relative overflow-hidden py-24 sm:py-32">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-size-[64px_64px] opacity-20" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,color-mix(in_srgb,var(--primary)_18%,transparent),transparent)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,color-mix(in_srgb,var(--primary)_12%,transparent),transparent)]" />
         {/* Animated ambient orbs */}
-        <div className="pointer-events-none absolute -top-32 left-[15%] h-[28rem] w-[36rem] rounded-full bg-primary/25 blur-3xl animate-orb-1" />
-        <div className="pointer-events-none absolute top-10 right-[10%] h-72 w-72 rounded-full bg-primary/18 blur-3xl animate-orb-2" />
+        <div className="pointer-events-none absolute -top-32 left-[15%] h-[28rem] w-[36rem] rounded-full bg-primary/15 blur-3xl animate-orb-1" />
+        <div className="pointer-events-none absolute top-10 right-[10%] h-72 w-72 rounded-full bg-primary/12 blur-3xl animate-orb-2" />
 
         <div className="relative mx-auto max-w-6xl px-4 text-center">
           <div className="mb-6 inline-flex items-center rounded-full border bg-muted px-4 py-1.5 text-xs font-medium text-muted-foreground" data-animate>
@@ -55,7 +55,7 @@ export default function HomePage() {
             30-day free trial &mdash; no credit card required
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl" data-animate data-delay="100">
-            {"Your r\u00e9sum\u00e9 is dead."}
+            Your <WordRotator /> is dead.
             <br />
             <span className="hero-gradient-text">
               Build living proof.

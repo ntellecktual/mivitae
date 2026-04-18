@@ -303,4 +303,38 @@ export default defineSchema({
   })
     .index("by_userId", ["userId"])
     .index("by_userId_emailKey", ["userId", "emailKey"]),
+
+  // ── v2: Verified Skill Scores ────────────────────────────────────────
+  skillScores: defineTable({
+    demoId: v.id("userDemos"),
+    userId: v.id("users"),
+    overallScore: v.number(),            // 0-100
+    dimensions: v.object({
+      technicalDepth: v.number(),        // 0-100
+      realWorldRelevance: v.number(),    // 0-100
+      communicationClarity: v.number(),  // 0-100
+      problemSolving: v.number(),        // 0-100
+      innovation: v.number(),           // 0-100
+    }),
+    summary: v.string(),                 // One-paragraph assessment
+    strengths: v.array(v.string()),      // Top 3 strengths
+    improvements: v.array(v.string()),   // Top 3 improvement areas
+    gradedAt: v.number(),
+  })
+    .index("by_demoId", ["demoId"])
+    .index("by_userId", ["userId"])
+    .index("by_userId_overallScore", ["userId", "overallScore"]),
+
+  // ── v2: Public Showcase — featured portfolios/demos ──────────────────
+  showcaseEntries: defineTable({
+    userId: v.id("users"),
+    profileId: v.id("profiles"),
+    demoId: v.optional(v.id("userDemos")),
+    featuredAt: v.number(),
+    category: v.optional(v.string()),    // "engineering", "design", "data", "product", etc.
+    curatorNote: v.optional(v.string()), // Editorial blurb
+    isActive: v.boolean(),
+  })
+    .index("by_isActive", ["isActive"])
+    .index("by_category", ["category"]),
 });

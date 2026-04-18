@@ -1,6 +1,11 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { getUserPlan, getLimits } from "./planLimits";
+
+// ── View milestones for notifications ──────────────────────────────────
+
+const VIEW_MILESTONES = [10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000];
 
 // ── Record a view on a public profile ──────────────────────────────────
 
@@ -34,9 +39,19 @@ export const recordView = mutation({
     // Increment denormalized view counter on the profile
     const profile = await ctx.db.get(args.profileId);
     if (profile) {
-      await ctx.db.patch(args.profileId, {
-        viewCount: (profile.viewCount ?? 0) + 1,
-      });
+      const newCount = (profile.viewCount ?? 0) + 1;
+      await ctx.db.patch(args.profileId, { viewCount: newCount });
+
+      // Check for milestone notification
+      if (VIEW_MILESTONES.includes(newCount)) {
+        await ctx.scheduler.runAfter(0, internal.notifications.createInternal, {
+          userId: profile.userId,
+          type: "milestone",
+          title: `🎉 ${newCount} portfolio views!`,
+          body: `Your portfolio just hit ${newCount} views. Keep sharing — momentum builds trust.`,
+          link: "/dashboard/analytics",
+        });
+      }
     }
   },
 });

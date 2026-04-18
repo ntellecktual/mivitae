@@ -68,6 +68,7 @@ const navSections = [
     label: "Tools",
     items: [
       { href: "/dashboard/theme", label: "Theme Studio", icon: Palette },
+      { href: "/dashboard/skill-scores", label: "Skill Scores", icon: Shield },
       { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
       { href: "/dashboard/clicks", label: "Click Tracking", icon: MousePointerClick },
       { href: "/dashboard/export", label: "Export PDF", icon: FileDown },

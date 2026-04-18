@@ -28,8 +28,9 @@ import {
   GitBranch,
   FileDown,
   Sparkles,
+  HelpCircle,
 } from "lucide-react";
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -37,17 +38,15 @@ import { useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ErrorBoundary } from "@/components/error-boundary";
-
-const GuidedTour = lazy(() =>
-  import("@/components/guided-tour").then((m) => ({ default: m.GuidedTour }))
-);
+import { GuidedTour, useTour, TOUR_SECTIONS } from "@/components/guided-tour";
 
 /* ── Sidebar navigation groups ─────────────────────────────────────── */
 const navSections = [
   {
-    label: "Overview",
+    label: "You",
     items: [
       { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/dashboard/profile", label: "Profile", icon: User },
       { href: "/dashboard/upload", label: "Upload Resume", icon: Upload },
       { href: "/dashboard/messages", label: "Messages", icon: Mail },
     ],
@@ -59,15 +58,19 @@ const navSections = [
       { href: "/dashboard/education", label: "Education", icon: GraduationCap },
       { href: "/dashboard/skills", label: "Skills", icon: Wrench },
       { href: "/dashboard/volunteering", label: "Volunteering", icon: Heart },
-      { href: "/dashboard/demos", label: "Demos", icon: Zap },
-      { href: "/dashboard/github", label: "GitHub Import", icon: GitBranch },
-      { href: "/dashboard/profile", label: "Profile", icon: User },
     ],
   },
   {
-    label: "Tools",
+    label: "Showcase",
     items: [
+      { href: "/dashboard/demos", label: "Demos", icon: Zap },
+      { href: "/dashboard/github", label: "GitHub Import", icon: GitBranch },
       { href: "/dashboard/theme", label: "Theme Studio", icon: Palette },
+    ],
+  },
+  {
+    label: "Insights",
+    items: [
       { href: "/dashboard/skill-scores", label: "Skill Scores", icon: Shield },
       { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
       { href: "/dashboard/clicks", label: "Click Tracking", icon: MousePointerClick },
@@ -77,6 +80,55 @@ const navSections = [
     ],
   },
 ];
+
+/* ── Guide button with section picker ─────────────────────────────── */
+
+function GuideButton({ onNavigate }: { onNavigate?: () => void }) {
+  const { startTour, startFullTour } = useTour();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-foreground"
+      >
+        <HelpCircle className="h-4 w-4 shrink-0" />
+        Guide
+      </button>
+
+      {open && (
+        <div className="absolute bottom-full left-0 mb-1 w-56 rounded-lg border bg-popover p-1.5 shadow-xl animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
+          <button
+            onClick={() => {
+              startFullTour();
+              setOpen(false);
+              onNavigate?.();
+            }}
+            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            Full Tour
+          </button>
+          <div className="my-1 h-px bg-border" />
+          {TOUR_SECTIONS.map((section) => (
+            <button
+              key={section.id}
+              onClick={() => {
+                startTour(section.id);
+                setOpen(false);
+                onNavigate?.();
+              }}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              {section.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ── Sidebar content (shared between desktop & mobile) ─────────────── */
 function SidebarContent({
@@ -202,6 +254,8 @@ function SidebarContent({
           Settings
         </Link>
 
+        <GuideButton onNavigate={onNavigate} />
+
         <Separator className="my-2 opacity-50" />
 
         <div className="flex items-center gap-3 rounded-lg px-3 py-2">
@@ -299,6 +353,7 @@ export default function DashboardLayout({
   }
 
   return (
+    <GuidedTour>
     <div className="flex min-h-screen">
       {/* Desktop Sidebar — sticky, full viewport height */}
       <aside className="hidden w-64 shrink-0 lg:block">
@@ -366,11 +421,9 @@ export default function DashboardLayout({
             {children}
           </ErrorBoundary>
         </main>
-        <Suspense fallback={null}>
-          <GuidedTour />
-        </Suspense>
       </div>
     </div>
+    </GuidedTour>
   );
 }
 

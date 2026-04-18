@@ -526,6 +526,28 @@ function ReviewStep({ onNext, onBack }: { onNext: () => void; onBack: () => void
     convexUser ? { userId: convexUser._id } : "skip"
   );
 
+  // Elapsed timer for pending/processing states
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    const status = latestResume?.parseStatus;
+    if (status !== "pending" && status !== "processing") {
+      setElapsed(0);
+      return;
+    }
+    const start = latestResume?.uploadedAt ?? Date.now();
+    setElapsed(Math.floor((Date.now() - start) / 1000));
+    const interval = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - start) / 1000));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [latestResume?.parseStatus, latestResume?.uploadedAt]);
+
+  const formatElapsed = (s: number) => {
+    const mins = Math.floor(s / 60);
+    const secs = s % 60;
+    return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+  };
+
   const statusConfig = {
     pending: {
       icon: Clock,
@@ -555,6 +577,7 @@ function ReviewStep({ onNext, onBack }: { onNext: () => void; onBack: () => void
 
   const status = latestResume?.parseStatus;
   const cfg = status ? statusConfig[status] : null;
+  const isActive = status === "pending" || status === "processing";
 
   return (
     <Card>
@@ -579,12 +602,28 @@ function ReviewStep({ onNext, onBack }: { onNext: () => void; onBack: () => void
                 status === "processing" && "animate-spin"
               )}
             />
-            <div>
+            <div className="flex-1">
               <p className="font-semibold">{latestResume.fileName}</p>
               <p className={cn("mt-0.5 text-sm", cfg.color)}>{cfg.label}</p>
             </div>
+            {isActive && (
+              <span className="tabular-nums text-sm font-medium text-muted-foreground">
+                {formatElapsed(elapsed)}
+              </span>
+            )}
           </div>
         ) : null}
+
+        {isActive && (
+          <div className="space-y-2">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div className="h-full animate-pulse rounded-full bg-primary/60" style={{ width: elapsed < 15 ? `${Math.min((elapsed / 30) * 100, 90)}%` : "90%" }} />
+            </div>
+            <p className="text-center text-xs text-muted-foreground">
+              Typically takes 15–30 seconds
+            </p>
+          </div>
+        )}
 
         <div className="rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground">
           <p>

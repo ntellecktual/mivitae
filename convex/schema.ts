@@ -11,6 +11,7 @@ export default defineSchema({
     createdAt: v.number(),
     referralCode: v.optional(v.string()),
     referralCredits: v.optional(v.number()),
+    isFoundingUser: v.optional(v.boolean()),
   })
     .index("by_clerkId", ["clerkId"])
     .index("by_email", ["email"])

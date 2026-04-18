@@ -41,6 +41,10 @@ export const upsertFromClerk = internalMutation({
       return existing._id;
     }
 
+    // Auto-grant founding plan to first 10 users
+    const existingUsers = await ctx.db.query("users").take(10);
+    const isFoundingUser = existingUsers.length < 10;
+
     const newId = await ctx.db.insert("users", {
       clerkId: args.clerkId,
       email: args.email,
@@ -48,6 +52,7 @@ export const upsertFromClerk = internalMutation({
       lastName: args.lastName,
       imageUrl: args.imageUrl,
       createdAt: Date.now(),
+      ...(isFoundingUser ? { isFoundingUser: true } : {}),
     });
     // Auto-generate a referral code for every new user
     await ctx.runMutation(internal.referrals.ensureCode, { userId: newId });

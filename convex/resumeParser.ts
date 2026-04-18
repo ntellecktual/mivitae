@@ -241,7 +241,7 @@ Return this exact JSON structure:
           institution: entry.institution,
           degree: entry.degree,
           fieldOfStudy: entry.fieldOfStudy ?? undefined,
-          startYear: entry.startYear,
+          startYear: entry.startYear ?? 0,
           endYear: entry.endYear ?? undefined,
           gpa: entry.gpa ?? undefined,
           honors: entry.honors ?? undefined,

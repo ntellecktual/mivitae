@@ -8,6 +8,13 @@ export const CREATOR_CLERK_IDS = new Set([
   "user_3CQM2bLQWM1PMcueoShBM22ie1w",
 ]);
 
+// ── Founding Users ───────────────────────────────────────────────────────────
+// First 10 users get free pro+team access for life. Add Clerk IDs here for
+// immediate effect, or they are auto-granted via isFoundingUser in the DB.
+export const FOUNDING_CLERK_IDS = new Set([
+  "user_3CV8skhzPWeAb9DyRLD1GJBDabZ",
+]);
+
 // ── Plan Limits ────────────────────────────────────────────────────────────
 
 export const PLAN_LIMITS = {
@@ -45,9 +52,14 @@ export async function getUserPlan(
   ctx: QueryCtx | MutationCtx,
   userId: Id<"users">
 ): Promise<PlanId> {
-  // Creator bypass: always return top-tier plan
+  // Creator / founding user bypass: always return top-tier plan
   const userRecord = await ctx.db.get(userId);
-  if (userRecord && CREATOR_CLERK_IDS.has(userRecord.clerkId)) {
+  if (
+    userRecord &&
+    (CREATOR_CLERK_IDS.has(userRecord.clerkId) ||
+      FOUNDING_CLERK_IDS.has(userRecord.clerkId) ||
+      userRecord.isFoundingUser === true)
+  ) {
     return "team";
   }
 

@@ -64,28 +64,17 @@ export default function SignInPage() {
 
       {/* ── Right form panel ───────────────────────────────────────── */}
       <div className="relative flex flex-1 flex-col bg-background">
-        {/* Top bar — absolutely pinned so Clerk card height never shifts it */}
-        <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-6 py-4 z-10">
-          {/* Logo visible only on mobile (panel hidden) */}
-          <Link href="/" className="flex items-center lg:invisible">
-            <Image
-              src="/logo-light.png"
-              alt="mivitae"
-              width={90}
-              height={27}
-              className="block dark:hidden"
-              priority
-            />
-            <Image
-              src="/logo-dark.png"
-              alt="mivitae"
-              width={90}
-              height={27}
-              className="hidden dark:block"
-              priority
-            />
+        {/* Mobile logo — absolutely pinned top-left (hidden on desktop) */}
+        <div className="absolute top-4 left-6 z-10 lg:hidden">
+          <Link href="/" className="flex items-center">
+            <Image src="/logo-light.png" alt="mivitae" width={90} height={27} className="block dark:hidden" priority />
+            <Image src="/logo-dark.png" alt="mivitae" width={90} height={27} className="hidden dark:block" priority />
           </Link>
-          <ThemeToggle className="ml-auto" />
+        </div>
+
+        {/* Theme toggle — absolutely pinned top-right */}
+        <div className="absolute top-4 right-6 z-10">
+          <ThemeToggle />
         </div>
 
         {/* Centered form — fills the whole panel, centers independently */}

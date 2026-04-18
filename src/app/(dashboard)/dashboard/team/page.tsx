@@ -202,8 +202,9 @@ function CreateTeamForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Show upgrade gate if not on team plan
-  if (planData !== undefined && planData.plan !== "team") {
+  // Show upgrade gate if not on team plan.
+  // planData is null while auth is initializing — skip gate until it resolves.
+  if (planData != null && planData.plan !== "team") {
     return (
       <div className="mx-auto max-w-xl p-6 space-y-6 text-center">
         <div className="flex justify-center">

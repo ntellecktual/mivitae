@@ -164,6 +164,7 @@ export default function UploadPage() {
 
       {/* Drop zone */}
       <Card
+        data-tour="upload-dropzone"
         className={`transition-all ${
           dragActive
             ? "border-primary bg-primary/5"
@@ -224,7 +225,7 @@ export default function UploadPage() {
       </Card>
 
       {/* LinkedIn / paste text */}
-      <Card>
+      <Card data-tour="upload-linkedin">
         <CardContent className="p-6">
           <div className="flex items-center gap-2 mb-3">
             <LinkedinIcon className="h-5 w-5 text-[#0A66C2]" />

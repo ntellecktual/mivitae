@@ -477,6 +477,7 @@ export default function EducationPage() {
           </div>
           {!adding && !editingId && (
             <Button
+              data-tour="education-add"
               onClick={() => {
                 setAdding(true);
                 setEditingId(null);

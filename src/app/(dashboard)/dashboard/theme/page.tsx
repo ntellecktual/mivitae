@@ -659,7 +659,7 @@ export default function ThemePage() {
       </div>
 
       {/* Preset Gallery */}
-      <div>
+      <div data-tour="theme-presets">
         <div className="mb-3 flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold">Start from a preset</p>

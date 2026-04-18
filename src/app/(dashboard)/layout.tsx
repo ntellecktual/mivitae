@@ -29,6 +29,7 @@ import {
   FileDown,
   Sparkles,
   HelpCircle,
+  Crown,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
@@ -61,11 +62,16 @@ const navSections = [
     ],
   },
   {
+    label: "Design",
+    items: [
+      { href: "/dashboard/theme", label: "Theme Studio", icon: Palette },
+    ],
+  },
+  {
     label: "Showcase",
     items: [
       { href: "/dashboard/demos", label: "Demos", icon: Zap },
       { href: "/dashboard/github", label: "GitHub Import", icon: GitBranch },
-      { href: "/dashboard/theme", label: "Theme Studio", icon: Palette },
     ],
   },
   {
@@ -171,7 +177,12 @@ function SidebarContent({
       <nav className="flex-1 overflow-y-auto px-3 py-2">
         {navSections.map((section, idx) => (
           <div key={section.label} className={cn(idx > 0 && "mt-6")}>
-            <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+            <p className={cn(
+              "mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider",
+              section.label === "Design"
+                ? "bg-gradient-to-r from-primary to-violet-500 bg-clip-text text-transparent"
+                : "text-muted-foreground/70"
+            )}>
               {section.label}
             </p>
             <div className="space-y-0.5">
@@ -180,6 +191,7 @@ function SidebarContent({
                   pathname === item.href ||
                   (item.href !== "/dashboard" &&
                     pathname.startsWith(item.href + "/"));
+                const isThemeStudio = item.href === "/dashboard/theme";
                 return (
                   <Link
                     key={item.href}
@@ -188,8 +200,12 @@ function SidebarContent({
                     className={cn(
                       "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
                       isActive
-                        ? "bg-primary/10 text-primary shadow-sm"
-                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                        ? isThemeStudio
+                          ? "bg-gradient-to-r from-primary/15 to-violet-500/15 text-primary shadow-sm ring-1 ring-primary/20"
+                          : "bg-primary/10 text-primary shadow-sm"
+                        : isThemeStudio
+                          ? "text-muted-foreground hover:bg-gradient-to-r hover:from-primary/10 hover:to-violet-500/10 hover:text-foreground"
+                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
                     )}
                   >
                     <item.icon
@@ -197,7 +213,9 @@ function SidebarContent({
                         "h-4 w-4 shrink-0 transition-colors duration-200",
                         isActive
                           ? "text-primary"
-                          : "text-muted-foreground/60 group-hover:text-foreground"
+                          : isThemeStudio
+                            ? "text-muted-foreground/60 group-hover:text-primary"
+                            : "text-muted-foreground/60 group-hover:text-foreground"
                       )}
                     />
                     {item.label}
@@ -238,8 +256,20 @@ function SidebarContent({
         )}
       </nav>
 
-      {/* Bottom: Settings + User Profile */}
+      {/* Bottom: Upgrade CTA + Settings + User Profile */}
       <div className="mt-auto border-t border-sidebar-border px-3 py-3">
+        {/* Upgrade CTA — only for free-plan users */}
+        {selfPlan && selfPlan.plan === "free" && !selfPlan.isCreator && (
+          <Link
+            href="/dashboard/settings"
+            onClick={onNavigate}
+            className="group mb-1.5 flex items-center gap-3 rounded-lg bg-gradient-to-r from-primary/15 via-primary/10 to-violet-500/15 px-3 py-2.5 text-sm font-semibold text-primary ring-1 ring-primary/20 transition-all duration-200 hover:from-primary/25 hover:via-primary/20 hover:to-violet-500/25 hover:ring-primary/40 hover:shadow-md"
+          >
+            <Crown className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+            Upgrade
+          </Link>
+        )}
+
         <Link
           href="/dashboard/settings"
           onClick={onNavigate}

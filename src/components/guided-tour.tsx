@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useCallback, createContext, useContext, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { X, ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
 
@@ -12,97 +13,220 @@ export type TourStep = {
   content: string;
   placement?: "top" | "bottom" | "left" | "right";
   section: string;
+  /** Page to navigate to before showing this step */
+  href?: string;
+  /** "nav" = sidebar link highlight, "page" = in-page element */
+  phase: "nav" | "page";
 };
 
 // ── All tour steps organized by section ───────────────────────────────
 
 const ALL_TOUR_STEPS: TourStep[] = [
+  // ── Profile ──
   {
     section: "profile",
+    phase: "nav",
     target: '[href="/dashboard/profile"]',
     title: "Your Profile",
-    content:
-      "This is your public identity. Set your headline, bio, portfolio URL slug, and social links. This is the first thing anyone sees when they visit your portfolio.",
+    content: "This is where you build your public identity. Let's take a look inside.",
+    placement: "right",
+  },
+  {
+    section: "profile",
+    phase: "page",
+    href: "/dashboard/profile",
+    target: '[data-tour="profile-slug"]',
+    title: "Your Portfolio URL",
+    content: "Set your custom URL slug and toggle public visibility. Share this link with recruiters, clients, and collaborators.",
+    placement: "bottom",
+  },
+  {
+    section: "profile",
+    phase: "page",
+    href: "/dashboard/profile",
+    target: '[data-tour="profile-about"]',
+    title: "About You",
+    content: "Write your headline and bio — this is the first thing people read. Add your location so employers in your area can find you.",
+    placement: "right",
+  },
+  {
+    section: "profile",
+    phase: "page",
+    href: "/dashboard/profile",
+    target: '[data-tour="profile-links"]',
+    title: "Social Links",
+    content: "Add your website, LinkedIn, and GitHub. These show as clickable icons on your portfolio.",
+    placement: "right",
+  },
+  {
+    section: "profile",
+    phase: "page",
+    href: "/dashboard/profile",
+    target: '[data-tour="profile-save"]',
+    title: "Save & Preview",
+    content: "Hit Save Changes when you're done. The live preview on the right updates as you type.",
+    placement: "left",
+  },
+
+  // ── Upload ──
+  {
+    section: "upload",
+    phase: "nav",
+    target: '[href="/dashboard/upload"]',
+    title: "Upload Resume",
+    content: "Upload a resume and our AI does the heavy lifting. Let's see how.",
     placement: "right",
   },
   {
     section: "upload",
-    target: '[href="/dashboard/upload"]',
-    title: "Upload Your Resume",
-    content:
-      "Upload a PDF or Word resume. Our AI reads it and auto-fills your work history, education, and skills — so you don't have to type anything twice.",
+    phase: "page",
+    href: "/dashboard/upload",
+    target: '[data-tour="upload-dropzone"]',
+    title: "Drag & Drop Your Resume",
+    content: "Drop a PDF or Word file here, or click Browse. Our AI extracts your work history, education, and skills in seconds.",
+    placement: "bottom",
+  },
+  {
+    section: "upload",
+    phase: "page",
+    href: "/dashboard/upload",
+    target: '[data-tour="upload-linkedin"]',
+    title: "Or Paste from LinkedIn",
+    content: "Copy your LinkedIn profile text and paste it here. We'll parse it the same way — no file needed.",
+    placement: "top",
+  },
+
+  // ── Work History ──
+  {
+    section: "work-history",
+    phase: "nav",
+    target: '[href="/dashboard/portfolio"]',
+    title: "Work History",
+    content: "Your professional timeline lives here. Let's look inside.",
     placement: "right",
   },
   {
     section: "work-history",
-    target: '[href="/dashboard/portfolio"]',
-    title: "Work History",
-    content:
-      "If you uploaded a resume, your roles are already here. Review them, tweak descriptions, reorder, or add new positions. This feeds directly into your public portfolio.",
+    phase: "page",
+    href: "/dashboard/portfolio",
+    target: '[data-tour="portfolio-add"]',
+    title: "Add a Position",
+    content: "Click here to add a role manually. If you uploaded a resume, your positions are already listed on the timeline below.",
+    placement: "bottom",
+  },
+
+  // ── Education ──
+  {
+    section: "education",
+    phase: "nav",
+    target: '[href="/dashboard/education"]',
+    title: "Education",
+    content: "Degrees and certifications — also auto-filled from your resume.",
     placement: "right",
   },
   {
     section: "education",
-    target: '[href="/dashboard/education"]',
-    title: "Education",
-    content:
-      "Your degrees and certifications — also auto-filled from your resume. Add any that were missed or update details.",
+    phase: "page",
+    href: "/dashboard/education",
+    target: '[data-tour="education-add"]',
+    title: "Add Education",
+    content: "Add degrees, certifications, or courses. Each entry shows details like GPA, honors, and relevant coursework.",
+    placement: "bottom",
+  },
+
+  // ── Skills ──
+  {
+    section: "skills",
+    phase: "nav",
+    target: '[href="/dashboard/skills"]',
+    title: "Skills",
+    content: "Tag your expertise across any profession.",
     placement: "right",
   },
   {
     section: "skills",
-    target: '[href="/dashboard/skills"]',
-    title: "Skills",
-    content:
-      "Tag your core skills across any profession. These show as badges on your portfolio and help recruiters filter and find you.",
-    placement: "right",
+    phase: "page",
+    href: "/dashboard/skills",
+    target: '[data-tour="skills-add"]',
+    title: "Add a Skill",
+    content: "Add skills with a category, proficiency level (1–5), and years of experience. They show as filterable badges on your portfolio.",
+    placement: "bottom",
   },
+
+  // ── Demos ──
   {
     section: "demos",
+    phase: "nav",
     target: '[href="/dashboard/demos"]',
-    title: "Create a Demo",
-    content:
-      "This is what makes mivitae different. Hit \"Generate Demo\" — our AI builds an interactive, visual proof of your work. Dashboards, case studies, charts — tailored to your profession.",
+    title: "Demo Studio",
+    content: "This is what makes mivitae different. Let's see how demos work.",
     placement: "right",
   },
   {
     section: "demos",
+    phase: "page",
+    href: "/dashboard/demos",
+    target: '[data-tour="demos-mode"]',
+    title: "Simple vs Advanced",
+    content: "Simple mode walks you through a wizard. Advanced gives you full control over templates and customization.",
+    placement: "bottom",
+  },
+  {
+    section: "demos",
+    phase: "page",
+    href: "/dashboard/demos",
+    target: '[data-tour="demos-new"]',
+    title: "Create a New Demo",
+    content: "Click here to generate an interactive demo. Our AI builds visual proofs — dashboards, case studies, charts — tailored to your profession.",
+    placement: "bottom",
+  },
+
+  // ── GitHub Import ──
+  {
+    section: "demos",
+    phase: "nav",
     target: '[href="/dashboard/github"]',
     title: "Import from GitHub",
-    content:
-      "If you have code projects, connect GitHub and import repos directly as demos. Each one gets a live preview card on your portfolio.",
+    content: "Connect GitHub and import repos directly as portfolio demos. Each one gets a live preview card.",
+    placement: "right",
+  },
+
+  // ── Theme Studio ──
+  {
+    section: "theme",
+    phase: "nav",
+    target: '[href="/dashboard/theme"]',
+    title: "Theme Studio",
+    content: "Make your portfolio look like you — not a template. Let's customize.",
     placement: "right",
   },
   {
     section: "theme",
-    target: '[href="/dashboard/theme"]',
-    title: "Theme Studio",
-    content:
-      "Pick from 18+ presets or fully customize colors, fonts, spacing, and layout. Your portfolio should look like you — not a template.",
-    placement: "right",
+    phase: "page",
+    href: "/dashboard/theme",
+    target: '[data-tour="theme-presets"]',
+    title: "Theme Presets",
+    content: "Pick from 18+ presets as a starting point. Then fine-tune colors, fonts, spacing, and layout to make it truly yours.",
+    placement: "top",
   },
+
+  // ── Skill Scores ──
   {
     section: "skill-scores",
+    phase: "nav",
     target: '[href="/dashboard/skill-scores"]',
     title: "Skill Scores",
-    content:
-      "After you create demos, our AI evaluates them on 5 dimensions: depth, relevance, clarity, problem-solving, and innovation. It's a verified score you can share.",
+    content: "After you create demos, our AI evaluates them on 5 dimensions: depth, relevance, clarity, problem-solving, and innovation. Verified scores you can share.",
     placement: "right",
   },
+
+  // ── Analytics ──
   {
     section: "analytics",
+    phase: "nav",
     target: '[href="/dashboard/analytics"]',
     title: "Analytics",
-    content:
-      "See who's viewing your portfolio, which demos get the most attention, and track views over time. Know when recruiters are looking.",
-    placement: "right",
-  },
-  {
-    section: "settings",
-    target: '[href="/dashboard/settings"]',
-    title: "Settings",
-    content:
-      "Manage your subscription, notification preferences, privacy controls, and account details.",
+    content: "See who's viewing your portfolio, which demos get the most attention, and track views over time. Know when recruiters are looking.",
     placement: "right",
   },
 ];
@@ -117,7 +241,6 @@ export const TOUR_SECTIONS = [
   { id: "theme", label: "Theme Studio" },
   { id: "skill-scores", label: "Skill Scores" },
   { id: "analytics", label: "Analytics" },
-  { id: "settings", label: "Settings" },
 ] as const;
 
 const STORAGE_KEY = "mivitae_tour_completed";
@@ -225,11 +348,15 @@ function getTooltipStyle(
 // ── Main GuidedTour component ─────────────────────────────────────────
 
 export function GuidedTour({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [active, setActive] = useState(false);
   const [steps, setSteps] = useState<TourStep[]>([]);
   const [stepIdx, setStepIdx] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Auto-start for first-time users
   useEffect(() => {
     const completed = localStorage.getItem(STORAGE_KEY);
     if (!completed) {
@@ -253,33 +380,79 @@ export function GuidedTour({ children }: { children: React.ReactNode }) {
       startFullTour();
       return;
     }
-    const sectionSteps = ALL_TOUR_STEPS.filter((s) => s.section === section);
-    if (sectionSteps.length === 0) return;
-    setSteps(sectionSteps);
+    // Section-specific: show only "page" steps (skip sidebar nav highlight)
+    const sectionSteps = ALL_TOUR_STEPS.filter(
+      (s) => s.section === section && s.phase === "page"
+    );
+    if (sectionSteps.length === 0) {
+      // Fallback: section has only nav steps (e.g., analytics, skill-scores)
+      const navSteps = ALL_TOUR_STEPS.filter((s) => s.section === section);
+      if (navSteps.length === 0) return;
+      setSteps(navSteps);
+    } else {
+      setSteps(sectionSteps);
+    }
     setStepIdx(0);
     setActive(true);
   }, [startFullTour]);
 
-  const updateRect = useCallback(() => {
-    if (!active || !steps[stepIdx]) return;
-    const el = document.querySelector(steps[stepIdx].target) as HTMLElement | null;
-    if (el) {
-      setTargetRect(el.getBoundingClientRect());
-      el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    } else {
-      setTargetRect(null);
-    }
-  }, [active, steps, stepIdx]);
+  const currentStep = steps[stepIdx] ?? null;
 
+  // Navigate when needed + find target element with retry
   useEffect(() => {
-    updateRect();
-    window.addEventListener("resize", updateRect);
-    window.addEventListener("scroll", updateRect, true);
-    return () => {
-      window.removeEventListener("resize", updateRect);
-      window.removeEventListener("scroll", updateRect, true);
+    if (!active || !currentStep) return;
+
+    // Clear previous retry
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
+    }
+
+    // Navigate if the step requires a different page
+    if (currentStep.href && pathname !== currentStep.href) {
+      router.push(currentStep.href);
+      setTargetRect(null);
+      return; // Wait for pathname to update, this effect will re-run
+    }
+
+    // Find target element with retry (page may still be rendering)
+    let attempts = 0;
+    const find = () => {
+      const el = document.querySelector(currentStep.target) as HTMLElement | null;
+      if (el) {
+        setTargetRect(el.getBoundingClientRect());
+        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } else if (attempts < 15) {
+        attempts++;
+        retryTimerRef.current = setTimeout(find, 200);
+      } else {
+        setTargetRect(null);
+      }
     };
-  }, [updateRect]);
+    find();
+
+    return () => {
+      if (retryTimerRef.current) {
+        clearTimeout(retryTimerRef.current);
+        retryTimerRef.current = null;
+      }
+    };
+  }, [active, currentStep, pathname, router]);
+
+  // Update rect on scroll/resize
+  useEffect(() => {
+    if (!active || !currentStep) return;
+    const update = () => {
+      const el = document.querySelector(currentStep.target) as HTMLElement | null;
+      if (el) setTargetRect(el.getBoundingClientRect());
+    };
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [active, currentStep]);
 
   const handleNext = () => {
     if (stepIdx < steps.length - 1) {
@@ -297,8 +470,6 @@ export function GuidedTour({ children }: { children: React.ReactNode }) {
     setActive(false);
     localStorage.setItem(STORAGE_KEY, "true");
   };
-
-  const currentStep = steps[stepIdx];
 
   return (
     <TourContext.Provider value={{ startTour, startFullTour }}>

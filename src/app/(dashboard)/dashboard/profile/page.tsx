@@ -196,6 +196,7 @@ export default function ProfilePage() {
             </a>
           )}
           <button
+            data-tour="profile-save"
             disabled={saving || (!dirty && slugInput === profile.slug)}
             onClick={handleSave}
             className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
@@ -218,7 +219,7 @@ export default function ProfilePage() {
           <CardContent className="p-6 space-y-0 divide-y divide-border">
 
             {/* Section: Profile URL & Visibility */}
-            <div className="pb-6 space-y-4">
+            <div data-tour="profile-slug" className="pb-6 space-y-4">
               <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
                 Profile URL &amp; Visibility
               </h3>
@@ -344,7 +345,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Section: About */}
-            <div className="py-6 space-y-4">
+            <div data-tour="profile-about" className="py-6 space-y-4">
               <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
                 About You
               </h3>
@@ -378,7 +379,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Section: Links */}
-            <div className="pt-6 space-y-4">
+            <div data-tour="profile-links" className="pt-6 space-y-4">
               <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
                 <Globe className="h-4 w-4" /> Links
               </h3>

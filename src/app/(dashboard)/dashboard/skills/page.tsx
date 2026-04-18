@@ -126,7 +126,7 @@ export default function SkillsPage() {
             Showcase your technical and soft skills on your public portfolio.
           </p>
         </div>
-        <Button onClick={() => { setIsAdding(true); setEditingId(null); }} disabled={isAdding}>
+        <Button data-tour="skills-add" onClick={() => { setIsAdding(true); setEditingId(null); }} disabled={isAdding}>
           <Plus className="mr-2 h-4 w-4" /> Add Skill
         </Button>
       </div>

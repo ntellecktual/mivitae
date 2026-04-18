@@ -275,6 +275,7 @@ export default function PortfolioPage() {
         </div>
         {!adding && !editingId && (
           <Button
+            data-tour="portfolio-add"
             onClick={() => {
               setAdding(true);
               setEditingId(null);

@@ -1713,7 +1713,7 @@ export default function DemosPage() {
               : "Write HTML/CSS/JS directly, attach to portfolio entries, and let visitors experience your projects live."}
           </p>
           {/* Mode toggle */}
-          <div className="mt-4 inline-flex rounded-lg border border-border bg-muted/30 p-0.5">
+          <div data-tour="demos-mode" className="mt-4 inline-flex rounded-lg border border-border bg-muted/30 p-0.5">
             <button
               onClick={() => { setPageMode("simple"); setMode({ type: "grid" }); }}
               className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
@@ -1776,6 +1776,7 @@ export default function DemosPage() {
               })}
             </div>
             <Button
+              data-tour="demos-new"
               size="sm"
               onClick={() => setMode(pageMode === "simple" ? { type: "simple-wizard" } : { type: "picking" })}
               className="h-8"

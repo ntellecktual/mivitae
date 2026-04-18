@@ -3,11 +3,11 @@
 import { useEffect, useState, useRef } from "react";
 
 const WORDS = [
-  "r\u00e9sum\u00e9",
-  "vitae",
-  "CV",
-  "portfolio",
-  "cover letter",
+  "R\u00e9sum\u00e9s",
+  "CVs",
+  "Cover letters",
+  "Portfolios",
+  "Static PDFs",
 ];
 
 const TYPE_MS = 90;

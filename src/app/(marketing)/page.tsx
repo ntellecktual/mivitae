@@ -55,7 +55,7 @@ export default function HomePage() {
             30-day free trial &mdash; no credit card required
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl" data-animate data-delay="100">
-            Your <WordRotator /> is dead.
+            <WordRotator /> are done.
             <br />
             <span className="hero-gradient-text">
               Build living proof.

@@ -94,8 +94,8 @@ export default function SignUpPage() {
 
       {/* ── Right form panel ───────────────────────────────────────── */}
       <div className="relative flex flex-1 flex-col bg-background">
-        {/* Top bar */}
-        <div className="flex items-center justify-between px-6 py-4">
+        {/* Top bar — absolutely pinned so Clerk card height never shifts it */}
+        <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-6 py-4 z-10">
           {/* Logo visible only on mobile (panel hidden) */}
           <Link href="/" className="flex items-center lg:invisible">
             <Image
@@ -118,8 +118,8 @@ export default function SignUpPage() {
           <ThemeToggle className="ml-auto" />
         </div>
 
-        {/* Centered form */}
-        <div className="flex flex-1 items-center justify-center px-4 py-8">
+        {/* Centered form — fills the whole panel, centers independently */}
+        <div className="flex min-h-screen items-center justify-center px-4">
           <div className="w-full max-w-md animate-fade-in">
             <Suspense
               fallback={
@@ -133,8 +133,8 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        {/* Back to home */}
-        <div className="flex justify-center pb-6">
+        {/* Back to home — absolutely pinned to bottom */}
+        <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-6">
           <Link
             href="/"
             className="text-xs text-muted-foreground transition-colors hover:text-foreground"

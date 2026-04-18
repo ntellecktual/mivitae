@@ -12,9 +12,11 @@ import type { PlanId } from "./planLimits";
  */
 export const getSelfPlan = query({
   args: {},
-  handler: async (ctx): Promise<{ plan: PlanId; isCreator: boolean; isFoundingUser: boolean }> => {
+  handler: async (ctx): Promise<{ plan: PlanId; isCreator: boolean; isFoundingUser: boolean } | null> => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return { plan: "free", isCreator: false, isFoundingUser: false };
+    // Return null (not a fake "free" plan) when auth hasn't propagated yet.
+    // The frontend treats null the same as undefined — don't render plan-gated UI.
+    if (!identity) return null;
 
     // Creator bypass
     if (CREATOR_CLERK_IDS.has(identity.subject)) {

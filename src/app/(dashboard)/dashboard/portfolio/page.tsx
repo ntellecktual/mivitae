@@ -264,6 +264,22 @@ export default function PortfolioPage() {
     ? [...sections].sort((a, b) => a.order - b.order)
     : [];
 
+  if (sections === undefined) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="h-9 w-40 animate-pulse rounded-lg bg-muted" />
+            <div className="mt-2 h-5 w-64 animate-pulse rounded bg-muted" />
+          </div>
+        </div>
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-32 animate-pulse rounded-xl border bg-muted/60" />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

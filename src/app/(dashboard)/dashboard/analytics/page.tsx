@@ -276,7 +276,7 @@ export default function AnalyticsPage() {
   const analytics = useQuery(api.analytics.getSelfAnalytics);
 
   const hasAccess =
-    selfPlan === undefined ||
+    selfPlan == null || // null (auth not propagated yet) or undefined (query loading)
     selfPlan.isCreator ||
     selfPlan.isFoundingUser ||
     selfPlan.plan === "pro" ||

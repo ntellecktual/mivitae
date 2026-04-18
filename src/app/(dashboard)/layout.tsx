@@ -145,7 +145,7 @@ function SidebarContent({
   pathname: string;
   onNavigate?: () => void;
 }) {
-  const { user } = useUser();
+  const { user, isLoaded: isUserLoaded } = useUser();
   const isAdmin = useQuery(api.admin.isAdmin);
   const selfPlan = useQuery(api.subscriptions.getSelfPlan);
   const isFoundingUser = selfPlan?.isFoundingUser ?? false;
@@ -293,9 +293,13 @@ function SidebarContent({
           <UserButton />
           <div className="flex-1 overflow-hidden">
             <div className="flex items-center gap-1.5">
-              <p className="truncate text-sm font-medium text-foreground">
-                {user?.firstName ?? "Account"}
-              </p>
+              {isUserLoaded ? (
+                <p className="truncate text-sm font-medium text-foreground">
+                  {user?.firstName ?? "Account"}
+                </p>
+              ) : (
+                <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+              )}
               {isFoundingUser && (
                 <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400 shrink-0">
                   <Sparkles className="h-2.5 w-2.5" />
@@ -303,9 +307,13 @@ function SidebarContent({
                 </span>
               )}
             </div>
-            <p className="truncate text-xs text-muted-foreground">
-              {user?.primaryEmailAddress?.emailAddress ?? ""}
-            </p>
+            {isUserLoaded ? (
+              <p className="truncate text-xs text-muted-foreground">
+                {user?.primaryEmailAddress?.emailAddress}
+              </p>
+            ) : (
+              <div className="h-3 w-28 animate-pulse rounded bg-muted" />
+            )}
           </div>
           <ThemeToggle className="shrink-0" />
         </div>

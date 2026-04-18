@@ -464,6 +464,24 @@ export default function EducationPage() {
   const sorted = entries ? [...entries].sort((a, b) => a.order - b.order) : [];
   const sortedCerts = certificates ? [...certificates].sort((a, b) => a.order - b.order) : [];
 
+  if (entries === undefined || certificates === undefined) {
+    return (
+      <div className="space-y-10">
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="h-9 w-32 animate-pulse rounded-lg bg-muted" />
+              <div className="mt-2 h-5 w-56 animate-pulse rounded bg-muted" />
+            </div>
+          </div>
+          {[1, 2].map((i) => (
+            <div key={i} className="h-28 animate-pulse rounded-xl border bg-muted/60" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-10">
       {/* Education Entries */}

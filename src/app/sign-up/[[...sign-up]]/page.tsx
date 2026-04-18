@@ -111,19 +111,17 @@ export default function SignUpPage() {
 
         {/* Centered form — fills the whole panel, centers independently */}
         <div className="flex min-h-screen items-center justify-center px-4">
-          <div className="w-full max-w-md animate-fade-in space-y-4">
-            {/* Back link */}
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
-            >
-              ← Back to mivitae.org
-            </Link>
-
-            {/* Logo — replaces Clerk's "Create your account" header */}
-            <div className="flex justify-center pb-1">
-              <Image src="/logo-light.png" alt="mivitae" width={110} height={33} className="block dark:hidden" priority />
-              <Image src="/logo-dark.png" alt="mivitae" width={110} height={33} className="hidden dark:block" priority />
+          <div className="w-full max-w-md animate-fade-in">
+            {/* Back link + logo centered above card */}
+            <div className="mb-5 flex flex-col items-center gap-3">
+              <Link
+                href="/"
+                className="self-start text-xs text-muted-foreground transition-colors hover:text-foreground"
+              >
+                ← Back to mivitae.org
+              </Link>
+              <Image src="/logo-light.png" alt="mivitae" width={90} height={27} className="block dark:hidden" priority />
+              <Image src="/logo-dark.png" alt="mivitae" width={90} height={27} className="hidden dark:block" priority />
             </div>
 
             <Suspense

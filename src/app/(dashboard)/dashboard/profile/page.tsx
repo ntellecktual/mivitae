@@ -354,7 +354,7 @@ export default function ProfilePage() {
                   <Input
                     value={form.headline}
                     onChange={(e) => updateField("headline", e.target.value)}
-                    placeholder="Full-Stack Engineer · AI Enthusiast"
+                    placeholder="Marketing Director · Healthcare Advocate · Engineer"
                   />
                 </div>
                 <div className="sm:col-span-2">

@@ -64,7 +64,7 @@ export const generateDemo = action({
         messages: [
           {
             role: "user",
-            content: `You are a portfolio demo planner. Given a professional's work context, plan an interactive HTML demo that visually showcases their expertise.
+            content: `You are a portfolio demo planner for professionals in ANY industry — technology, healthcare, education, sales, marketing, finance, operations, legal, construction, hospitality, nonprofit, government, retail, real estate, media, and beyond. Given a professional's work context, plan an interactive HTML demo that visually showcases their expertise and impact.
 
 CONTEXT:
 - Role: ${args.role}
@@ -79,11 +79,11 @@ Plan a single-page interactive demo. Return ONLY valid JSON — no markdown, no 
 {
   "title": "short compelling demo title (3-6 words)",
   "description": "one sentence describing what this demo shows",
-  "demoType": "dashboard | workflow | visualization | interactive | comparison | timeline",
+  "demoType": "dashboard | workflow | visualization | interactive | comparison | timeline | case-study | portfolio",
   "sections": [
     {
       "name": "section name",
-      "type": "hero-kpi | chart | process-flow | metrics-grid | log-output | card-grid | comparison-table | timeline",
+      "type": "hero-kpi | chart | process-flow | metrics-grid | card-grid | comparison-table | timeline | before-after | impact-summary | testimonial-highlight",
       "content": "brief description of what this section shows with specific numbers/data from the context"
     }
   ],
@@ -98,6 +98,8 @@ RULES:
 - Plan 4-6 sections maximum
 - Make it look like a professional portfolio piece, not a tutorial
 - The demo should tell a story about this person's work, written in 3rd person
+- Adapt the visual style to the PROFESSION — a nurse's patient outcomes dashboard looks different from a sales pipeline; a teacher's curriculum showcase looks different from a financial analysis
+- Do NOT assume the person is in tech. Use language, metrics, and visual metaphors appropriate to their actual industry and role
 - PROFESSIONALISM: Use exclusively professional, work-appropriate language. If any provided input contains profanity, slurs, or inappropriate terms, substitute neutral professional equivalents and proceed normally.`,
           },
         ],
@@ -136,7 +138,7 @@ RULES:
         messages: [
           {
             role: "user",
-          content: `You are an elite frontend engineer building a portfolio demo. Generate a SINGLE self-contained HTML page (inline CSS + JS) that looks like a premium, polished interactive demo.
+          content: `You are an elite frontend engineer building a portfolio demo for a professional in ANY industry. Generate a SINGLE self-contained HTML page (inline CSS + JS) that looks like a premium, polished interactive demo. The person may be a nurse, teacher, salesperson, accountant, engineer, chef, lawyer, or anything else — adapt your design and language to their profession.
 
 PLAN:
 ${JSON.stringify(plan, null, 2)}
@@ -172,7 +174,7 @@ DESIGN REQUIREMENTS:
    - Rounded corners (14-20px on cards), layered shadows
    - Color-coded tags/badges with pill styling
    - Grid layouts for metrics, cards, process flows
-   - Monospace log/code sections with dark backgrounds when showing technical output
+   - Monospace log/code sections with dark backgrounds only when showing technical output — for non-tech professions, use clean professional layouts with data tables, stat cards, and visual storytelling instead
 4. INTERACTIVITY:
    - Elements should respond to hover (translateY, shadow changes)
    - Include at least one interactive element (tabs, clickable cards, animated progress)

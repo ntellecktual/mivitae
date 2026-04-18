@@ -186,7 +186,7 @@ export default function PortfolioPage() {
             <Input
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
-              placeholder="Senior Engineer"
+              placeholder="Project Manager"
             />
           </div>
           <div>

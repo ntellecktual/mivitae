@@ -64,7 +64,7 @@ export default function HomePage() {
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl" data-animate data-delay="200">
             {"Upload your r\u00e9sum\u00e9 and get a beautiful, shareable portfolio with interactive demos that "}
             <em>prove</em>
-            {" your skills \u2014 not just describe them. AI-parsed, fully themed, SEO-ready, and live in under 5 minutes."}
+            {" what you can do \u2014 in any industry, any role. AI-parsed, fully themed, SEO-ready, and live in under 5 minutes."}
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4" data-animate data-delay="300">
             <Link
@@ -85,8 +85,8 @@ export default function HomePage() {
           {/* Sentinel — FloatingCTA watches this leaving the viewport */}
           <div id="hero-cta-sentinel" aria-hidden="true" className="mt-8" data-animate data-delay="400">
             <p className="text-xs font-medium text-muted-foreground">
-              Every day without a portfolio is another missed opportunity. Recruiters
-              are looking <span className="text-primary">right now.</span>
+              A nonprofit mission to bring every career to life. For every industry,
+              every role, <span className="text-primary">every person.</span>
             </p>
           </div>
         </div>
@@ -131,15 +131,15 @@ export default function HomePage() {
             <div data-animate data-delay="150">
               <ProblemCard
                 icon={HelpCircle}
-                problem={'"I built X" means nothing'}
-                detail={`Anyone can say they "optimized a pipeline." mivitae lets you show the pipeline \u2014 interactive, visual, real.`}
+                problem={'"I did X" means nothing'}
+                detail={`Anyone can claim they "grew revenue 40%" or "reduced patient wait times." mivitae lets you show the proof \u2014 interactive, visual, real.`}
               />
             </div>
             <div data-animate data-delay="300">
               <ProblemCard
                 icon={Clock}
                 problem="Building a website takes weeks"
-                detail={`You don\u2019t need a developer portfolio built from scratch. You need one live today. Upload a r\u00e9sum\u00e9, we handle the rest.`}
+                detail={`You don\u2019t need a developer to build a professional portfolio. You need one live today. Upload a r\u00e9sum\u00e9, we handle the rest.`}
               />
             </div>
           </div>
@@ -168,7 +168,7 @@ export default function HomePage() {
                 step={2}
                 icon={Wand2}
                 title="AI builds your demos"
-                description={`Answer 3 questions about your best work. Our AI generates interactive, visual demos with real data from your accomplishments \u2014 glassmorphism dashboards, animated charts, and live code.`}
+                description={`Answer 3 questions about your best work. Our AI generates interactive, visual demos with real data from your accomplishments \u2014 polished dashboards, animated charts, and professional case studies.`}
               />
             </div>
             <div data-animate data-delay="400">
@@ -203,14 +203,14 @@ export default function HomePage() {
             <FeatureCard
               icon={Wand2}
               title="AI Demo Generation"
-              description="Answer 3 questions about your work. Our AI plans the demo structure, then generates production-quality HTML/CSS/JS with real metrics, interactive charts, and animations."
-              whyItMatters="You don't need to code to show proof of your work. Non-technical users get developer-quality demos."
+              description="Answer 3 questions about your work. Our AI plans the demo structure, then generates production-quality interactive visuals with real metrics, charts, and animations — for any profession."
+              whyItMatters="You don't need to code to show proof of your work. Anyone in any profession gets polished, interactive demos."
             />
             <FeatureCard
               icon={Zap}
               title="Smart Demo Caching"
-              description="Similar roles get instant results. If another Data Engineer with Python skills already generated a demo, yours renders immediately."
-              whyItMatters="Faster experience and zero cost on repeat role patterns. Most users get instant demos."
+              description="Similar roles get instant results. If another professional with a matching background already generated a demo, yours renders immediately."
+              whyItMatters="Faster experience and zero cost on repeat patterns. Whether you're a nurse, a marketer, or an engineer — similar roles get instant demos."
             />
           </FeatureGroup>
 
@@ -220,7 +220,7 @@ export default function HomePage() {
               icon={Briefcase}
               title="Work History Management"
               description="Full CRUD for every role. Company, title, dates, description, skills, achievements. Drag to reorder. Link interactive demos directly to each position."
-              whyItMatters={`Structured career narrative, not a wall of text. Demo links turn "I did X" into "here\u2019s X running live."`}
+              whyItMatters={`Structured career narrative, not a wall of text. Demo links turn "I did X" into "here\u2019s X in action."`}
             />
             <FeatureCard
               icon={GraduationCap}
@@ -231,8 +231,8 @@ export default function HomePage() {
             <FeatureCard
               icon={Code2}
               title="Interactive Demo Cards"
-              description="Full HTML/CSS/JS demos embedded in sandboxed iframes. Status tracking (live/WIP/archived), tags, categories, GitHub links, and banner images."
-              whyItMatters="The core differentiator. No other portfolio tool lets you attach working, interactive proof to every job."
+              description="Full HTML/CSS/JS demos embedded in sandboxed iframes. Status tracking (live/WIP/archived), tags, categories, links, and banner images. Works for every profession."
+              whyItMatters="The core differentiator. No other portfolio tool lets you attach working, interactive proof to every job — regardless of your profession."
             />
             <FeatureCard
               icon={FileText}
@@ -427,9 +427,9 @@ export default function HomePage() {
             <div data-animate data-delay="450">
               <UseCaseCard
                 icon={Briefcase}
-                title="Dev Shops & Freelance Teams"
+                title="Professional Services & Agencies"
                 tagline="Win clients before the first call."
-                description={`B2B clients ask one question: who will actually be working on this, and can they do it? Your team org page answers that directly \u2014 each developer\u2019s individual portfolio, shared demos of real work, one professional URL to close deals.`}
+                description={`B2B clients ask one question: who will actually be working on this, and can they do it? Your team org page answers that directly \u2014 each member\u2019s individual portfolio, shared demos of real work, one professional URL to close deals.`}
               />
             </div>
           </div>
@@ -460,7 +460,7 @@ export default function HomePage() {
             {" have a portfolio?"}
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            While you wait, other candidates are sharing living proof of their work.
+            While you wait, other candidates are sharing living proof of their work — in every industry.
           </p>
           <div className="mx-auto mt-10 grid gap-4 sm:grid-cols-3">
             <div data-animate data-delay="0">
@@ -477,8 +477,8 @@ export default function HomePage() {
             </div>
             <div data-animate data-delay="300">
               <CostCard
-                stat="$12/mo"
-                description={`is what separates you from unlimited demos, analytics, and a professional presence \u2014 less than a lunch`}
+                stat="Free"
+                description={`to start \u2014 because proving your worth should never cost you. A nonprofit mission for the 99% who deserve more than a PDF.`}
               />
             </div>
           </div>
@@ -579,21 +579,21 @@ export default function HomePage() {
               <TestimonialCard
                 quote="I uploaded my resume on my lunch break and had a polished portfolio by the time I got home. Three recruiters reached out that same week."
                 name="Marcus T."
-                role="Full-Stack Developer"
+                role="Operations Manager"
               />
             </div>
             <div data-animate data-delay="150">
               <TestimonialCard
                 quote="We replaced our agency's talent spreadsheet with mivitae Team. Client response rate to candidate submissions jumped from 15% to 40%."
                 name="Sarah K."
-                role="Technical Recruiter, DevStack Partners"
+                role="Recruiting Director, TalentBridge Partners"
               />
             </div>
             <div data-animate data-delay="300">
               <TestimonialCard
-                quote="The AI demo builder is unreal. I described my data pipeline project and it generated an interactive dashboard that looks like I hired a designer. Landed my biggest contract through that one link."
+                quote="The AI demo builder is unreal. I described my patient outcomes improvement project and it generated an interactive dashboard that looks like I hired a designer. Landed my biggest role through that one link."
                 name="Priya R."
-                role="Senior Data Engineer"
+                role="Clinical Nurse Leader"
               />
             </div>
           </div>
@@ -621,11 +621,11 @@ export default function HomePage() {
             />
             <FaqItem
               question="What are demo cards?"
-              answer={`Demo cards are interactive, embeddable proof-of-work snippets you attach to each role in your portfolio. Think animated dashboards, data visualizations, process flows, or case studies \u2014 live evidence of your skills, not just descriptions.`}
+              answer={`Demo cards are interactive, embeddable proof-of-work snippets you attach to each role in your portfolio. Think animated dashboards, impact visualizations, process flows, or case studies \u2014 live evidence of your skills, not just descriptions.`}
             />
             <FaqItem
               question="Do I need coding skills?"
-              answer="Not at all. The AI demo builder creates interactive demos from a simple questionnaire. Advanced users can write custom HTML/CSS/JS if they prefer, but it's entirely optional."
+              answer="Not at all. mivitae is built for every profession — nurses, teachers, marketers, accountants, engineers, and everyone in between. The AI demo builder creates interactive demos from a simple questionnaire. No technical skills required."
             />
             <FaqItem
               question="Can I use this alongside LinkedIn?"
@@ -660,7 +660,7 @@ export default function HomePage() {
           {/* Live recruiting signal */}
           <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-2 text-xs font-semibold text-primary">
             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-            Recruiters are searching right now
+            A nonprofit on a mission for the 99%
           </div>
 
           <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
@@ -670,8 +670,8 @@ export default function HomePage() {
           </h2>
 
           <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            Your next employer is forming an opinion about you before the first interview.
-            Give them something worth remembering &mdash; not a PDF they&apos;ll forget.
+            Your experience deserves more than a black-and-white piece of paper.
+            Give the world something worth remembering.
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">

@@ -48,20 +48,56 @@ function GitHubIcon({ className }: { className?: string }) {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  backend: "Backend / API",
-  frontend: "Frontend",
-  ml: "Machine Learning",
-  data: "Data Engineering",
-  devops: "DevOps",
+  // Technology
+  engineering: "Engineering & Technology",
+  data: "Data & Analytics",
+  design: "Design & Creative",
+  // Business Functions
+  sales: "Sales & Business Development",
+  marketing: "Marketing & Communications",
+  finance: "Finance & Accounting",
+  operations: "Operations & Supply Chain",
+  hr: "Human Resources & People",
+  pm: "Project & Product Management",
+  legal: "Legal & Compliance",
+  support: "Customer Success & Support",
+  // Industries
+  healthcare: "Healthcare & Life Sciences",
+  education: "Education & Training",
+  construction: "Construction & Trades",
+  hospitality: "Hospitality & Food Service",
+  retail: "Retail & E-Commerce",
+  realestate: "Real Estate & Property",
+  government: "Government & Public Sector",
+  nonprofit: "Nonprofit & Social Impact",
+  media: "Media & Entertainment",
   general: "General",
 };
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  backend: { bg: "rgba(139,92,246,.1)", text: "#8b5cf6", border: "rgba(139,92,246,.2)" },
-  frontend: { bg: "rgba(59,130,246,.1)", text: "#3b82f6", border: "rgba(59,130,246,.2)" },
-  ml: { bg: "rgba(249,115,22,.1)", text: "#f97316", border: "rgba(249,115,22,.2)" },
+  // Technology
+  engineering: { bg: "rgba(139,92,246,.1)", text: "#8b5cf6", border: "rgba(139,92,246,.2)" },
   data: { bg: "rgba(245,158,11,.1)", text: "#f59e0b", border: "rgba(245,158,11,.2)" },
-  devops: { bg: "rgba(16,185,129,.1)", text: "#10b981", border: "rgba(16,185,129,.2)" },
+  design: { bg: "rgba(236,72,153,.1)", text: "#ec4899", border: "rgba(236,72,153,.2)" },
+  // Business Functions
+  sales: { bg: "rgba(34,197,94,.1)", text: "#22c55e", border: "rgba(34,197,94,.2)" },
+  marketing: { bg: "rgba(168,85,247,.1)", text: "#a855f7", border: "rgba(168,85,247,.2)" },
+  finance: { bg: "rgba(20,184,166,.1)", text: "#14b8a6", border: "rgba(20,184,166,.2)" },
+  operations: { bg: "rgba(249,115,22,.1)", text: "#f97316", border: "rgba(249,115,22,.2)" },
+  hr: { bg: "rgba(244,63,94,.1)", text: "#f43f5e", border: "rgba(244,63,94,.2)" },
+  pm: { bg: "rgba(59,130,246,.1)", text: "#3b82f6", border: "rgba(59,130,246,.2)" },
+  legal: { bg: "rgba(100,116,139,.1)", text: "#64748b", border: "rgba(100,116,139,.2)" },
+  support: { bg: "rgba(6,182,212,.1)", text: "#06b6d4", border: "rgba(6,182,212,.2)" },
+  // Industries
+  healthcare: { bg: "rgba(239,68,68,.1)", text: "#ef4444", border: "rgba(239,68,68,.2)" },
+  education: { bg: "rgba(16,185,129,.1)", text: "#10b981", border: "rgba(16,185,129,.2)" },
+  construction: { bg: "rgba(234,179,8,.1)", text: "#eab308", border: "rgba(234,179,8,.2)" },
+  hospitality: { bg: "rgba(251,146,60,.1)", text: "#fb923c", border: "rgba(251,146,60,.2)" },
+  retail: { bg: "rgba(192,132,252,.1)", text: "#c084fc", border: "rgba(192,132,252,.2)" },
+  realestate: { bg: "rgba(45,212,191,.1)", text: "#2dd4bf", border: "rgba(45,212,191,.2)" },
+  government: { bg: "rgba(71,85,105,.1)", text: "#475569", border: "rgba(71,85,105,.2)" },
+  nonprofit: { bg: "rgba(251,113,133,.1)", text: "#fb7185", border: "rgba(251,113,133,.2)" },
+  media: { bg: "rgba(217,70,239,.1)", text: "#d946ef", border: "rgba(217,70,239,.2)" },
   general: { bg: "rgba(107,114,128,.1)", text: "#6b7280", border: "rgba(107,114,128,.2)" },
 };
 
@@ -72,10 +108,17 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
 };
 
 const SUGGESTED_TAGS = [
-  "React", "TypeScript", "Python", "Node.js", "API", "Chart.js",
-  "Real-time", "Dashboard", "Machine Learning", "Data Pipeline",
-  "CI/CD", "Docker", "AWS", "Azure", "GraphQL", "REST",
-  "WebSocket", "PostgreSQL", "MongoDB", "Redis",
+  // Universal
+  "Dashboard", "Case Study", "Process Improvement", "Leadership", "Strategy",
+  "Analytics", "Presentation", "Project Management", "Client Work", "Team Lead",
+  // Technology
+  "React", "TypeScript", "Python", "Node.js", "API", "Machine Learning",
+  // Business
+  "Sales Pipeline", "Marketing Campaign", "Financial Analysis", "Operations",
+  "Customer Success", "Supply Chain", "HR Program", "Compliance",
+  // Creative & Other
+  "Design System", "Brand Identity", "Content Strategy", "Research",
+  "Training Program", "Patient Care", "Curriculum", "Event Planning",
 ];
 
 // ── Types ────────────────────────────────────────────────────────────────
@@ -1007,7 +1050,7 @@ function SimpleCreateForm({
                   setManualRole(e.target.value);
                   setSectionId("");
                 }}
-                placeholder="e.g. Senior Data Engineer"
+                placeholder="e.g. Marketing Director, Nurse Manager, Sales Lead"
                 className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
@@ -1035,7 +1078,7 @@ function SimpleCreateForm({
               <input
                 value={manualSkills}
                 onChange={(e) => setManualSkills(e.target.value)}
-                placeholder="e.g. Python, SQL, AWS, Machine Learning"
+                placeholder="e.g. Project Management, Patient Care, Sales Strategy"
                 className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>

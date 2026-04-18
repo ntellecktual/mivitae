@@ -203,7 +203,7 @@ function DemoScoreCard({
                 {/* Dimension bars */}
                 <div className="space-y-3">
                   <DimensionBar
-                    label="Technical Depth"
+                    label="Professional Depth"
                     score={score.dimensions.technicalDepth}
                   />
                   <DimensionBar

@@ -13,13 +13,29 @@ import { toast } from "sonner";
 import { Id } from "../../../../../convex/_generated/dataModel";
 
 const SKILL_CATEGORIES = [
+  // Professional
+  "Leadership",
+  "Communication",
+  "Project Management",
+  "Strategy",
+  "Analytics",
+  // Technology
   "Languages",
   "Frameworks",
   "Tools",
   "Databases",
   "Cloud",
+  // Creative
   "Design",
-  "Soft Skills",
+  // Business
+  "Sales & Marketing",
+  "Finance & Accounting",
+  "Operations",
+  "Human Resources",
+  // Industry-Specific
+  "Healthcare",
+  "Education",
+  "Legal",
   "Other",
 ];
 

@@ -308,7 +308,7 @@ function ProfileStep({ onNext }: { onNext: () => void }) {
           </Label>
           <Input
             id="headline"
-            placeholder='e.g. "Senior Software Engineer @ Stripe"'
+            placeholder='e.g. "Marketing Director @ Unilever" or "Registered Nurse @ Mayo Clinic"'
             {...field("headline")}
           />
         </div>
@@ -713,7 +713,7 @@ function PortfolioStep({ onNext, onBack }: { onNext: () => void; onBack: () => v
                 <Label>
                   Role <span className="text-destructive">*</span>
                 </Label>
-                <Input placeholder="Senior Engineer" {...field("role")} />
+                <Input placeholder="Project Manager" {...field("role")} />
               </div>
             </div>
 

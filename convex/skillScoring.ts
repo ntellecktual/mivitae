@@ -44,7 +44,7 @@ export const gradeDemo = action({
       messages: [
         {
           role: "user",
-          content: `You are a senior technical evaluator assessing an interactive portfolio demo for professional skill verification.
+          content: `You are a senior professional evaluator assessing an interactive portfolio demo for skill verification. The demo could be from ANY profession — engineering, healthcare, education, sales, marketing, finance, operations, legal, construction, or any other field. Evaluate based on the actual profession demonstrated.
 
 DEMO TITLE: ${demo.title}
 DEMO DESCRIPTION: ${demo.description}
@@ -55,9 +55,9 @@ ${(demo.htmlContent ?? demo.content).slice(0, 6000)}
 ${portfolio ? `PORTFOLIO CONTEXT: This person works as ${portfolio.role} with skills in ${portfolio.skills}.` : ""}
 
 Score this demo on 5 dimensions (0-100 each):
-1. Technical Depth — Does the demo demonstrate real technical knowledge, not just surface-level work?
-2. Real-World Relevance — Would this skill/demo matter in an actual job?
-3. Communication Clarity — Is the demo well-organized, clear, and easy to understand for non-experts?
+1. Professional Depth — Does the demo demonstrate real domain knowledge, not just surface-level work?
+2. Real-World Relevance — Would this skill/demo matter in an actual job in this profession?
+3. Communication Clarity — Is the demo well-organized, clear, and easy to understand?
 4. Problem Solving — Does the demo demonstrate solving a real problem with a clear approach?
 5. Innovation — Does the demo show creative or novel thinking beyond boilerplate?
 

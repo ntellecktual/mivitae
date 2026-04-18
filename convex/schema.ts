@@ -235,7 +235,7 @@ export default defineSchema({
     userId: v.id("users"),
     portfolioId: v.id("portfolios"),
     name: v.string(),
-    category: v.string(),            // e.g. "Languages", "Frameworks", "Tools", "Soft Skills"
+    category: v.string(),            // e.g. "Leadership", "Communication", "Analytics", "Design", "Sales & Marketing"
     proficiency: v.optional(v.number()), // 1-5 scale
     yearsOfExperience: v.optional(v.number()),
     order: v.number(),
@@ -310,7 +310,7 @@ export default defineSchema({
     userId: v.id("users"),
     overallScore: v.number(),            // 0-100
     dimensions: v.object({
-      technicalDepth: v.number(),        // 0-100
+      technicalDepth: v.number(),        // 0-100 — Professional depth
       realWorldRelevance: v.number(),    // 0-100
       communicationClarity: v.number(),  // 0-100
       problemSolving: v.number(),        // 0-100
@@ -331,7 +331,7 @@ export default defineSchema({
     profileId: v.id("profiles"),
     demoId: v.optional(v.id("userDemos")),
     featuredAt: v.number(),
-    category: v.optional(v.string()),    // "engineering", "design", "data", "product", etc.
+    category: v.optional(v.string()),    // e.g. "engineering", "healthcare", "sales", "education", "finance", etc.
     curatorNote: v.optional(v.string()), // Editorial blurb
     isActive: v.boolean(),
   })

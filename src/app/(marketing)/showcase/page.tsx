@@ -18,11 +18,17 @@ import { cn } from "@/lib/utils";
 
 const CATEGORIES = [
   { value: undefined, label: "All" },
-  { value: "engineering", label: "Engineering" },
-  { value: "design", label: "Design" },
-  { value: "data", label: "Data" },
-  { value: "product", label: "Product" },
-  { value: "devops", label: "DevOps" },
+  { value: "engineering", label: "Engineering & Tech" },
+  { value: "design", label: "Design & Creative" },
+  { value: "data", label: "Data & Analytics" },
+  { value: "sales", label: "Sales & Business" },
+  { value: "marketing", label: "Marketing" },
+  { value: "finance", label: "Finance" },
+  { value: "healthcare", label: "Healthcare" },
+  { value: "education", label: "Education" },
+  { value: "operations", label: "Operations" },
+  { value: "hr", label: "HR & People" },
+  { value: "pm", label: "Project Mgmt" },
   { value: "other", label: "Other" },
 ] as const;
 

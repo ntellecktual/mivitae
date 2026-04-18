@@ -91,8 +91,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-        </div>
-      </section>
 
       {/* Social Proof Strip */}
       <section className="border-b border-t bg-muted/40 py-6">

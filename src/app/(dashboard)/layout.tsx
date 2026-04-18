@@ -146,9 +146,14 @@ function SidebarContent({
   onNavigate?: () => void;
 }) {
   const { user, isLoaded: isUserLoaded } = useUser();
+  const { isAuthenticated } = useConvexAuth();
   const isAdmin = useQuery(api.admin.isAdmin);
   const selfPlan = useQuery(api.subscriptions.getSelfPlan);
-  const isFoundingUser = selfPlan?.isFoundingUser ?? false;
+  // selfPlan is undefined while loading, null when Convex has no auth yet,
+  // and an object once auth is confirmed and the query resolves.
+  // planReady = we have a confirmed, auth-backed plan value.
+  const planReady = isAuthenticated && selfPlan != null;
+  const isFoundingUser = planReady ? selfPlan.isFoundingUser : false;
 
   return (
     <div className="flex h-full flex-col">
@@ -259,8 +264,10 @@ function SidebarContent({
 
       {/* Bottom: Upgrade CTA + Settings + User Profile */}
       <div className="mt-auto border-t border-sidebar-border px-3 py-3">
-        {/* Upgrade CTA — only for free-plan users */}
-        {selfPlan && selfPlan.plan === "free" && !selfPlan.isCreator && (
+        {/* Upgrade CTA — only shown once plan is confirmed AND user is on free tier.
+            planReady guards against stale cache and unauthenticated Convex snapshots
+            flashing "free" before the real subscription data arrives. */}
+        {planReady && selfPlan.plan === "free" && !selfPlan.isCreator && (
           <Link
             href="/dashboard/settings"
             onClick={onNavigate}
@@ -290,7 +297,11 @@ function SidebarContent({
         <Separator className="my-2 opacity-50" />
 
         <div className="flex items-center gap-3 rounded-lg px-3 py-2">
-          <UserButton />
+          {isUserLoaded ? (
+            <UserButton />
+          ) : (
+            <div className="h-7 w-7 animate-pulse rounded-full bg-muted shrink-0" />
+          )}
           <div className="flex-1 overflow-hidden">
             <div className="flex items-center gap-1.5">
               {isUserLoaded ? (
@@ -300,7 +311,8 @@ function SidebarContent({
               ) : (
                 <div className="h-4 w-20 animate-pulse rounded bg-muted" />
               )}
-              {isFoundingUser && (
+              {/* Badge only renders once we have confirmed plan data — never flashes in */}
+              {planReady && isFoundingUser && (
                 <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400 shrink-0">
                   <Sparkles className="h-2.5 w-2.5" />
                   Founding

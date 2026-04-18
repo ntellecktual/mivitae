@@ -280,7 +280,8 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_recipientUserId", ["recipientUserId"])
-    .index("by_profileId", ["profileId"]),
+    .index("by_profileId", ["profileId"])
+    .index("by_senderEmail", ["senderEmail"]),
 
   // In-app notifications
   notifications: defineTable({

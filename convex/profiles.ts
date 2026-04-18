@@ -212,8 +212,35 @@ export const upsertSelf = mutation({
   },
 });
 
+// ThemeConfig validator — mirrors src/lib/theme.ts ThemeConfig interface
+const themeConfigValidator = v.object({
+  bgType: v.union(v.literal("solid"), v.literal("gradient"), v.literal("pattern")),
+  bgPrimary: v.string(),
+  bgSecondary: v.string(),
+  bgAngle: v.number(),
+  patternType: v.union(v.literal("dots"), v.literal("grid"), v.literal("lines"), v.literal("none")),
+  patternColor: v.string(),
+  accentColor: v.string(),
+  textColor: v.string(),
+  subtextColor: v.string(),
+  cardBg: v.string(),
+  cardBorder: v.string(),
+  headingFont: v.string(),
+  bodyFont: v.string(),
+  heroLayout: v.union(v.literal("centered"), v.literal("left")),
+  cardStyle: v.union(v.literal("default"), v.literal("glass"), v.literal("bordered"), v.literal("flat"), v.literal("elevated")),
+  containerWidth: v.union(v.literal("narrow"), v.literal("default"), v.literal("wide")),
+  showExperience: v.boolean(),
+  showEducation: v.boolean(),
+  showDemos: v.boolean(),
+  showSkills: v.boolean(),
+  showVolunteering: v.boolean(),
+  customCss: v.optional(v.string()),
+  animationStyle: v.optional(v.union(v.literal("none"), v.literal("subtle"), v.literal("bold"), v.literal("playful"))),
+});
+
 export const saveTheme = mutation({
-  args: { themeConfig: v.any() },
+  args: { themeConfig: themeConfigValidator },
   handler: async (ctx, args) => {
     const user = await ensureAuthUser(ctx);
 

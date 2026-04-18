@@ -7,6 +7,7 @@ export type HeroLayout = "centered" | "left";
 export type CardStyle = "default" | "glass" | "bordered" | "flat" | "elevated";
 export type PatternType = "dots" | "grid" | "lines" | "none";
 export type ContainerWidth = "narrow" | "default" | "wide";
+export type AnimationStyle = "none" | "subtle" | "bold" | "playful";
 
 export interface ThemeConfig {
   // Background
@@ -35,6 +36,8 @@ export interface ThemeConfig {
   showDemos: boolean;
   showSkills: boolean;
   showVolunteering: boolean;
+  // Animation
+  animationStyle?: AnimationStyle;
   // Advanced
   customCss?: string;
 }
@@ -783,4 +786,49 @@ a { color: var(--demo-accent); }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: ${hexToRgba(theme.textColor, 0.15)}; border-radius: 3px; }
 `;
+}
+
+// ── Animation CSS by style ─────────────────────────────────────────────────
+
+export function getAnimationCss(id: string, style: AnimationStyle = "subtle"): string {
+  if (style === "none") {
+    return `#${id} .pf-animate { animation: none; }`;
+  }
+
+  const variants: Record<Exclude<AnimationStyle, "none">, string> = {
+    subtle: `
+      @keyframes pf-fade-up {
+        from { opacity: 0; transform: translateY(12px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      #${id} .pf-animate { animation: pf-fade-up 0.5s ease both; }
+      #${id} section:nth-child(1) { animation-delay: 0s; }
+      #${id} section:nth-child(2) { animation-delay: 0.08s; }
+      #${id} section:nth-child(3) { animation-delay: 0.16s; }
+    `,
+    bold: `
+      @keyframes pf-slide-in {
+        from { opacity: 0; transform: translateY(32px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      #${id} .pf-animate { animation: pf-slide-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+      #${id} section:nth-child(1) { animation-delay: 0s; }
+      #${id} section:nth-child(2) { animation-delay: 0.12s; }
+      #${id} section:nth-child(3) { animation-delay: 0.24s; }
+    `,
+    playful: `
+      @keyframes pf-bounce-in {
+        0%   { opacity: 0; transform: translateY(48px) scale(0.9); }
+        60%  { opacity: 1; transform: translateY(-8px) scale(1.02); }
+        80%  { transform: translateY(4px) scale(0.99); }
+        100% { transform: translateY(0) scale(1); }
+      }
+      #${id} .pf-animate { animation: pf-bounce-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+      #${id} section:nth-child(1) { animation-delay: 0s; }
+      #${id} section:nth-child(2) { animation-delay: 0.15s; }
+      #${id} section:nth-child(3) { animation-delay: 0.3s; }
+    `,
+  };
+
+  return variants[style];
 }

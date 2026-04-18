@@ -15,6 +15,7 @@ import {
   type CardStyle,
   type PatternType,
   type ContainerWidth,
+  type AnimationStyle,
   THEME_PRESETS,
   HEADING_FONTS,
   BODY_FONTS,
@@ -792,16 +793,25 @@ function LayoutPanel({
       <div>
         <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Animation Style</p>
         <div className="grid grid-cols-2 gap-1.5">
-          {ANIMATION_PRESETS.map((anim) => (
-            <button
-              key={anim.id}
-              title={`${anim.label} animation style`}
-              className="rounded-lg border border-white/10 p-2 text-left transition-all hover:border-white/25 hover:bg-white/5"
-            >
-              <p className="text-[11px] font-semibold text-white">{anim.label}</p>
-              <p className="text-[9px] text-white/50">{anim.desc}</p>
-            </button>
-          ))}
+          {ANIMATION_PRESETS.map((anim) => {
+            const active = (theme.animationStyle ?? "subtle") === anim.id;
+            return (
+              <button
+                key={anim.id}
+                title={`${anim.label} animation style`}
+                onClick={() => update({ animationStyle: anim.id as AnimationStyle })}
+                className={cn(
+                  "rounded-lg border p-2 text-left transition-all",
+                  active
+                    ? "border-white/40 bg-white/10 ring-1 ring-white/20"
+                    : "border-white/10 hover:border-white/25 hover:bg-white/5",
+                )}
+              >
+                <p className="text-[11px] font-semibold text-white">{anim.label}</p>
+                <p className="text-[9px] text-white/50">{anim.desc}</p>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query, mutation, internalMutation, internalAction } from "./_generated/server";
+import { query, mutation, internalMutation, internalAction, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { getUserPlan, getLimits } from "./planLimits";
 import { ensureAuthUser } from "./authHelpers";
@@ -47,7 +47,8 @@ export const create = mutation({
   },
 });
 
-export const getByUserId = query({
+// Internal only — no frontend callers
+export const getByUserId = internalQuery({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
     return await ctx.db
@@ -61,6 +62,10 @@ export const getByUserId = query({
 export const getLatest = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
+    // Auth gate — only allow fetching your own resumes
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
     return await ctx.db
       .query("resumes")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))

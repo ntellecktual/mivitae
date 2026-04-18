@@ -42,11 +42,21 @@ export const send = mutation({
     const recentCount = recentMessages.filter(m => m.createdAt > oneHourAgo).length;
     if (recentCount >= 5) throw new Error("Too many messages. Please try again later.");
 
+    // Rate limit: max 10 messages per sender email per hour (across all profiles)
+    const senderRecent = await ctx.db
+      .query("contactMessages")
+      .withIndex("by_senderEmail", (q) => q.eq("senderEmail", args.senderEmail.trim().toLowerCase()))
+      .take(100);
+    const senderRecentCount = senderRecent.filter(m => m.createdAt > oneHourAgo).length;
+    if (senderRecentCount >= 10) throw new Error("Too many messages. Please try again later.");
+
+    const normalizedEmail = args.senderEmail.trim().toLowerCase().slice(0, 254);
+
     const messageId = await ctx.db.insert("contactMessages", {
       profileId: args.profileId,
       recipientUserId: profile.userId,
       senderName: sanitizeText(args.senderName, 100),
-      senderEmail: args.senderEmail.trim().slice(0, 254),
+      senderEmail: normalizedEmail,
       message: sanitizeText(args.message, 5000),
       isRead: false,
       createdAt: Date.now(),
@@ -69,7 +79,7 @@ export const send = mutation({
       await ctx.scheduler.runAfter(0, internal.emails.sendContactForward, {
         recipientEmail: user.email,
         senderName: sanitizeText(args.senderName, 100),
-        senderEmail: args.senderEmail.trim().slice(0, 254),
+        senderEmail: normalizedEmail,
         message: sanitizeText(args.message, 5000),
       });
     }

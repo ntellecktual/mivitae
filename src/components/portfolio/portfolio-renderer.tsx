@@ -6,6 +6,7 @@ import { api } from "@/lib/convex";
 import { MapPin, Globe, ExternalLink, Briefcase, GraduationCap, Zap, Wrench, Heart, Mail } from "lucide-react";
 import {
   type ThemeConfig,
+  type AnimationStyle,
   resolveTheme,
   getBackgroundStyle,
   getCardStyle,
@@ -13,7 +14,30 @@ import {
   getGoogleFontsUrl,
   hexToRgba,
   buildDemoIframeCss,
+  getAnimationCss,
 } from "@/lib/theme";
+
+// ── CSS Sanitizer ──────────────────────────────────────────────────────────
+// Strips dangerous patterns from user-supplied custom CSS to prevent XSS.
+
+function sanitizeCss(css: string): string {
+  let s = css;
+  // Block </style> tag breakout (case-insensitive)
+  s = s.replace(/<\s*\/\s*style\s*>/gi, "");
+  // Block <script> injection
+  s = s.replace(/<\s*script[^>]*>/gi, "");
+  // Block javascript: and data: in url()
+  s = s.replace(/url\s*\(\s*(['"]?)\s*(javascript|data)\s*:/gi, 'url($1blocked:');
+  // Block IE expression()
+  s = s.replace(/expression\s*\(/gi, "blocked(");
+  // Block @import (data exfiltration / remote CSS injection)
+  s = s.replace(/@import\b/gi, "/* blocked-import */");
+  // Block -moz-binding (Firefox XBL)
+  s = s.replace(/-moz-binding\s*:/gi, "blocked:");
+  // Block behavior: (IE HTCs)
+  s = s.replace(/behavior\s*:/gi, "blocked:");
+  return s;
+}
 
 // ── Prop Types (mirror Convex document shapes) ─────────────────────────────
 
@@ -374,17 +398,8 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     /* Accent color for icons */
     #${id} .pf-accent { color: ${theme.accentColor}; }
 
-    /* ── Entrance animations ── */
-    @keyframes pf-fade-up {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    #${id} .pf-animate {
-      animation: pf-fade-up 0.5s ease both;
-    }
-    #${id} section:nth-child(1) { animation-delay: 0s; }
-    #${id} section:nth-child(2) { animation-delay: 0.1s; }
-    #${id} section:nth-child(3) { animation-delay: 0.2s; }
+    /* ── Entrance animations (driven by theme.animationStyle) ── */
+    ${getAnimationCss(id, theme.animationStyle ?? "subtle")}
 
     /* ── Print overrides (scoped) ── */
     @media print {
@@ -515,9 +530,9 @@ export default function PortfolioRenderer({
         <link rel="stylesheet" href={previewFontUrl} />
       )}
 
-      {/* Custom CSS (advanced) */}
+      {/* Custom CSS (advanced) — sanitized to prevent XSS */}
       {theme.customCss && !preview && (
-        <style dangerouslySetInnerHTML={{ __html: theme.customCss }} />
+        <style dangerouslySetInnerHTML={{ __html: sanitizeCss(theme.customCss) }} />
       )}
 
       {/* ── Hero ──────────────────────────────────────────────────── */}

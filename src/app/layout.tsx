@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Providers } from "@/components/providers";
+import "@/lib/env"; // Validate env vars at startup
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({

@@ -79,7 +79,21 @@ export default function SignInPage() {
 
         {/* Centered form — fills the whole panel, centers independently */}
         <div className="flex min-h-screen items-center justify-center px-4">
-          <div className="w-full max-w-md animate-fade-in">
+          <div className="w-full max-w-md animate-fade-in space-y-4">
+            {/* Back link */}
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              ← Back to mivitae.org
+            </Link>
+
+            {/* Logo — replaces Clerk's "Sign in to mivitae" header */}
+            <div className="flex justify-center pb-1">
+              <Image src="/logo-light.png" alt="mivitae" width={110} height={33} className="block dark:hidden" priority />
+              <Image src="/logo-dark.png" alt="mivitae" width={110} height={33} className="hidden dark:block" priority />
+            </div>
+
             <SignIn
               fallbackRedirectUrl="/dashboard"
               signUpUrl="/sign-up"
@@ -90,6 +104,8 @@ export default function SignInPage() {
                   fontFamily: "inherit",
                 },
                 elements: {
+                  headerTitle: "hidden",
+                  headerSubtitle: "hidden",
                   formButtonPrimary: "bg-primary hover:bg-primary/90 shadow-none",
                   footerActionLink: "text-primary hover:text-primary/80",
                   identityPreviewEditButton: "text-primary",
@@ -97,16 +113,6 @@ export default function SignInPage() {
               }}
             />
           </div>
-        </div>
-
-        {/* Back to home — absolutely pinned to bottom */}
-        <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-6">
-          <Link
-            href="/"
-            className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-          >
-            ← Back to mivitae.org
-          </Link>
         </div>
       </div>
     </div>

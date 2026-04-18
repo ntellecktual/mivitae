@@ -50,7 +50,7 @@ export default function HomePage() {
         <div className="pointer-events-none absolute top-10 right-[10%] h-72 w-72 rounded-full bg-primary/12 blur-3xl animate-orb-2" />
 
         <div className="relative mx-auto max-w-6xl px-4 text-center">
-          <div className="mb-6 inline-flex items-center rounded-full border bg-muted px-4 py-1.5 text-xs font-medium text-muted-foreground" data-animate>
+          <div id="trial-badge" className="mb-6 inline-flex items-center rounded-full border bg-muted px-4 py-1.5 text-xs font-medium text-muted-foreground" data-animate>
             <Zap className="mr-1.5 h-3 w-3 text-primary" />
             30-day free trial &mdash; no credit card required
           </div>

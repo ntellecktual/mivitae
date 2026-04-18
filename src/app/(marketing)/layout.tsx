@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth, useClerk } from "@clerk/nextjs";
@@ -12,11 +13,40 @@ export default function MarketingLayout({
 }) {
   const { isSignedIn } = useAuth();
   const { signOut } = useClerk();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const badge = document.getElementById("trial-badge");
+      if (badge) {
+        setScrolled(badge.getBoundingClientRect().bottom <= 0);
+      } else {
+        setScrolled(window.scrollY > 80);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-border/20 bg-background/40 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 lg:px-6">
+      <header
+        className={`sticky top-0 z-30 transition-all duration-500 ${
+          scrolled
+            ? "border-b border-border/20 bg-background/40 backdrop-blur-xl"
+            : "border-b border-transparent bg-transparent"
+        }`}
+      >
+        <div
+          className="flex h-16 items-center justify-between transition-all duration-500"
+          style={{
+            maxWidth: scrolled ? "9999px" : "72rem",
+            marginLeft: scrolled ? "0" : "auto",
+            marginRight: scrolled ? "0" : "auto",
+            paddingLeft: scrolled ? "1.5rem" : "1rem",
+            paddingRight: scrolled ? "1.5rem" : "1rem",
+          }}
+        >
           <Link href="/" className="flex items-center transition-opacity hover:opacity-80">
             <Image
               src="/logo-light.png"

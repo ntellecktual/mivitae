@@ -377,6 +377,7 @@ function UploadStep({ onNext, onBack }: { onNext: () => void; onBack: () => void
   );
   const generateUploadUrl = useMutation(api.resumes.generateUploadUrl);
   const createResume = useMutation(api.resumes.create);
+  const startParse = useMutation(api.resumes.startParse);
 
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -409,7 +410,8 @@ function UploadStep({ onNext, onBack }: { onNext: () => void; onBack: () => void
         });
         if (!result.ok) throw new Error("Upload failed. Please try again.");
         const { storageId } = await result.json();
-        await createResume({ storageId, fileName: file.name });
+        const resumeId = await createResume({ storageId, fileName: file.name });
+        await startParse({ resumeId, storageId, fileType: "pdf" });
         setUploaded(true);
         setUploadedName(file.name);
       } catch (e: unknown) {
@@ -418,7 +420,7 @@ function UploadStep({ onNext, onBack }: { onNext: () => void; onBack: () => void
         setUploading(false);
       }
     },
-    [convexUser, generateUploadUrl, createResume]
+    [convexUser, generateUploadUrl, createResume, startParse]
   );
 
   const handleDrop = useCallback(

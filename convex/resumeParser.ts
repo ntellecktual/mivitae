@@ -87,8 +87,16 @@ export const parseResume = internalAction({
         const client = new Anthropic({ apiKey });
 
         const sourceLabel = isText ? "pasted text" : isDocx ? "document text" : "attached PDF";
-        const promptText = `You are a resume parser. Extract structured data from the ${sourceLabel} and return ONLY valid JSON — no markdown, no code fences, no commentary.
+        const promptText = `You are an expert resume parser. Extract structured career data and return ONLY a single valid JSON object — no markdown, no code fences, no commentary, no extra text.
 
+CRITICAL RULES:
+- Each job position must appear EXACTLY ONCE. Do NOT duplicate entries even if the same company appears multiple times with different roles — create one entry per unique role+company combination.
+- Each educational institution must appear EXACTLY ONCE.
+- If a field is unknown, use null — never omit required fields.
+- startDate and endDate must be human-readable strings like "Jan 2020" or "March 2018". Use null for endDate if it is the current position.
+- startYear and endYear for education must be 4-digit integers (e.g. 2015). Use null if unknown.
+
+Return this exact JSON structure:
 {
   "workHistory": [
     {
@@ -96,9 +104,9 @@ export const parseResume = internalAction({
       "role": "string",
       "startDate": "string (e.g. Jan 2020)",
       "endDate": "string or null (null if current)",
-      "description": "string (2-3 sentence summary)",
-      "skills": ["technical and soft skills"],
-      "achievements": ["quantified accomplishments"]
+      "description": "2-3 sentence summary of responsibilities",
+      "skills": ["array of technical and soft skills used in this role"],
+      "achievements": ["quantified accomplishments, max 5 bullets"]
     }
   ],
   "education": [
@@ -106,11 +114,11 @@ export const parseResume = internalAction({
       "institution": "string",
       "degree": "string (e.g. Bachelor of Science)",
       "fieldOfStudy": "string or null",
-      "startYear": number,
+      "startYear": number or null,
       "endYear": number or null,
       "gpa": "string or null",
       "honors": "string or null",
-      "activities": ["clubs, sports, activities"]
+      "activities": ["clubs, sports, organizations"]
     }
   ]
 }`;
@@ -174,15 +182,42 @@ export const parseResume = internalAction({
       const jsonText = rawText.replace(/^```(?:json)?\n?/m, "").replace(/\n?```$/m, "").trim();
       const parsed: ParsedResume = JSON.parse(jsonText);
 
+      // Deduplicate work entries (guard against AI repeating the same role)
+      const seenWork = new Set<string>();
+      const uniqueWork = parsed.workHistory.filter((e) => {
+        const key = `${e.companyName}|${e.role}`.toLowerCase();
+        if (seenWork.has(key)) return false;
+        seenWork.add(key);
+        return true;
+      });
+
+      // Deduplicate education entries
+      const seenEdu = new Set<string>();
+      const uniqueEducation = parsed.education.filter((e) => {
+        const key = `${e.institution}|${e.degree}`.toLowerCase();
+        if (seenEdu.has(key)) return false;
+        seenEdu.add(key);
+        return true;
+      });
+
       // 4. Ensure portfolio exists
       const portfolioId: string = await ctx.runMutation(
         internal.portfolios.ensureDefaultInternal,
         { userId: args.userId }
       );
 
-      // 5. Insert work history
-      for (let i = 0; i < parsed.workHistory.length; i++) {
-        const entry = parsed.workHistory[i];
+      // 5. Clear any existing parsed entries first (idempotent re-parse)
+      await ctx.runMutation(internal.portfolioSections.deleteAllForPortfolioInternal, {
+        portfolioId: portfolioId as never,
+      });
+      await ctx.runMutation(internal.educationEntries.deleteAllForPortfolioInternal, {
+        portfolioId: portfolioId as never,
+        userId: args.userId,
+      });
+
+      // 6. Insert work history
+      for (let i = 0; i < uniqueWork.length; i++) {
+        const entry = uniqueWork[i];
         await ctx.runMutation(internal.portfolioSections.createInternal, {
           portfolioId: portfolioId as never,
           userId: args.userId,
@@ -197,9 +232,9 @@ export const parseResume = internalAction({
         });
       }
 
-      // 6. Insert education
-      for (let i = 0; i < parsed.education.length; i++) {
-        const entry = parsed.education[i];
+      // 7. Insert education
+      for (let i = 0; i < uniqueEducation.length; i++) {
+        const entry = uniqueEducation[i];
         await ctx.runMutation(internal.educationEntries.createInternal, {
           userId: args.userId,
           portfolioId: portfolioId as never,

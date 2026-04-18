@@ -95,6 +95,19 @@ export const createSelf = mutation({
   },
 });
 
+// Delete all education entries for a given portfolio (used before re-parse to avoid duplicates)
+export const deleteAllForPortfolioInternal = internalMutation({
+  args: { portfolioId: v.id("portfolios"), userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const entries = await ctx.db
+      .query("educationEntries")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .take(200);
+    const toDelete = entries.filter((e) => e.portfolioId === args.portfolioId);
+    await Promise.all(toDelete.map((e) => ctx.db.delete(e._id)));
+  },
+});
+
 // Internal version for resumeParser (accepts portfolioId + userId directly)
 export const createInternal = internalMutation({
   args: {

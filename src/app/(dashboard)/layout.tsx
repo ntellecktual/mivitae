@@ -154,7 +154,7 @@ function SidebarContent({
     <div className="flex h-full flex-col">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2 px-5">
-        <Link href="/" className="flex items-center transition-opacity hover:opacity-80" onClick={onNavigate}>
+        <Link href="/dashboard" className="flex items-center transition-opacity hover:opacity-80" onClick={onNavigate}>
           <Image
             src="/logo-light.png"
             alt="mivitae"
@@ -364,7 +364,7 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen bg-background">
         <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border/50 bg-background/80 px-4 backdrop-blur-xl lg:px-6">
-          <Link href="/" className="flex items-center">
+          <Link href="/dashboard" className="flex items-center">
             <Image
               src="/logo-light.png"
               alt="mivitae"

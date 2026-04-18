@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useAuth, useClerk } from "@clerk/nextjs";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function MarketingLayout({
@@ -9,6 +10,9 @@ export default function MarketingLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { isSignedIn } = useAuth();
+  const { signOut } = useClerk();
+
   return (
     <>
       <header className="sticky top-0 z-30 border-b border-border/20 bg-background/40 backdrop-blur-xl">
@@ -56,18 +60,37 @@ export default function MarketingLayout({
             >
               Showcase
             </Link>
-            <Link
-              href="/sign-in"
-              className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:bg-accent hover:text-foreground"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/sign-up"
-              className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
-            >
-              Get Started
-            </Link>
+            {isSignedIn ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:bg-accent hover:text-foreground"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => signOut({ redirectUrl: "/" })}
+                  className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/sign-in"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:bg-accent hover:text-foreground"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/sign-up"
+                  className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
             <ThemeToggle className="ml-1" />
           </nav>
         </div>

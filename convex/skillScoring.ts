@@ -5,6 +5,47 @@ import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
 import Anthropic from "@anthropic-ai/sdk";
 
+// ── Pre-process HTML so the evaluation window captures actual content ────
+function prepareContentForGrading(raw: string): string {
+  let html = raw;
+
+  // 1. Strip <style> blocks — CSS doesn't demonstrate skill
+  html = html.replace(/<style[\s\S]*?<\/style>/gi, "");
+
+  // 2. Strip <script> blocks but extract meaningful comments/logic
+  //    Keep a brief note about JS presence so the evaluator knows it's interactive
+  const scriptBlocks = html.match(/<script[\s\S]*?<\/script>/gi) ?? [];
+  const hasInteractiveJS = scriptBlocks.some(
+    (s) =>
+      s.includes("fetch(") ||
+      s.includes("addEventListener") ||
+      s.includes("async ") ||
+      s.includes("Promise"),
+  );
+  html = html.replace(/<script[\s\S]*?<\/script>/gi, "");
+  if (hasInteractiveJS) {
+    html +=
+      "\n[INTERACTIVE: This demo includes JavaScript that fetches live API data, runs simulations, and renders dynamic results in the browser.]";
+  }
+
+  // 3. Treat <details> content as visible (expand collapsed sections)
+  html = html.replace(/<\/?details[^>]*>/gi, "");
+  html = html.replace(/<\/?summary[^>]*>/gi, "");
+
+  // 4. Strip Django/Jinja template tags
+  html = html.replace(/\{%[\s\S]*?%\}/g, "");
+  html = html.replace(/\{\{[\s\S]*?\}\}/g, "");
+
+  // 5. Strip excessive inline style attributes (keep the tag structure)
+  html = html.replace(/ style="[^"]{80,}"/gi, "");
+
+  // 6. Collapse whitespace
+  html = html.replace(/\n{3,}/g, "\n\n");
+  html = html.replace(/[ \t]{4,}/g, " ");
+
+  return html.trim();
+}
+
 // ── Grade a demo and produce a verified skill score ──────────────────────
 
 export const gradeDemo = action({
@@ -38,6 +79,11 @@ export const gradeDemo = action({
 
     const client = new Anthropic();
 
+    // Pre-process: strip CSS/scripts/template tags so the content window
+    // captures actual demo substance instead of styling boilerplate
+    const rawContent = demo.htmlContent ?? demo.content;
+    const cleanedContent = prepareContentForGrading(rawContent);
+
     const response = await client.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 1500,
@@ -49,17 +95,28 @@ export const gradeDemo = action({
 DEMO TITLE: ${demo.title}
 DEMO DESCRIPTION: ${demo.description}
 DEMO TAGS: ${(demo.tags ?? []).join(", ")}
-DEMO HTML/CONTENT (first 6000 chars):
-${(demo.htmlContent ?? demo.content).slice(0, 6000)}
+DEMO CONTENT (cleaned HTML, up to 12000 chars):
+${cleanedContent.slice(0, 12000)}
 
 ${portfolio ? `PORTFOLIO CONTEXT: This person works as ${portfolio.role} with skills in ${portfolio.skills}.` : ""}
 
+EVALUATION GUIDELINES:
+- CSS styling has been stripped. Focus entirely on the substantive content.
+- Content from collapsible sections (<details>) has been expanded and is included above.
+- If the content notes "[INTERACTIVE: ...]", the demo includes live JavaScript functionality — give credit for interactivity even though the JS code was stripped.
+- Look for ACTUAL demo content: code examples, data tables, technical implementations, formulas, quantitative results, metrics, methodology descriptions, and domain-specific artifacts.
+- Code blocks (<pre>, <code>) with real implementation code (not pseudocode) indicate strong technical depth.
+- Quantitative results (accuracy metrics, benchmarks, performance numbers) with specific values indicate strong problem solving.
+- Multiple sections covering different aspects of a topic indicate strong communication clarity.
+- Novel techniques, unique approaches, or creative combinations of methods indicate strong innovation.
+- Do NOT penalize demos for being HTML-based — evaluate the professional substance within the HTML.
+
 Score this demo on 5 dimensions (0-100 each):
-1. Professional Depth — Does the demo demonstrate real domain knowledge, not just surface-level work?
-2. Real-World Relevance — Would this skill/demo matter in an actual job in this profession?
-3. Communication Clarity — Is the demo well-organized, clear, and easy to understand?
-4. Problem Solving — Does the demo demonstrate solving a real problem with a clear approach?
-5. Innovation — Does the demo show creative or novel thinking beyond boilerplate?
+1. Professional Depth — Does the demo demonstrate real domain knowledge, not just surface-level work? Look for: real code implementations, specific technical details, domain-specific terminology used correctly, quantitative metrics.
+2. Real-World Relevance — Would this skill/demo matter in an actual job in this profession? Look for: industry-standard tools/frameworks, production-ready patterns, real data sources.
+3. Communication Clarity — Is the demo well-organized, clear, and easy to understand? Look for: logical section flow, clear headings, visual hierarchy, explanatory text alongside technical content.
+4. Problem Solving — Does the demo demonstrate solving a real problem with a clear approach? Look for: defined problem statement, methodology, quantitative results/benchmarks, validation.
+5. Innovation — Does the demo show creative or novel thinking beyond boilerplate? Look for: unique approaches, creative visualizations, combining multiple techniques, going beyond tutorials.
 
 Respond in EXACTLY this JSON format (no markdown, no wrapping):
 {

@@ -36,6 +36,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useQuery } from "convex/react";
+import { useConvexAuth } from "convex/react";
 import { api } from "@/lib/convex";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -321,11 +322,18 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
   const onboardingState = useQuery(api.onboarding.getSelf);
 
-  // Gate: redirect to onboarding if not complete (and not already there)
+  // Gate: redirect to onboarding if not complete (and not already there).
+  // Only act once Convex auth is confirmed — onboardingState is null while
+  // Clerk's token hasn't propagated yet, which would cause a spurious redirect
+  // to /dashboard/onboarding (and then back to /dashboard) on every refresh.
   const isOnboarding = pathname === "/dashboard/onboarding";
   useEffect(() => {
+    // Don't redirect while auth is still initializing
+    if (isAuthLoading || !isAuthenticated) return;
+
     if (
       onboardingState !== undefined &&
       onboardingState !== null &&
@@ -338,15 +346,21 @@ export default function DashboardLayout({
     if (onboardingState === null && !isOnboarding) {
       router.replace("/dashboard/onboarding");
     }
-  }, [onboardingState, isOnboarding, router]);
+  }, [onboardingState, isOnboarding, router, isAuthenticated, isAuthLoading]);
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  // During onboarding, show a minimal layout without sidebar navigation
-  if (isOnboarding || (onboardingState !== undefined && !onboardingState?.isComplete)) {
+  // During onboarding, show a minimal layout without sidebar navigation.
+  // Only switch to minimal layout once auth is confirmed — while auth is still
+  // loading, onboardingState is null (no identity) which would incorrectly
+  // trigger the minimal layout on every refresh.
+  const showOnboardingLayout =
+    isOnboarding ||
+    (isAuthenticated && onboardingState !== undefined && !onboardingState?.isComplete);
+  if (showOnboardingLayout) {
     return (
       <div className="min-h-screen bg-background">
         <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border/50 bg-background/80 px-4 backdrop-blur-xl lg:px-6">

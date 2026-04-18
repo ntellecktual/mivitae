@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { HTMLAttributes } from "react";
 import {
   ArrowRight,
   Upload,
@@ -32,36 +33,43 @@ import {
   HelpCircle,
   Clock,
 } from "lucide-react";
+import { ScrollAnimator } from "@/components/marketing/scroll-animator";
+import { FloatingCTA } from "@/components/marketing/floating-cta";
 
 export default function HomePage() {
   return (
     <div>
+      <ScrollAnimator />
+      <FloatingCTA />
       {/* Hero */}
       <section className="relative overflow-hidden py-24 sm:py-32">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.15)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.15)_1px,transparent_1px)] bg-[size:64px_64px]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,hsl(var(--primary)/0.08),transparent)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.15)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.15)_1px,transparent_1px)] bg-size-[64px_64px]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,hsl(var(--primary)/0.1),transparent)]" />
+        {/* Animated ambient orbs */}
+        <div className="pointer-events-none absolute -top-32 left-[15%] h-112 w-md rounded-full bg-primary/8 blur-3xl animate-orb-1" />
+        <div className="pointer-events-none absolute top-10 right-[10%] h-72 w-72 rounded-full bg-primary/6 blur-3xl animate-orb-2" />
 
         <div className="relative mx-auto max-w-6xl px-4 text-center">
-          <div className="mb-6 inline-flex items-center rounded-full border bg-muted px-4 py-1.5 text-xs font-medium text-muted-foreground">
+          <div className="mb-6 inline-flex items-center rounded-full border bg-muted px-4 py-1.5 text-xs font-medium text-muted-foreground" data-animate>
             <Zap className="mr-1.5 h-3 w-3 text-primary" />
             30-day free trial &mdash; no credit card required
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
+          <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl" data-animate data-delay="100">
             {"Your r\u00e9sum\u00e9 is dead."}
             <br />
-            <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <span className="hero-gradient-text">
               Build living proof.
             </span>
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl" data-animate data-delay="200">
             {"Upload your r\u00e9sum\u00e9 and get a beautiful, shareable portfolio with interactive demos that "}
             <em>prove</em>
             {" your skills \u2014 not just describe them. AI-parsed, fully themed, SEO-ready, and live in under 5 minutes."}
           </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4" data-animate data-delay="300">
             <Link
               href="/sign-up"
-              className="inline-flex items-center rounded-xl bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
+              className="inline-flex items-center rounded-xl bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
             >
               Start for Free
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -74,10 +82,15 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <p className="mt-8 text-xs font-medium text-muted-foreground">
-            Every day without a portfolio is another missed opportunity. Recruiters
-            are looking <span className="text-primary">right now.</span>
-          </p>
+          {/* Sentinel — FloatingCTA watches this leaving the viewport */}
+          <div id="hero-cta-sentinel" aria-hidden="true" className="mt-8" data-animate data-delay="400">
+            <p className="text-xs font-medium text-muted-foreground">
+              Every day without a portfolio is another missed opportunity. Recruiters
+              are looking <span className="text-primary">right now.</span>
+            </p>
+          </div>
+        </div>
+      </section>
         </div>
       </section>
 
@@ -86,12 +99,12 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4">
           <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-16">
             {[
-              { value: "1,200+", label: "portfolios published" },
-              { value: "5 min", label: "from upload to live" },
-              { value: "23", label: "features, one platform" },
-              { value: "30-day", label: "free trial, no card" },
+              { value: "1,200+", label: "portfolios published", delay: "0" },
+              { value: "5 min", label: "from upload to live", delay: "100" },
+              { value: "23", label: "features, one platform", delay: "200" },
+              { value: "30-day", label: "free trial, no card", delay: "300" },
             ].map((stat) => (
-              <div key={stat.label} className="flex flex-col items-center gap-1">
+              <div key={stat.label} className="flex flex-col items-center gap-1" data-animate data-delay={stat.delay}>
                 <span className="text-2xl font-bold">{stat.value}</span>
                 <span className="text-center text-xs text-muted-foreground">
                   {stat.label}
@@ -110,21 +123,27 @@ export default function HomePage() {
             <span className="text-primary">prove.</span>
           </h2>
           <div className="mx-auto mt-10 grid gap-6 sm:grid-cols-3">
-            <ProblemCard
-              icon={FileWarning}
-              problem="PDFs get buried"
-              detail={`Recruiters see 250+ r\u00e9sum\u00e9s per opening. A PDF buried in an inbox doesn\u2019t stand out \u2014 a living URL does.`}
-            />
-            <ProblemCard
-              icon={HelpCircle}
-              problem={'"I built X" means nothing'}
-              detail={`Anyone can say they "optimized a pipeline." mivitae lets you show the pipeline \u2014 interactive, visual, real.`}
-            />
-            <ProblemCard
-              icon={Clock}
-              problem="Building a website takes weeks"
-              detail={`You don\u2019t need a developer portfolio built from scratch. You need one live today. Upload a r\u00e9sum\u00e9, we handle the rest.`}
-            />
+            <div data-animate data-delay="0">
+              <ProblemCard
+                icon={FileWarning}
+                problem="PDFs get buried"
+                detail={`Recruiters see 250+ r\u00e9sum\u00e9s per opening. A PDF buried in an inbox doesn\u2019t stand out \u2014 a living URL does.`}
+              />
+            </div>
+            <div data-animate data-delay="150">
+              <ProblemCard
+                icon={HelpCircle}
+                problem={'"I built X" means nothing'}
+                detail={`Anyone can say they "optimized a pipeline." mivitae lets you show the pipeline \u2014 interactive, visual, real.`}
+              />
+            </div>
+            <div data-animate data-delay="300">
+              <ProblemCard
+                icon={Clock}
+                problem="Building a website takes weeks"
+                detail={`You don\u2019t need a developer portfolio built from scratch. You need one live today. Upload a r\u00e9sum\u00e9, we handle the rest.`}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -138,24 +157,30 @@ export default function HomePage() {
             subtitle="No coding required. No design skills needed. Just your resume."
           />
           <div className="mt-16 grid gap-8 sm:grid-cols-3">
-            <StepCard
-              step={1}
-              icon={Upload}
-              title={`Upload your r\u00e9sum\u00e9`}
-              description={`Drop a PDF. Our AI reads the actual document \u2014 not OCR \u2014 and extracts your entire work history, education, skills, and achievements in seconds.`}
-            />
-            <StepCard
-              step={2}
-              icon={Wand2}
-              title="AI builds your demos"
-              description={`Answer 3 questions about your best work. Our AI generates interactive, visual demos with real data from your accomplishments \u2014 glassmorphism dashboards, animated charts, and live code.`}
-            />
-            <StepCard
-              step={3}
-              icon={Globe}
-              title="Publish & share"
-              description={`Your portfolio goes live at mivitae.org/u/your-name. SEO-optimized, social-share-ready, and always up to date. One URL for every application.`}
-            />
+            <div data-animate data-delay="0">
+              <StepCard
+                step={1}
+                icon={Upload}
+                title={`Upload your r\u00e9sum\u00e9`}
+                description={`Drop a PDF. Our AI reads the actual document \u2014 not OCR \u2014 and extracts your entire work history, education, skills, and achievements in seconds.`}
+              />
+            </div>
+            <div data-animate data-delay="200">
+              <StepCard
+                step={2}
+                icon={Wand2}
+                title="AI builds your demos"
+                description={`Answer 3 questions about your best work. Our AI generates interactive, visual demos with real data from your accomplishments \u2014 glassmorphism dashboards, animated charts, and live code.`}
+              />
+            </div>
+            <div data-animate data-delay="400">
+              <StepCard
+                step={3}
+                icon={Globe}
+                title="Publish & share"
+                description={`Your portfolio goes live at mivitae.org/u/your-name. SEO-optimized, social-share-ready, and always up to date. One URL for every application.`}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -170,7 +195,7 @@ export default function HomePage() {
           />
 
           {/* AI-Powered */}
-          <FeatureGroup title="AI-Powered Intelligence" className="mt-16">
+          <FeatureGroup title="AI-Powered Intelligence" className="mt-16" data-animate>
             <FeatureCard
               icon={Brain}
               title={`AI R\u00e9sum\u00e9 Parsing`}
@@ -192,7 +217,7 @@ export default function HomePage() {
           </FeatureGroup>
 
           {/* Portfolio Building */}
-          <FeatureGroup title="Portfolio Building" className="mt-12">
+          <FeatureGroup title="Portfolio Building" className="mt-12" data-animate data-delay="100">
             <FeatureCard
               icon={Briefcase}
               title="Work History Management"
@@ -220,7 +245,7 @@ export default function HomePage() {
           </FeatureGroup>
 
           {/* Design & Customization */}
-          <FeatureGroup title="Design & Customization" className="mt-12">
+          <FeatureGroup title="Design & Customization" className="mt-12" data-animate data-delay="100">
             <FeatureCard
               icon={Palette}
               title="Theme Studio"
@@ -242,7 +267,7 @@ export default function HomePage() {
           </FeatureGroup>
 
           {/* Public Presence */}
-          <FeatureGroup title="Your Public Presence" className="mt-12">
+          <FeatureGroup title="Your Public Presence" className="mt-12" data-animate data-delay="100">
             <FeatureCard
               icon={Globe}
               title="Public Portfolio Pages"
@@ -270,7 +295,7 @@ export default function HomePage() {
           </FeatureGroup>
 
           {/* Analytics & Growth */}
-          <FeatureGroup title="Analytics & Growth" className="mt-12">
+          <FeatureGroup title="Analytics & Growth" className="mt-12" data-animate data-delay="100">
             <FeatureCard
               icon={BarChart3}
               title="Analytics Dashboard"
@@ -292,7 +317,7 @@ export default function HomePage() {
           </FeatureGroup>
 
           {/* Trust & Security */}
-          <FeatureGroup title="Trust & Security" className="mt-12">
+          <FeatureGroup title="Trust & Security" className="mt-12" data-animate data-delay="100">
             <FeatureCard
               icon={Shield}
               title="Enterprise-Grade Auth"
@@ -327,6 +352,38 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Mid-page CTA ── */}
+      <section className="relative overflow-hidden border-b py-20">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_80%_at_50%_50%,hsl(var(--primary)/0.07),transparent)]" />
+        <div className="relative mx-auto max-w-3xl px-4 text-center" data-animate>
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+            You&apos;ve seen the features
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            Your portfolio could be live in 5 minutes.
+          </h2>
+          <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
+            Every feature you just read is included in the free trial. No credit card,
+            no setup fees, no gotchas.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/sign-up"
+              className="inline-flex items-center rounded-xl bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
+            >
+              Start Building Free
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+            <Link
+              href="#pricing"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Compare plans &rarr;
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* For Teams */}
       <section id="for-teams" className="border-b bg-muted/30 py-24">
         <div className="mx-auto max-w-6xl px-4">
@@ -345,30 +402,38 @@ export default function HomePage() {
           />
 
           <div className="mt-16 grid gap-6 sm:grid-cols-2">
-            <UseCaseCard
-              icon={Building2}
-              title="Recruiting & HR Agencies"
-              tagline="Stop sending resumes. Send proof."
-              description={`Your candidates\u2019 skills, verified and live \u2014 not buried in a PDF inbox. Send hiring managers a curated talent page where every candidate\u2019s work is one click away. One closed placement covers months of Team.`}
-            />
-            <UseCaseCard
-              icon={GraduationCap}
-              title="Bootcamps & University Programs"
-              tagline="Your placement rate, made visible."
-              description={`Give every cohort a branded showcase page. Hiring partners don\u2019t read placement statistics \u2014 they click through portfolios. Turn your program\u2019s outcomes into a living credential that sells itself.`}
-            />
-            <UseCaseCard
-              icon={Users}
-              title="Student Clubs & Project Collectives"
-              tagline="Shared work, individual credit."
-              description="Built something together? Team members link their individual portfolios to the same shared demo cards. The robotics club, the open source collective, the hackathon team. Everyone gets credit, one cohesive story."
-            />
-            <UseCaseCard
-              icon={Briefcase}
-              title="Dev Shops & Freelance Teams"
-              tagline="Win clients before the first call."
-              description={`B2B clients ask one question: who will actually be working on this, and can they do it? Your team org page answers that directly \u2014 each developer\u2019s individual portfolio, shared demos of real work, one professional URL to close deals.`}
-            />
+            <div data-animate data-delay="0">
+              <UseCaseCard
+                icon={Building2}
+                title="Recruiting & HR Agencies"
+                tagline="Stop sending resumes. Send proof."
+                description={`Your candidates\u2019 skills, verified and live \u2014 not buried in a PDF inbox. Send hiring managers a curated talent page where every candidate\u2019s work is one click away. One closed placement covers months of Team.`}
+              />
+            </div>
+            <div data-animate data-delay="150">
+              <UseCaseCard
+                icon={GraduationCap}
+                title="Bootcamps & University Programs"
+                tagline="Your placement rate, made visible."
+                description={`Give every cohort a branded showcase page. Hiring partners don\u2019t read placement statistics \u2014 they click through portfolios. Turn your program\u2019s outcomes into a living credential that sells itself.`}
+              />
+            </div>
+            <div data-animate data-delay="300">
+              <UseCaseCard
+                icon={Users}
+                title="Student Clubs & Project Collectives"
+                tagline="Shared work, individual credit."
+                description="Built something together? Team members link their individual portfolios to the same shared demo cards. The robotics club, the open source collective, the hackathon team. Everyone gets credit, one cohesive story."
+              />
+            </div>
+            <div data-animate data-delay="450">
+              <UseCaseCard
+                icon={Briefcase}
+                title="Dev Shops & Freelance Teams"
+                tagline="Win clients before the first call."
+                description={`B2B clients ask one question: who will actually be working on this, and can they do it? Your team org page answers that directly \u2014 each developer\u2019s individual portfolio, shared demos of real work, one professional URL to close deals.`}
+              />
+            </div>
           </div>
 
           <div className="mt-12 grid gap-6 sm:grid-cols-3">
@@ -400,18 +465,24 @@ export default function HomePage() {
             While you wait, other candidates are sharing living proof of their work.
           </p>
           <div className="mx-auto mt-10 grid gap-4 sm:grid-cols-3">
-            <CostCard
-              stat="72%"
-              description={`of recruiters say they review portfolios over r\u00e9sum\u00e9s when both are available`}
-            />
-            <CostCard
-              stat="3.2x"
-              description="higher response rate for candidates with interactive work samples vs. PDF-only applications"
-            />
-            <CostCard
-              stat="$12/mo"
-              description={`is what separates you from unlimited demos, analytics, and a professional presence \u2014 less than a lunch`}
-            />
+            <div data-animate data-delay="0">
+              <CostCard
+                stat="72%"
+                description={`of recruiters say they review portfolios over r\u00e9sum\u00e9s when both are available`}
+              />
+            </div>
+            <div data-animate data-delay="150">
+              <CostCard
+                stat="3.2x"
+                description="higher response rate for candidates with interactive work samples vs. PDF-only applications"
+              />
+            </div>
+            <div data-animate data-delay="300">
+              <CostCard
+                stat="$12/mo"
+                description={`is what separates you from unlimited demos, analytics, and a professional presence \u2014 less than a lunch`}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -426,64 +497,70 @@ export default function HomePage() {
           />
 
           <div className="mt-12 grid gap-8 sm:grid-cols-3">
-            <PricingCard
-              name="Free Trial"
-              price="$0"
-              period="for 30 days"
-              description="Everything you need to try mivitae. No commitment."
-              features={[
-                "Full feature access for 30 days",
-                "1 portfolio",
-                "3 interactive demo cards",
-                `AI r\u00e9sum\u00e9 parsing (2 parses/day)`,
-                "AI demo generation",
-                "Public profile link",
-                "5 work history sections",
-                "3 education entries",
-              ]}
-              cta="Get Started Free"
-              href="/sign-up"
-            />
-            <PricingCard
-              name="Pro"
-              price="$12"
-              period="/month"
-              description="For professionals serious about their career visibility."
-              features={[
-                "Unlimited demo cards",
-                "Unlimited portfolios",
-                "Analytics dashboard & referrer tracking",
-                "Theme Studio with 12 presets + custom CSS",
-                "50 work history sections",
-                "20 education entries",
-                `AI r\u00e9sum\u00e9 parsing (10 parses/day)`,
-                "Profile strength scoring",
-                "Custom profile slug",
-                "Priority support",
-              ]}
-              cta="Start Free Trial"
-              href="/sign-up"
-              featured
-            />
-            <PricingCard
-              name="Team"
-              price="$49"
-              period="/month"
-              description="For agencies, programs, and teams that sell collectively."
-              features={[
-                "5 team member seats",
-                "Branded org page (mivitae.org/org/name)",
-                "Team Theme Studio",
-                "Shared demo library",
-                "Team analytics dashboard",
-                "Individual Pro portfolios for all members",
-                "50 demos per member",
-                "Admin seat transfer",
-                "Everything in Pro",
-              ]}
-              cta="Start Team Trial"
-              href="/sign-up"
-            />
+            <div data-animate data-delay="0">
+              <PricingCard
+                name="Free Trial"
+                price="$0"
+                period="for 30 days"
+                description="Everything you need to try mivitae. No commitment."
+                features={[
+                  "Full feature access for 30 days",
+                  "1 portfolio",
+                  "3 interactive demo cards",
+                  `AI r\u00e9sum\u00e9 parsing (2 parses/day)`,
+                  "AI demo generation",
+                  "Public profile link",
+                  "5 work history sections",
+                  "3 education entries",
+                ]}
+                cta="Get Started Free"
+                href="/sign-up"
+              />
+            </div>
+            <div data-animate data-delay="150">
+              <PricingCard
+                name="Pro"
+                price="$12"
+                period="/month"
+                description="For professionals serious about their career visibility."
+                features={[
+                  "Unlimited demo cards",
+                  "Unlimited portfolios",
+                  "Analytics dashboard & referrer tracking",
+                  "Theme Studio with 12 presets + custom CSS",
+                  "50 work history sections",
+                  "20 education entries",
+                  `AI r\u00e9sum\u00e9 parsing (10 parses/day)`,
+                  "Profile strength scoring",
+                  "Custom profile slug",
+                  "Priority support",
+                ]}
+                cta="Start Free Trial"
+                href="/sign-up"
+                featured
+              />
+            </div>
+            <div data-animate data-delay="300">
+              <PricingCard
+                name="Team"
+                price="$49"
+                period="/month"
+                description="For agencies, programs, and teams that sell collectively."
+                features={[
+                  "5 team member seats",
+                  "Branded org page (mivitae.org/org/name)",
+                  "Team Theme Studio",
+                  "Shared demo library",
+                  "Team analytics dashboard",
+                  "Individual Pro portfolios for all members",
+                  "50 demos per member",
+                  "Admin seat transfer",
+                  "Everything in Pro",
+                ]}
+                cta="Start Team Trial"
+                href="/sign-up"
+              />
+            </div>
           </div>
           <p className="mt-8 text-center text-xs text-muted-foreground">
             All plans include a 30-day free trial. Cancel anytime. Individual
@@ -500,21 +577,27 @@ export default function HomePage() {
             subtitle={`Professionals and teams who switched from static r\u00e9sum\u00e9s to living portfolios.`}
           />
           <div className="mt-16 grid gap-8 sm:grid-cols-3">
-            <TestimonialCard
-              quote="I uploaded my resume on my lunch break and had a polished portfolio by the time I got home. Three recruiters reached out that same week."
-              name="Marcus T."
-              role="Full-Stack Developer"
-            />
-            <TestimonialCard
-              quote="We replaced our agency's talent spreadsheet with mivitae Team. Client response rate to candidate submissions jumped from 15% to 40%."
-              name="Sarah K."
-              role="Technical Recruiter, DevStack Partners"
-            />
-            <TestimonialCard
-              quote="The AI demo builder is unreal. I described my data pipeline project and it generated an interactive dashboard that looks like I hired a designer. Landed my biggest contract through that one link."
-              name="Priya R."
-              role="Senior Data Engineer"
-            />
+            <div data-animate data-delay="0">
+              <TestimonialCard
+                quote="I uploaded my resume on my lunch break and had a polished portfolio by the time I got home. Three recruiters reached out that same week."
+                name="Marcus T."
+                role="Full-Stack Developer"
+              />
+            </div>
+            <div data-animate data-delay="150">
+              <TestimonialCard
+                quote="We replaced our agency's talent spreadsheet with mivitae Team. Client response rate to candidate submissions jumped from 15% to 40%."
+                name="Sarah K."
+                role="Technical Recruiter, DevStack Partners"
+              />
+            </div>
+            <div data-animate data-delay="300">
+              <TestimonialCard
+                quote="The AI demo builder is unreal. I described my data pipeline project and it generated an interactive dashboard that looks like I hired a designer. Landed my biggest contract through that one link."
+                name="Priya R."
+                role="Senior Data Engineer"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -525,7 +608,7 @@ export default function HomePage() {
           <h2 className="text-center text-3xl font-bold">
             Frequently asked questions
           </h2>
-          <div className="mt-12 space-y-4">
+          <div className="mt-12 space-y-4" data-animate>
             <FaqItem
               question="Is the 30-day trial really free?"
               answer="Yes. No credit card required. You get full access to all features for 30 days. After that, you can continue on the free plan with limited features, or upgrade to Pro or Team."
@@ -567,27 +650,62 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-24">
-        <div className="mx-auto max-w-3xl px-4 text-center">
-          <h2 className="text-3xl font-bold sm:text-4xl">
-            Stop telling. Start <span className="text-primary">showing.</span>
+      <section className="relative overflow-hidden py-32">
+        {/* Layered background */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_60%,hsl(var(--primary)/0.13),transparent)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.12)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.12)_1px,transparent_1px)] bg-size-[48px_48px]" />
+        {/* Ambient orbs */}
+        <div className="pointer-events-none absolute -left-24 top-8 h-72 w-72 rounded-full bg-primary/12 blur-3xl animate-orb-2" />
+        <div className="pointer-events-none absolute -right-24 bottom-8 h-72 w-72 rounded-full bg-primary/10 blur-3xl animate-orb-1" />
+
+        <div className="relative mx-auto max-w-3xl px-4 text-center" data-animate>
+          {/* Live recruiting signal */}
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-2 text-xs font-semibold text-primary">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+            Recruiters are searching right now
+          </div>
+
+          <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+            Stop telling.
+            <br />
+            <span className="hero-gradient-text">Start showing.</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-            Your next employer is Googling you right now. What do they find
-            {" \u2014 "}a PDF, or living proof?
+
+          <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+            Your next employer is forming an opinion about you before the first interview.
+            Give them something worth remembering &mdash; not a PDF they&apos;ll forget.
           </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+
+          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               href="/sign-up"
-              className="inline-flex items-center rounded-xl bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
+              className="inline-flex items-center rounded-xl bg-primary px-9 py-4 text-base font-semibold text-primary-foreground shadow-xl shadow-primary/30 transition-all hover:bg-primary/90 hover:shadow-2xl hover:shadow-primary/40 hover:-translate-y-0.5"
             >
               Build Your Portfolio Now
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+            <Link
+              href="#pricing"
+              className="inline-flex items-center rounded-xl border px-9 py-4 text-base font-medium transition-colors hover:bg-muted"
+            >
+              View pricing
             </Link>
           </div>
-          <p className="mt-6 text-xs text-muted-foreground">
-            Free for 30 days. No credit card. Portfolio stays live forever.
-          </p>
+
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <CheckCircle className="h-4 w-4 text-primary" />
+              Free for 30 days
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle className="h-4 w-4 text-primary" />
+              No credit card required
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle className="h-4 w-4 text-primary" />
+              Portfolio stays live forever
+            </span>
+          </div>
         </div>
       </section>
     </div>
@@ -671,13 +789,14 @@ function FeatureGroup({
   title,
   children,
   className = "",
-}: {
+  ...divProps
+}: HTMLAttributes<HTMLDivElement> & {
   title: string;
   children: React.ReactNode;
   className?: string;
 }) {
   return (
-    <div className={className}>
+    <div className={className} {...divProps}>
       <h3 className="mb-6 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary">
         <span className="h-px w-6 bg-primary" />
         {title}

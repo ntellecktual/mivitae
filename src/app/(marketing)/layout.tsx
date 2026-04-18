@@ -51,18 +51,6 @@ export default function MarketingLayout({
               Pricing
             </Link>
             <Link
-              href="/gallery"
-              className="hidden rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:bg-accent hover:text-foreground sm:block"
-            >
-              Gallery
-            </Link>
-            <Link
-              href="/blog"
-              className="hidden rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:bg-accent hover:text-foreground md:block"
-            >
-              Blog
-            </Link>
-            <Link
               href="/sign-in"
               className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:bg-accent hover:text-foreground"
             >

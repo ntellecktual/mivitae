@@ -95,6 +95,7 @@ CRITICAL RULES:
 - If a field is unknown, use null — never omit required fields.
 - startDate and endDate must be human-readable strings like "Jan 2020" or "March 2018". Use null for endDate if it is the current position.
 - startYear and endYear for education must be 4-digit integers (e.g. 2015). Use null if unknown.
+- PROFESSIONALISM: Extract and present all content using professional, work-appropriate language only. If the source document contains any profanity or inappropriate language, replace it with neutral professional equivalents in your output.
 
 Return this exact JSON structure:
 {

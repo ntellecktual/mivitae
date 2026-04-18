@@ -97,7 +97,8 @@ RULES:
 - Use REAL numbers from the accomplishment and impact fields — do not invent data
 - Plan 4-6 sections maximum
 - Make it look like a professional portfolio piece, not a tutorial
-- The demo should tell a story about this person's work, written in 3rd person`,
+- The demo should tell a story about this person's work, written in 3rd person
+- PROFESSIONALISM: Use exclusively professional, work-appropriate language. If any provided input contains profanity, slurs, or inappropriate terms, substitute neutral professional equivalents and proceed normally.`,
           },
         ],
       })
@@ -186,7 +187,8 @@ DESIGN REQUIREMENTS:
 
 Return ONLY the raw HTML fragment — no markdown code fences, no explanation, no \`\`\`html wrapper. Start directly with <style> and end with </script> or the last HTML element.
 
-IMPORTANT: The output MUST be under 500KB. Keep CSS concise. Avoid data URIs for images — use emoji or Font Awesome icons (already loaded via CDN in the parent).`,
+IMPORTANT: The output MUST be under 500KB. Keep CSS concise. Avoid data URIs for images — use emoji or Font Awesome icons (already loaded via CDN in the parent).
+PROFESSIONALISM: Write exclusively professional, work-appropriate content. If any input contains profanity or inappropriate language, ignore it and use neutral professional equivalents throughout.`,
           },
         ],
       })

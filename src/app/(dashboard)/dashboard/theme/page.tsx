@@ -1148,9 +1148,9 @@ export default function ThemePage() {
         </div>
       </div>
 
-      {/* ── Floating Panel (above toolbar) ───────────────────────── */}
+      {/* ── Floating Panel (to the right of toolbar) ───────────── */}
       {activePanel && (
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-50 w-105 max-w-[calc(100vw-2rem)] max-h-[50vh] overflow-y-auto rounded-2xl border border-white/10 bg-neutral-900/95 backdrop-blur-xl p-4 shadow-2xl shadow-black/60 animate-in fade-in-0 slide-in-from-bottom-4 duration-200 scrollbar-none">
+        <div className="absolute left-24 top-1/2 -translate-y-1/2 z-50 w-96 max-w-[calc(100vw-8rem)] max-h-[80vh] overflow-y-auto rounded-2xl border border-white/10 bg-neutral-900/95 backdrop-blur-xl p-4 shadow-2xl shadow-black/60 animate-in fade-in-0 slide-in-from-left-4 duration-200 scrollbar-none">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-white capitalize">{activePanel}</h3>
             <button
@@ -1181,8 +1181,8 @@ export default function ThemePage() {
         </div>
       )}
 
-      {/* ── Floating Toolbar ─────────────────────────────────────── */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 rounded-2xl border border-white/10 bg-neutral-900/90 backdrop-blur-xl px-2 py-1.5 shadow-2xl shadow-black/60">
+      {/* ── Floating Toolbar (left vertical) ───────────────────── */}
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-1 rounded-2xl border border-white/10 bg-neutral-900/90 backdrop-blur-xl px-1.5 py-2 shadow-2xl shadow-black/60">
         {/* Undo / Redo */}
         <button
           onClick={undo}
@@ -1207,7 +1207,7 @@ export default function ThemePage() {
           <Redo2 className="h-4 w-4" />
         </button>
 
-        <div className="mx-1 h-6 w-px bg-white/10" />
+        <div className="my-1 h-px w-6 bg-white/10" />
 
         {/* Tool buttons */}
         <ToolbarBtn icon={Sparkles} label="Presets" active={activePanel === "presets"} onClick={() => togglePanel("presets")} />
@@ -1217,10 +1217,10 @@ export default function ThemePage() {
         <ToolbarBtn icon={Layers} label="Sections" active={activePanel === "sections"} onClick={() => togglePanel("sections")} />
         <ToolbarBtn icon={Code2} label="CSS" active={activePanel === "advanced"} onClick={() => togglePanel("advanced")} />
 
-        <div className="mx-1 h-6 w-px bg-white/10" />
+        <div className="my-1 h-px w-6 bg-white/10" />
 
         {/* Device switcher */}
-        <div className="flex items-center gap-0.5">
+        <div className="flex flex-col items-center gap-0.5">
           {([
             { mode: "desktop" as DeviceMode, icon: Monitor },
             { mode: "tablet" as DeviceMode, icon: Tablet },
@@ -1244,7 +1244,7 @@ export default function ThemePage() {
           ))}
         </div>
 
-        <div className="mx-1 h-6 w-px bg-white/10" />
+        <div className="my-1 h-px w-6 bg-white/10" />
 
         {/* View Live */}
         {profile?.slug && (

@@ -27,6 +27,7 @@ import {
   Shield,
   GitBranch,
   FileDown,
+  Sparkles,
 } from "lucide-react";
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
@@ -86,6 +87,8 @@ function SidebarContent({
 }) {
   const { user } = useUser();
   const isAdmin = useQuery(api.admin.isAdmin);
+  const selfPlan = useQuery(api.subscriptions.getSelfPlan);
+  const isFoundingUser = selfPlan?.isFoundingUser ?? false;
 
   return (
     <div className="flex h-full flex-col">
@@ -203,9 +206,17 @@ function SidebarContent({
         <div className="flex items-center gap-3 rounded-lg px-3 py-2">
           <UserButton />
           <div className="flex-1 overflow-hidden">
-            <p className="truncate text-sm font-medium text-foreground">
-              {user?.firstName ?? "Account"}
-            </p>
+            <div className="flex items-center gap-1.5">
+              <p className="truncate text-sm font-medium text-foreground">
+                {user?.firstName ?? "Account"}
+              </p>
+              {isFoundingUser && (
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400 shrink-0">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  Founding
+                </span>
+              )}
+            </div>
             <p className="truncate text-xs text-muted-foreground">
               {user?.primaryEmailAddress?.emailAddress ?? ""}
             </p>

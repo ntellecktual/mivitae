@@ -115,10 +115,12 @@ function SettingsContent() {
 
   const currentPlan = selfPlan?.plan ?? "free";
   const isCreator = selfPlan?.isCreator ?? false;
-  const isTrialing = !isCreator && subscription?.status === "trialing";
+  const isFoundingUser = selfPlan?.isFoundingUser ?? false;
+  const isBypassUser = isCreator || isFoundingUser;
+  const isTrialing = !isBypassUser && subscription?.status === "trialing";
   const isActive =
-    !isCreator && (subscription?.status === "active" || isTrialing);
-  const isCanceled = !isCreator && subscription?.cancelAtPeriodEnd;
+    !isBypassUser && (subscription?.status === "active" || isTrialing);
+  const isCanceled = !isBypassUser && subscription?.cancelAtPeriodEnd;
 
   async function handleUpgrade(priceEnvKey: string) {
     setLoading(priceEnvKey);
@@ -231,8 +233,33 @@ function SettingsContent() {
           </Card>
         )}
 
+        {/* Founding member card */}
+        {isFoundingUser && (
+          <Card className="mb-6 border-amber-400/50 bg-amber-50/50 dark:bg-amber-950/20">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">
+                  <Sparkles className="h-6 w-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-lg font-semibold">Founding Member</p>
+                    <Badge className="bg-amber-500 text-white border-0">
+                      Team · Free for Life
+                    </Badge>
+                  </div>
+                  <p className="mt-0.5 text-sm text-muted-foreground">
+                    You&apos;re one of our first members — thank you for helping shape mivitae.
+                    You have full Team plan access, permanently, at no cost.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Regular subscription card */}
-        {!isCreator && subscription !== undefined && (
+        {!isBypassUser && subscription !== undefined && (
           <Card className="mb-6">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -309,7 +336,7 @@ function SettingsContent() {
                       <Icon className="h-5 w-5 text-primary" />
                       <h3 className="font-semibold">{plan.name}</h3>
                     </div>
-                    {plan.popular && !isCreator && (
+                    {plan.popular && !isBypassUser && (
                       <Badge className="bg-primary text-primary-foreground">
                         Popular
                       </Badge>
@@ -317,6 +344,11 @@ function SettingsContent() {
                     {isCreator && plan.id === "team" && (
                       <Badge className="bg-primary/10 text-primary border-primary/30">
                         Your level
+                      </Badge>
+                    )}
+                    {isFoundingUser && plan.id === "team" && (
+                      <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border-amber-300 dark:border-amber-700">
+                        Your plan
                       </Badge>
                     )}
                   </div>
@@ -340,7 +372,7 @@ function SettingsContent() {
                     ))}
                   </ul>
 
-                  {isCreator ? (
+                  {isBypassUser ? (
                     <Button
                       className="w-full"
                       variant={plan.id === "team" ? "default" : "outline"}

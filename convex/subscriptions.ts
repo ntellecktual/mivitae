@@ -1,42 +1,52 @@
 import { v } from "convex/values";
 import { query, internalMutation, internalQuery } from "./_generated/server";
-import { CREATOR_CLERK_IDS } from "./planLimits";
+import { CREATOR_CLERK_IDS, FOUNDING_CLERK_IDS } from "./planLimits";
 import type { PlanId } from "./planLimits";
 
 // ── Queries ────────────────────────────────────────────────────────────────
 
 /**
- * Returns the caller's effective plan and whether they are a creator/superadmin.
+ * Returns the caller's effective plan, creator flag, and founding member flag.
  * Use this on the frontend instead of reading the raw subscription object when
- * you need to gate features — it correctly bypasses plan checks for creator IDs.
+ * you need to gate features — it correctly bypasses plan checks for creator/founding IDs.
  */
 export const getSelfPlan = query({
   args: {},
-  handler: async (ctx): Promise<{ plan: PlanId; isCreator: boolean }> => {
+  handler: async (ctx): Promise<{ plan: PlanId; isCreator: boolean; isFoundingUser: boolean }> => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return { plan: "free", isCreator: false };
+    if (!identity) return { plan: "free", isCreator: false, isFoundingUser: false };
 
     // Creator bypass
     if (CREATOR_CLERK_IDS.has(identity.subject)) {
-      return { plan: "team", isCreator: true };
+      return { plan: "team", isCreator: true, isFoundingUser: false };
+    }
+
+    // Founding member bypass (hardcoded IDs)
+    if (FOUNDING_CLERK_IDS.has(identity.subject)) {
+      return { plan: "team", isCreator: false, isFoundingUser: true };
     }
 
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
       .unique();
-    if (!user) return { plan: "free", isCreator: false };
+    if (!user) return { plan: "free", isCreator: false, isFoundingUser: false };
+
+    // Founding member via DB flag (auto-granted for first 10 signups)
+    if (user.isFoundingUser === true) {
+      return { plan: "team", isCreator: false, isFoundingUser: true };
+    }
 
     const sub = await ctx.db
       .query("subscriptions")
       .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .unique();
-    if (!sub) return { plan: "free", isCreator: false };
+    if (!sub) return { plan: "free", isCreator: false, isFoundingUser: false };
 
     if (sub.status === "active" || sub.status === "trialing") {
-      return { plan: (sub.plan as PlanId) ?? "free", isCreator: false };
+      return { plan: (sub.plan as PlanId) ?? "free", isCreator: false, isFoundingUser: false };
     }
-    return { plan: "free", isCreator: false };
+    return { plan: "free", isCreator: false, isFoundingUser: false };
   },
 });
 

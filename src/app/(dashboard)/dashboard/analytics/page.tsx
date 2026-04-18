@@ -278,6 +278,7 @@ export default function AnalyticsPage() {
   const hasAccess =
     selfPlan === undefined ||
     selfPlan.isCreator ||
+    selfPlan.isFoundingUser ||
     selfPlan.plan === "pro" ||
     selfPlan.plan === "team";
 

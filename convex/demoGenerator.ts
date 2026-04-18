@@ -54,8 +54,8 @@ export const generateDemo = action({
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY not configured");
     const client = new Anthropic({ apiKey });
 
-    // ── Step 1: Sonnet plans the demo structure (fast, cheap) ──────────
-    const planModel = "claude-sonnet-4-20250514";
+    // ── Step 1: Haiku plans the demo structure (fast, cheap) ───────────
+    const planModel = "claude-3-5-haiku-20241022";
 
     const planText = await client.messages
       .stream({

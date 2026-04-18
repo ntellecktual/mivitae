@@ -97,24 +97,13 @@ export default function SignInPage() {
               appearance={{
                 variables: {
                   colorPrimary: "hsl(160, 84%, 39%)",
-                  colorBackground: "hsl(160, 40%, 6%)",
-                  colorText: "#f1f5f9",
-                  colorTextSecondary: "#94a3b8",
-                  colorInputBackground: "rgba(255,255,255,0.05)",
-                  colorInputText: "#f1f5f9",
-                  colorNeutral: "#64748b",
                   borderRadius: "0.75rem",
                   fontFamily: "inherit",
                 },
                 elements: {
-                  card: "shadow-2xl border border-white/10 bg-[hsl(160,40%,6%)]",
                   formButtonPrimary: "bg-primary hover:bg-primary/90 shadow-none",
                   footerActionLink: "text-primary hover:text-primary/80",
                   identityPreviewEditButton: "text-primary",
-                  formFieldInput: "border-white/10",
-                  dividerLine: "bg-white/10",
-                  socialButtonsBlockButton: "border-white/10 hover:bg-white/5",
-                  socialButtonsBlockButtonText: "text-slate-200",
                 },
               }}
             />

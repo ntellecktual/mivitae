@@ -80,30 +80,27 @@ export default function SignInPage() {
         {/* Centered form — fills the whole panel, centers independently */}
         <div className="flex min-h-screen items-center justify-center px-4">
           <div className="w-full max-w-md animate-fade-in">
-            {/* Back link + logo centered above card */}
-            <div className="mb-5 flex flex-col items-center gap-3">
-              <Link
-                href="/"
-                className="self-start text-xs text-muted-foreground transition-colors hover:text-foreground"
-              >
-                ← Back to mivitae.org
-              </Link>
-              <Image src="/logo-light.png" alt="mivitae" width={90} height={27} className="block dark:hidden" priority />
-              <Image src="/logo-dark.png" alt="mivitae" width={90} height={27} className="hidden dark:block" priority />
-            </div>
+            <Link
+              href="/"
+              className="mb-4 block text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              ← Back to mivitae.org
+            </Link>
 
             <SignIn
               fallbackRedirectUrl="/dashboard"
               signUpUrl="/sign-up"
               appearance={{
+                layout: {
+                  logoImageUrl: "/logo-dark.png",
+                  logoPlacement: "inside",
+                },
                 variables: {
                   colorPrimary: "hsl(160, 84%, 39%)",
                   borderRadius: "0.75rem",
                   fontFamily: "inherit",
                 },
                 elements: {
-                  headerTitle: "hidden",
-                  headerSubtitle: "hidden",
                   formButtonPrimary: "bg-primary hover:bg-primary/90 shadow-none",
                   footerActionLink: "text-primary hover:text-primary/80",
                   identityPreviewEditButton: "text-primary",

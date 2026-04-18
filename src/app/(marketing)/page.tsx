@@ -43,11 +43,11 @@ export default function HomePage() {
       <FloatingCTA />
       {/* Hero */}
       <section className="relative overflow-hidden py-24 sm:py-32">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.15)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.15)_1px,transparent_1px)] bg-size-[64px_64px]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,hsl(var(--primary)/0.1),transparent)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-size-[64px_64px] opacity-20" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,color-mix(in_srgb,var(--primary)_18%,transparent),transparent)]" />
         {/* Animated ambient orbs */}
-        <div className="pointer-events-none absolute -top-32 left-[15%] h-112 w-md rounded-full bg-primary/8 blur-3xl animate-orb-1" />
-        <div className="pointer-events-none absolute top-10 right-[10%] h-72 w-72 rounded-full bg-primary/6 blur-3xl animate-orb-2" />
+        <div className="pointer-events-none absolute -top-32 left-[15%] h-[28rem] w-[36rem] rounded-full bg-primary/25 blur-3xl animate-orb-1" />
+        <div className="pointer-events-none absolute top-10 right-[10%] h-72 w-72 rounded-full bg-primary/18 blur-3xl animate-orb-2" />
 
         <div className="relative mx-auto max-w-6xl px-4 text-center">
           <div className="mb-6 inline-flex items-center rounded-full border bg-muted px-4 py-1.5 text-xs font-medium text-muted-foreground" data-animate>
@@ -69,7 +69,7 @@ export default function HomePage() {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4" data-animate data-delay="300">
             <Link
               href="/sign-up"
-              className="inline-flex items-center rounded-xl bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
+              className="btn-pulse-glow inline-flex items-center rounded-xl bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
             >
               Start for Free
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -103,7 +103,7 @@ export default function HomePage() {
               { value: "30-day", label: "free trial, no card", delay: "300" },
             ].map((stat) => (
               <div key={stat.label} className="flex flex-col items-center gap-1" data-animate data-delay={stat.delay}>
-                <span className="text-2xl font-bold">{stat.value}</span>
+                <span className="stat-value text-2xl font-bold text-primary">{stat.value}</span>
                 <span className="text-center text-xs text-muted-foreground">
                   {stat.label}
                 </span>

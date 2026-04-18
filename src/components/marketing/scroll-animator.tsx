@@ -20,7 +20,7 @@ export function ScrollAnimator() {
       { threshold: 0.08, rootMargin: "0px 0px -48px 0px" }
     );
 
-    document.querySelectorAll("[data-animate]").forEach((el) => {
+    document.querySelectorAll("[data-animate], [data-animate-card]").forEach((el) => {
       observer.observe(el);
     });
 

@@ -235,12 +235,13 @@
 /* ── Scroll-Reveal Animations ─────────────────────────────────────── */
 [data-animate] {
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.65s ease, transform 0.65s ease;
+  transform: translateY(52px) scale(0.96);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
 }
 [data-animate].is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 [data-animate][data-delay="100"] { transition-delay: 0.1s; }
 [data-animate][data-delay="150"] { transition-delay: 0.15s; }
@@ -269,18 +270,20 @@
 
 /* Marketing heading gradient animation */
 @keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50%       { background-position: 100% 50%; }
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 .hero-gradient-text {
+  /* var(--primary) is a hex value — use color-mix() for the lighter midpoint */
   background: linear-gradient(
     135deg,
-    hsl(var(--primary)),
-    hsl(var(--primary) / 0.7),
-    hsl(var(--primary))
+    var(--primary) 0%,
+    color-mix(in srgb, var(--primary) 45%, #ffffff) 50%,
+    var(--primary) 100%
   );
   background-size: 200% 200%;
-  animation: gradient-shift 5s ease infinite;
+  animation: gradient-shift 4s ease infinite;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -297,6 +300,83 @@
 }
 .animate-orb-1 { animation: orb-float-1 8s ease-in-out infinite; }
 .animate-orb-2 { animation: orb-float-2 10s ease-in-out infinite; }
+
+/* ── CTA Button Pulse Glow ────────────────────────────────────────── */
+@keyframes btn-glow {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 50%, transparent),
+                         0 4px 14px color-mix(in srgb, var(--primary) 30%, transparent); }
+  50%       { box-shadow: 0 0 0 10px color-mix(in srgb, var(--primary) 0%, transparent),
+                         0 4px 20px color-mix(in srgb, var(--primary) 45%, transparent); }
+}
+.btn-pulse-glow {
+  animation: btn-glow 2.5s ease-in-out infinite;
+}
+
+/* ── Stat value count-up flash ────────────────────────────────────── */
+@keyframes stat-pop {
+  0%   { transform: scale(0.8) translateY(8px); opacity: 0; }
+  60%  { transform: scale(1.08) translateY(-2px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+[data-animate].is-visible .stat-value {
+  animation: stat-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+[data-animate][data-delay="100"].is-visible .stat-value { animation-delay: 0.1s; }
+[data-animate][data-delay="200"].is-visible .stat-value { animation-delay: 0.2s; }
+[data-animate][data-delay="300"].is-visible .stat-value { animation-delay: 0.3s; }
+
+/* ── Card lift on scroll-reveal ───────────────────────────────────── */
+[data-animate-card] {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s ease;
+}
+[data-animate-card].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+[data-animate-card][data-delay="100"] { transition-delay: 0.1s; }
+[data-animate-card][data-delay="200"] { transition-delay: 0.2s; }
+[data-animate-card][data-delay="300"] { transition-delay: 0.3s; }
+[data-animate-card][data-delay="400"] { transition-delay: 0.4s; }
+
+/* ── Section heading underline grow ──────────────────────────────── */
+.heading-underline {
+  position: relative;
+  display: inline-block;
+}
+.heading-underline::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  height: 3px;
+  width: 0;
+  border-radius: 9999px;
+  background: var(--primary);
+  transform: translateX(-50%);
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.35s;
+}
+[data-animate].is-visible .heading-underline::after,
+.heading-underline.is-visible::after {
+  width: 60%;
+}
+
+/* ── Continuous ticker for social proof ───────────────────────────── */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker 22s linear infinite;
+}
+.ticker-track:hover {
+  animation-play-state: paused;
+}
 
 /* ── Print Styles (Global) ────────────────────────────────────────── */
 @media print {

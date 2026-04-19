@@ -342,7 +342,8 @@ export const updateAvatar = mutation({
 });
 
 /**
- * Backfill: copy users.imageUrl → profiles.avatarUrl for profiles missing an avatar.
+ * Backfill: copy users.imageUrl → profiles.avatarUrl for profiles that are missing
+ * an avatar OR have a bad local-path value (e.g. "/favicon.ico").
  * Run: npx convex run profiles:backfillAvatars
  */
 export const backfillAvatars = internalMutation({
@@ -351,10 +352,15 @@ export const backfillAvatars = internalMutation({
     const profiles = await ctx.db.query("profiles").collect();
     let updated = 0;
     for (const p of profiles) {
-      if (p.avatarUrl) continue;
+      // Skip profiles that already have a real remote URL
+      if (p.avatarUrl && p.avatarUrl.startsWith("http")) continue;
       const user = await ctx.db.get(p.userId);
       if (user?.imageUrl) {
         await ctx.db.patch(p._id, { avatarUrl: user.imageUrl });
+        updated++;
+      } else if (p.avatarUrl && !p.avatarUrl.startsWith("http")) {
+        // Clear the bad local-path value so the merge falls back gracefully
+        await ctx.db.patch(p._id, { avatarUrl: undefined });
         updated++;
       }
     }

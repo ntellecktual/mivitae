@@ -92,11 +92,11 @@ async function extractSkillsFromWorkHistory(workSummary: string): Promise<Extrac
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY not configured");
 
   const client = new Anthropic({ apiKey });
-  const model = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514";
+  const model = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
 
   const message = await client.messages.create({
     model,
-    max_tokens: 2048,
+    max_tokens: 4096,
     messages: [
       {
         role: "user",
@@ -123,6 +123,25 @@ ${workSummary.slice(0, 30000)}`,
   });
 
   const rawText = message.content[0].type === "text" ? message.content[0].text : "";
-  const jsonText = rawText.replace(/^```(?:json)?\n?/m, "").replace(/\n?```$/m, "").trim();
-  return JSON.parse(jsonText) as ExtractedSkill[];
+  let jsonText = rawText.replace(/^```(?:json)?\n?/m, "").replace(/\n?```$/m, "").trim();
+
+  // Handle truncated JSON — try to recover partial array
+  try {
+    return JSON.parse(jsonText) as ExtractedSkill[];
+  } catch {
+    // Attempt to close truncated array: find last complete object
+    const lastBrace = jsonText.lastIndexOf("}");
+    if (lastBrace > 0) {
+      jsonText = jsonText.slice(0, lastBrace + 1) + "]";
+      if (!jsonText.trimStart().startsWith("[")) {
+        jsonText = "[" + jsonText;
+      }
+      try {
+        return JSON.parse(jsonText) as ExtractedSkill[];
+      } catch {
+        // fall through
+      }
+    }
+    throw new Error("Could not parse skills JSON from Claude response");
+  }
 }

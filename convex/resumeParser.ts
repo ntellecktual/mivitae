@@ -91,7 +91,7 @@ export const parseResume = internalAction({
         const isText = args.fileType === "text";
 
         // 2. Build Claude message content based on file type
-        const model = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514";
+        const model = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
         const apiKey = process.env.ANTHROPIC_API_KEY;
         if (!apiKey) throw new Error("ANTHROPIC_API_KEY not configured");
         const client = new Anthropic({ apiKey });

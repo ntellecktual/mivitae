@@ -30,6 +30,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title,
       description,
+      ...(profile.avatarUrl && {
+        icons: {
+          icon: profile.avatarUrl,
+          apple: profile.avatarUrl,
+        },
+      }),
       openGraph: {
         title,
         description,

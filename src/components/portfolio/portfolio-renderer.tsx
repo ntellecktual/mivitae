@@ -532,61 +532,272 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     /* ── Work History Grid ─────────────────────────────────── */
     #${id} .pf-work-grid {
       display: grid;
-      gap: 20px;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    #${id} .pf-work-card--featured {
+      grid-column: span 2;
     }
 
     #${id} .pf-work-card {
-      ${cardCss};
+      position: relative;
+      border-radius: 16px;
       overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      aspect-ratio: 4/3;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    #${id} .pf-work-card--featured {
+      aspect-ratio: 16/9;
     }
     #${id} .pf-work-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px ${hexToRgba(theme.cardBorder, 0.35)};
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+    }
+    #${id} .pf-work-card.active {
+      outline: 2px solid ${theme.accentColor};
+      outline-offset: -2px;
     }
 
     #${id} .pf-work-card-img {
-      position: relative;
-      height: 200px;
+      position: absolute;
+      inset: 0;
       overflow: hidden;
-      background: linear-gradient(135deg, ${hexToRgba(theme.accentColor, 0.08)}, ${hexToRgba(theme.accentColor, 0.02)});
     }
     #${id} .pf-work-card-img img {
-      display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    #${id} .pf-work-card:hover .pf-work-card-img img {
+      transform: scale(1.06);
     }
     #${id} .pf-work-card-img-placeholder {
+      width: 100%;
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: ${theme.subtextColor};
+      background: linear-gradient(135deg, ${hexToRgba(theme.accentColor, 0.15)}, ${hexToRgba(theme.accentColor, 0.05)});
     }
+
     #${id} .pf-work-card-overlay {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 10px 16px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      inset: 0;
+      background: linear-gradient(transparent 40%, rgba(0,0,0,0.75));
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 16px 18px;
+      transition: background 0.3s ease;
+    }
+    #${id} .pf-work-card:hover .pf-work-card-overlay {
+      background: linear-gradient(transparent 30%, rgba(0,0,0,0.85));
+    }
+
+    #${id} .pf-work-card-domain {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(4px);
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 6px;
+      align-self: flex-start;
     }
     #${id} .pf-work-card-company {
       color: #fff;
       font-family: '${theme.headingFont}', sans-serif;
-      font-weight: 600;
-      font-size: 0.875rem;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      font-weight: 700;
+      font-size: 1.15rem;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      line-height: 1.2;
     }
-    #${id} .pf-work-card-body {
-      padding: 16px 20px 20px;
+    #${id} .pf-work-card-role {
+      color: rgba(255,255,255,0.75);
+      font-size: 0.78rem;
+      font-weight: 500;
+      margin-top: 2px;
     }
-    #${id} .pf-work-card-body h3 {
-      margin: 0 0 4px;
+    #${id} .pf-work-card-arrow {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.8rem;
+      opacity: 0;
+      transform: translate(4px, -4px);
+      transition: all 0.25s ease;
+    }
+    #${id} .pf-work-card:hover .pf-work-card-arrow {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+
+    /* ── Work Stats (hero badges) ──────────────────────────── */
+    #${id} .pf-work-stats {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    #${id} .pf-work-stat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 14px;
+      border: 1px solid ${hexToRgba(theme.cardBorder, 0.4)};
+      background: ${theme.cardBg};
+      box-shadow: 0 2px 8px ${hexToRgba(theme.cardBorder, 0.15)};
+      animation: pf-stat-float 3.5s ease-in-out infinite;
+    }
+    #${id} .pf-work-stat:nth-child(2) { animation-delay: 0.6s; }
+    #${id} .pf-work-stat:nth-child(3) { animation-delay: 1.2s; }
+    #${id} .pf-work-stat:nth-child(4) { animation-delay: 1.8s; }
+    @keyframes pf-stat-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    #${id} .pf-work-stat-value {
       font-family: '${theme.headingFont}', sans-serif;
-      font-weight: 600;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: ${theme.accentColor};
+    }
+    #${id} .pf-work-stat-label {
+      font-size: 0.7rem;
+      color: ${theme.subtextColor};
+      line-height: 1.3;
+    }
+
+    /* ── Work Detail Panel ─────────────────────────────────── */
+    #${id} .pf-work-detail {
+      margin-top: 20px;
+      animation: pf-detail-in 0.35s ease both;
+    }
+    @keyframes pf-detail-in {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #${id} .pf-work-detail-card {
+      ${cardCss};
+      overflow: hidden;
+    }
+    #${id} .pf-work-detail-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 24px;
+      border-bottom: 1px solid ${hexToRgba(theme.cardBorder, 0.3)};
+    }
+    #${id} .pf-work-detail-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 1px solid ${hexToRgba(theme.cardBorder, 0.5)};
+      flex-shrink: 0;
+    }
+    #${id} .pf-work-detail-info {
+      flex: 1;
+    }
+    #${id} .pf-work-detail-info h2 {
+      margin: 0;
+      font-family: '${theme.headingFont}', sans-serif;
+      font-weight: 700;
+      font-size: 1.15rem;
       color: ${theme.textColor};
+    }
+    #${id} .pf-work-detail-info p {
+      margin: 2px 0 0;
+      font-size: 0.82rem;
+      color: ${theme.subtextColor};
+    }
+    #${id} .pf-work-detail-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid ${hexToRgba(theme.cardBorder, 0.3)};
+      background: transparent;
+      color: ${theme.subtextColor};
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+    #${id} .pf-work-detail-close:hover {
+      background: rgba(239,68,68,0.08);
+      border-color: rgba(239,68,68,0.2);
+      color: #ef4444;
+    }
+    #${id} .pf-work-detail-body {
+      padding: 20px 24px 24px;
+    }
+    #${id} .pf-work-detail-section {
+      margin-bottom: 18px;
+    }
+    #${id} .pf-work-detail-section:last-child {
+      margin-bottom: 0;
+    }
+    #${id} .pf-work-detail-section h5 {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: ${theme.accentColor};
+      margin: 0 0 8px;
+      font-family: '${theme.headingFont}', sans-serif;
+    }
+    #${id} .pf-work-detail-section p {
+      font-size: 0.875rem;
+      color: ${theme.subtextColor};
+      line-height: 1.65;
+      margin: 0;
+    }
+    #${id} .pf-work-detail-section ul {
+      margin: 0;
+      padding-left: 0;
+      list-style: none;
+    }
+    #${id} .pf-work-detail-section li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: ${theme.subtextColor};
+      line-height: 1.6;
+      margin-bottom: 6px;
+    }
+
+    @container portfolio (max-width: 900px) {
+      #${id} .pf-work-grid { grid-template-columns: repeat(2, 1fr); }
+      #${id} .pf-work-card--featured { grid-column: span 1; }
+      #${id} .pf-work-card--featured { aspect-ratio: 4/3; }
+    }
+    @media (max-width: 900px) {
+      #${id} .pf-work-grid { grid-template-columns: repeat(2, 1fr); }
+      #${id} .pf-work-card--featured { grid-column: span 1; }
+      #${id} .pf-work-card--featured { aspect-ratio: 4/3; }
     }
 
     /* ── Education Cards (panel style) ────────────────────── */
@@ -1097,6 +1308,7 @@ export default function PortfolioRenderer({
   const [activeSection, setActiveSection] = useState<ActiveSection>("home");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedDemo, setExpandedDemo] = useState<string | null>(null);
+  const [expandedWork, setExpandedWork] = useState<string | null>(null);
   const [selectedDemoTag, setSelectedDemoTag] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [demoSearch, setDemoSearch] = useState("");
@@ -1555,64 +1767,176 @@ export default function PortfolioRenderer({
             <section className="pf-animate">
               <div className="pf-section-title">
                 <Briefcase style={{ width: 22, height: 22, flexShrink: 0 }} className="pf-accent" />
-                Work Experience
+                💼 Work Experience
               </div>
               <p className="pf-section-subtitle">
                 {sortedSections.length} position{sortedSections.length !== 1 ? "s" : ""} across my career
               </p>
               <div className="pf-divider" />
+
+              {/* ── Hero Stats ── */}
+              {(() => {
+                const uniqueCompanies = new Set(sortedSections.map(s => s.companyName)).size;
+                const uniqueSkills = new Set(sortedSections.flatMap(s => s.skills)).size;
+                const workYears = (() => {
+                  if (sortedSections.length === 0) return 0;
+                  const years = sortedSections.map(s => {
+                    const m = s.startDate.match(/\d{4}/);
+                    return m ? parseInt(m[0]) : new Date().getFullYear();
+                  });
+                  return new Date().getFullYear() - Math.min(...years);
+                })();
+                return (
+                  <div className="pf-work-stats">
+                    {workYears > 0 && (
+                      <div className="pf-work-stat">
+                        <span className="pf-work-stat-value">{workYears}+</span>
+                        <span className="pf-work-stat-label">Years<br/>experience</span>
+                      </div>
+                    )}
+                    <div className="pf-work-stat">
+                      <span className="pf-work-stat-value">{sortedSections.length}</span>
+                      <span className="pf-work-stat-label">Positions<br/>held</span>
+                    </div>
+                    {uniqueCompanies > 1 && (
+                      <div className="pf-work-stat">
+                        <span className="pf-work-stat-value">{uniqueCompanies}</span>
+                        <span className="pf-work-stat-label">Companies<br/>worked at</span>
+                      </div>
+                    )}
+                    {uniqueSkills > 0 && (
+                      <div className="pf-work-stat">
+                        <span className="pf-work-stat-value">{uniqueSkills}+</span>
+                        <span className="pf-work-stat-label">Technologies<br/>used</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* ── Image Card Grid ── */}
               <div className="pf-work-grid">
-                {sortedSections.map(s => {
-                  const linkedDemos = publicDemos.filter(d => s.demoIds?.includes(d._id));
-                  return (
-                    <div key={s._id} className="pf-work-card">
+                {sortedSections.map((s, i) => (
+                  <div
+                    key={s._id}
+                    className={`pf-work-card ${i === 0 && sortedSections.length >= 3 ? "pf-work-card--featured" : ""} ${expandedWork === s._id ? "active" : ""}`}
+                    onClick={() => setExpandedWork(expandedWork === s._id ? null : s._id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpandedWork(expandedWork === s._id ? null : s._id); }}}
+                  >
+                    <div className="pf-work-card-img">
                       {s.imageUrl ? (
-                        <div className="pf-work-card-img">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={s.imageUrl} alt={s.companyName} />
-                          <div className="pf-work-card-overlay">
-                            <span className="pf-work-card-company">{s.companyName}</span>
-                          </div>
-                        </div>
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={s.imageUrl} alt={s.companyName} />
                       ) : (
-                        <div className="pf-work-card-img pf-work-card-img-placeholder">
-                          <Briefcase style={{ width: 32, height: 32, opacity: 0.3 }} />
-                          <div className="pf-work-card-overlay">
-                            <span className="pf-work-card-company">{s.companyName}</span>
-                          </div>
+                        <div className="pf-work-card-img-placeholder">
+                          <Briefcase style={{ width: 48, height: 48, opacity: 0.2 }} />
                         </div>
                       )}
-                      <div className="pf-work-card-body">
-                        <h3>{s.role}</h3>
-                        <span className="pf-card-meta">
-                          <Calendar style={{ width: 12, height: 12, display: "inline", verticalAlign: "middle", marginRight: 4 }} />
-                          {s.startDate} — {s.endDate ?? "Present"}
+                    </div>
+                    <div className="pf-work-card-overlay">
+                      {s.skills.length > 0 && (
+                        <span className="pf-work-card-domain">
+                          🏷️ {s.skills.slice(0, 2).join(" · ")}
                         </span>
-                        {s.description && <p className="pf-card-desc">{s.description}</p>}
-                        {s.achievements.length > 0 && (
-                          <ul className="pf-achievements">
-                            {s.achievements.map((a, i) => <li key={i}>{a}</li>)}
-                          </ul>
-                        )}
-                        {s.skills.length > 0 && (
-                          <div className="pf-tags">
-                            {s.skills.map(skill => <span key={skill} className="pf-tag">{skill}</span>)}
+                      )}
+                      <span className="pf-work-card-company">{s.companyName}</span>
+                      <span className="pf-work-card-role">{s.role}</span>
+                    </div>
+                    <div className="pf-work-card-arrow">↗</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* ── Expanded Detail Panel ── */}
+              {expandedWork && (() => {
+                const s = sortedSections.find(sec => sec._id === expandedWork);
+                if (!s) return null;
+                const linkedDemos = publicDemos.filter(d => s.demoIds?.includes(d._id));
+                return (
+                  <div className="pf-work-detail">
+                    <div className="pf-work-detail-card">
+                      <div className="pf-work-detail-header">
+                        {s.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={s.imageUrl} alt={s.companyName} className="pf-work-detail-logo" />
+                        ) : (
+                          <div style={{ width: 48, height: 48, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", background: hexToRgba(theme.accentColor, 0.1), flexShrink: 0 }}>
+                            <Briefcase style={{ width: 20, height: 20, opacity: 0.5 }} />
                           </div>
                         )}
+                        <div className="pf-work-detail-info">
+                          <h2>{s.companyName}</h2>
+                          <p>{s.role} · 📅 {s.startDate} — {s.endDate ?? "Present"}</p>
+                        </div>
+                        <button
+                          className="pf-work-detail-close"
+                          onClick={(e) => { e.stopPropagation(); setExpandedWork(null); }}
+                          aria-label="Close details"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+
+                      {s.skills.length > 0 && (
+                        <div style={{ padding: "12px 24px 0", display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                          {s.skills.slice(0, 5).map(skill => (
+                            <span key={skill} className="pf-tag">{skill}</span>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="pf-work-detail-body">
+                        {s.description && (
+                          <div className="pf-work-detail-section">
+                            <h5>📋 Overview</h5>
+                            <p>{s.description}</p>
+                          </div>
+                        )}
+
+                        {s.achievements.length > 0 && (
+                          <div className="pf-work-detail-section">
+                            <h5>🎯 Key Achievements</h5>
+                            <ul>
+                              {s.achievements.map((a, idx) => (
+                                <li key={idx}>
+                                  <span style={{ flexShrink: 0, fontSize: "0.75rem" }}>✅</span>
+                                  {a}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {s.skills.length > 0 && (
+                          <div className="pf-work-detail-section">
+                            <h5>🛠️ Tech Stack</h5>
+                            <div className="pf-tags" style={{ marginTop: 0 }}>
+                              {s.skills.map(skill => (
+                                <span key={skill} className="pf-tag">{skill}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
                         {linkedDemos.length > 0 && (
-                          <div className="pf-tags">
-                            {linkedDemos.map(d => (
-                              <span key={d._id} className="pf-demo-tag">
-                                <Zap style={{ width: 10, height: 10 }} /> {d.title}
-                              </span>
-                            ))}
+                          <div className="pf-work-detail-section">
+                            <h5>⚡ Related Demos</h5>
+                            <div className="pf-tags" style={{ marginTop: 0 }}>
+                              {linkedDemos.map(d => (
+                                <span key={d._id} className="pf-demo-tag">
+                                  <Zap style={{ width: 10, height: 10 }} /> {d.title}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })()}
             </section>
           )}
 

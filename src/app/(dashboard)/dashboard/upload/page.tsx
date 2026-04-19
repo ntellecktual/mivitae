@@ -68,13 +68,14 @@ export default function UploadPage() {
   const handleUpload = useCallback(
     async (file: File) => {
       const name = file.name.toLowerCase();
-      const isValid = name.endsWith(".pdf") || name.endsWith(".docx");
+      const isDocx = name.endsWith(".docx") || name.endsWith(".doc");
+      const isValid = name.endsWith(".pdf") || isDocx;
       if (!convexUser || !isValid) {
-        toast.error("Please upload a PDF or Word (.docx) file");
+        toast.error("Please upload a PDF or Word (.docx / .doc) file");
         return;
       }
 
-      const fileType = name.endsWith(".docx") ? "docx" : "pdf";
+      const fileType = isDocx ? "docx" : "pdf";
 
       setUploading(true);
       try {
@@ -208,13 +209,13 @@ export default function UploadPage() {
               <h3 className="text-lg font-semibold">
                 {dragActive ? "Drop to upload" : "Drag & drop your resume"}
               </h3>
-              <p className="mt-1 text-sm text-muted-foreground">PDF or Word (.docx) · up to 10 MB</p>
+              <p className="mt-1 text-sm text-muted-foreground">PDF or Word (.docx, .doc) · up to 10 MB</p>
               <label className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
                 <Upload className="h-4 w-4" />
                 Browse Files
                 <input
                   type="file"
-                  accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  accept=".pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
                   className="hidden"
                   onChange={handleFileInput}
                 />

@@ -55,10 +55,9 @@ export const generateDemo = action({
     const client = new Anthropic({ apiKey });
 
     // ── Step 1: Haiku plans the demo structure (fast, cheap) ───────────
-    const planModel = "claude-3-5-haiku-20241022";
+    const planModel = process.env.ANTHROPIC_PLAN_MODEL ?? "claude-3-5-haiku-20241022";
 
-    const planText = await client.messages
-      .stream({
+    const planMessage = await client.messages.create({
         model: planModel,
         max_tokens: 1500,
         messages: [
@@ -103,8 +102,9 @@ RULES:
 - PROFESSIONALISM: Use exclusively professional, work-appropriate language. If any provided input contains profanity, slurs, or inappropriate terms, substitute neutral professional equivalents and proceed normally.`,
           },
         ],
-      })
-      .finalText();
+      });
+
+    const planText = planMessage.content[0].type === "text" ? planMessage.content[0].text : "";
 
     let plan: {
       title: string;
@@ -118,21 +118,18 @@ RULES:
     };
 
     try {
-      plan = JSON.parse(planText);
+      // Prefer extracting the first JSON object from the response (handles prose wrappers)
+      const jsonMatch = planText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new SyntaxError("No JSON object in plan response");
+      plan = JSON.parse(jsonMatch[0]);
     } catch {
-      // If Sonnet wraps in code fences, strip them
-      const cleaned = planText
-        .replace(/```json\s*/g, "")
-        .replace(/```\s*/g, "")
-        .trim();
-      plan = JSON.parse(cleaned);
+      throw new Error(`Demo planner returned invalid JSON. Raw response: ${planText.slice(0, 200)}`);
     }
 
     // ── Step 2: Sonnet builds the full HTML/CSS/JS ─────────────────────
-    const buildModel = "claude-sonnet-4-20250514";
+    const buildModel = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514";
 
-    const buildText = await client.messages
-      .stream({
+    const buildMessage = await client.messages.create({
         model: buildModel,
         max_tokens: 8000,
         messages: [
@@ -193,15 +190,17 @@ IMPORTANT: The output MUST be under 500KB. Keep CSS concise. Avoid data URIs for
 PROFESSIONALISM: Write exclusively professional, work-appropriate content. If any input contains profanity or inappropriate language, ignore it and use neutral professional equivalents throughout.`,
           },
         ],
-      })
-      .finalText();
+      });
 
-    const html = buildText
+    const rawBuildText = buildMessage.content[0].type === "text" ? buildMessage.content[0].text : "";
+    const html = rawBuildText
       .replace(/^```html\s*/i, "")
       .replace(/```\s*$/g, "")
       .trim();
 
-    // ── Store to cache (fire and forget — don't block the response) ────
+    if (!html) throw new Error("AI builder returned empty HTML");
+
+    // ── Store to cache ─────────────────────────────────────────────────
     const result = {
       html,
       title: plan.title,

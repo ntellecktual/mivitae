@@ -36,6 +36,8 @@ export interface ThemeConfig {
   showDemos: boolean;
   showSkills: boolean;
   showVolunteering: boolean;
+  showCertificates?: boolean;
+  showContact?: boolean;
   // Animation
   animationStyle?: AnimationStyle;
   // Advanced

@@ -20,6 +20,7 @@ export default defineSchema({
   profiles: defineTable({
     userId: v.id("users"),
     slug: v.string(),
+    displayName: v.optional(v.string()),
     headline: v.optional(v.string()),
     bio: v.optional(v.string()),
     location: v.optional(v.string()),

@@ -831,13 +831,15 @@ function SectionsPanel({
     { key: "showDemos", label: "Demos", icon: Eye },
     { key: "showSkills", label: "Skills", icon: Eye },
     { key: "showVolunteering", label: "Volunteering", icon: Eye },
+    { key: "showCertificates", label: "Certificates", icon: Eye },
+    { key: "showContact", label: "Contact Form", icon: Eye },
   ];
 
   return (
     <div className="space-y-1.5">
       <p className="text-[10px] text-white/60 uppercase tracking-wider mb-2">Visible Sections</p>
       {items.map(({ key, label }) => {
-        const visible = Boolean(theme[key]);
+        const visible = theme[key] !== false;
         return (
           <button
             key={key}

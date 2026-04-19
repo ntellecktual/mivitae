@@ -240,6 +240,8 @@ function ProfileStep({ onNext }: { onNext: () => void }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
     headline: "",
     bio: "",
     location: "",
@@ -248,21 +250,42 @@ function ProfileStep({ onNext }: { onNext: () => void }) {
     websiteUrl: "",
   });
 
-  // Pre-fill from existing profile
+  // Pre-fill from Clerk user + existing profile
+  useEffect(() => {
+    if (user) {
+      setForm((f) => ({
+        ...f,
+        firstName: user.firstName ?? f.firstName,
+        lastName: user.lastName ?? f.lastName,
+      }));
+    }
+  }, [user]);
+
   useEffect(() => {
     if (existingProfile) {
-      setForm({
+      setForm((f) => ({
+        ...f,
         headline: existingProfile.headline ?? "",
         bio: existingProfile.bio ?? "",
         location: existingProfile.location ?? "",
         linkedinUrl: existingProfile.linkedinUrl ?? "",
         githubUrl: existingProfile.githubUrl ?? "",
         websiteUrl: existingProfile.websiteUrl ?? "",
-      });
+        ...(existingProfile.displayName
+          ? {
+              firstName: existingProfile.displayName.split(" ")[0] ?? f.firstName,
+              lastName: existingProfile.displayName.split(" ").slice(1).join(" ") ?? f.lastName,
+            }
+          : {}),
+      }));
     }
   }, [existingProfile]);
 
   const handleNext = async () => {
+    if (!form.firstName.trim()) {
+      setError("First name is required.");
+      return;
+    }
     if (!form.headline.trim()) {
       setError("Headline is required.");
       return;
@@ -270,7 +293,14 @@ function ProfileStep({ onNext }: { onNext: () => void }) {
     setSaving(true);
     setError("");
     try {
+      // Update name in Clerk
+      await user?.update({
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim() || undefined,
+      });
+      const displayName = [form.firstName.trim(), form.lastName.trim()].filter(Boolean).join(" ");
       await upsertSelf({
+        displayName,
         headline: form.headline.trim(),
         bio: form.bio.trim() || undefined,
         location: form.location.trim() || undefined,
@@ -297,11 +327,23 @@ function ProfileStep({ onNext }: { onNext: () => void }) {
       <CardHeader>
         <CardTitle>Complete Your Profile</CardTitle>
         <CardDescription>
-          Hello, {user?.firstName ?? "there"}! Tell us about yourself so visitors know who you
-          are.
+          Let&apos;s start with the basics so visitors know who you are.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="firstName">
+              First Name <span className="text-destructive">*</span>
+            </Label>
+            <Input id="firstName" placeholder="Jane" {...field("firstName")} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="lastName">Last Name</Label>
+            <Input id="lastName" placeholder="Smith" {...field("lastName")} />
+          </div>
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="headline">
             Professional Headline <span className="text-destructive">*</span>

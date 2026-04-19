@@ -77,7 +77,9 @@ export const parseResume = internalAction({
         }
 
         const isDocx = args.fileType === "docx" ||
-          args.fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+          args.fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+          args.fileType === "application/msword" ||
+          args.fileType === "doc";
         const isText = args.fileType === "text";
 
         // 2. Build Claude message content based on file type

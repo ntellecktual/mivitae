@@ -19,11 +19,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       return { title: "Portfolio Not Found — mivitae" };
     }
 
-    const title = profile.headline
+    const title = profile.displayName
+      ? `${profile.displayName}${profile.headline ? ` — ${profile.headline}` : ""} — mivitae`
+      : profile.headline
       ? `${profile.headline} — mivitae`
       : `${slug} — mivitae`;
     const description =
-      profile.bio || `View ${slug}'s professional portfolio on mivitae.`;
+      profile.bio || `View ${profile.displayName ?? slug}'s professional portfolio on mivitae.`;
 
     return {
       title,
@@ -59,7 +61,8 @@ export default async function PublicPortfolioPage({ params }: Props) {
         ? {
             "@context": "https://schema.org",
             "@type": "Person",
-            name: profile.headline || slug,
+            name: profile.displayName || profile.headline || slug,
+            ...(profile.headline && { jobTitle: profile.headline }),
             ...(profile.bio && { description: profile.bio }),
             ...(profile.location && {
               address: { "@type": "PostalAddress", addressLocality: profile.location },

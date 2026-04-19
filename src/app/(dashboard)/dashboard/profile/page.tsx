@@ -120,8 +120,10 @@ export default function ProfilePage() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const displayName = clerkUser?.fullName ?? undefined;
       await upsertProfile({
         slug: slugInput || undefined,
+        displayName: displayName || undefined,
         headline: form.headline || undefined,
         bio: form.bio || undefined,
         location: form.location || undefined,

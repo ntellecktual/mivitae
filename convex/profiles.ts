@@ -59,6 +59,7 @@ export const createInternal = internalMutation({
   args: {
     userId: v.id("users"),
     slug: v.string(),
+    displayName: v.optional(v.string()),
     headline: v.optional(v.string()),
     bio: v.optional(v.string()),
     location: v.optional(v.string()),
@@ -86,6 +87,7 @@ export const createInternal = internalMutation({
 export const updateInternal = internalMutation({
   args: {
     profileId: v.id("profiles"),
+    displayName: v.optional(v.string()),
     headline: v.optional(v.string()),
     bio: v.optional(v.string()),
     location: v.optional(v.string()),
@@ -137,6 +139,7 @@ export const checkSlug = query({
 export const upsertSelf = mutation({
   args: {
     slug: v.optional(v.string()),
+    displayName: v.optional(v.string()),
     headline: v.optional(v.string()),
     bio: v.optional(v.string()),
     location: v.optional(v.string()),
@@ -201,6 +204,7 @@ export const upsertSelf = mutation({
     return await ctx.db.insert("profiles", {
       userId: user._id,
       slug,
+      displayName: args.displayName,
       headline: args.headline,
       bio: args.bio,
       location: args.location,

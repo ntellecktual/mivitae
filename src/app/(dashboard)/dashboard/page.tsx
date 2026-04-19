@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/lib/convex";
@@ -28,8 +29,25 @@ import {
   Gift,
   TrendingUp,
   Users,
+  Sparkles,
+  Crown,
+  Heart,
+  Wrench,
+  MousePointerClick,
+  GitBranch,
+  Shield,
+  FileDown,
+  Command,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+// ── Plan display names ────────────────────────────────────────────────────────
+const PLAN_LABELS: Record<string, string> = {
+  free: "Free",
+  pro: "Pro",
+  team: "Team",
+};
 
 // ── Completion Score ──────────────────────────────────────────────────────────
 
@@ -69,6 +87,27 @@ function calcCompletion(profile: ProfileShape | null | undefined): {
   return { score, items: items.map(({ label, done, href }) => ({ label, done, href })) };
 }
 
+// ── Keyboard shortcut actions ─────────────────────────────────────────────────
+
+const SHORTCUTS = [
+  { key: "p", href: "/dashboard/profile", label: "Profile", icon: User },
+  { key: "w", href: "/dashboard/portfolio", label: "Work History", icon: Briefcase },
+  { key: "e", href: "/dashboard/education", label: "Education", icon: GraduationCap },
+  { key: "s", href: "/dashboard/skills", label: "Skills", icon: Wrench },
+  { key: "d", href: "/dashboard/demos", label: "Demos", icon: Zap },
+  { key: "t", href: "/dashboard/theme", label: "Theme Studio", icon: Palette },
+  { key: "a", href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { key: "u", href: "/dashboard/upload", label: "Upload Resume", icon: Upload },
+  { key: "r", href: "/dashboard/referrals", label: "Referrals", icon: Gift },
+  { key: "g", href: "/dashboard/github", label: "GitHub Import", icon: GitBranch },
+  { key: "v", href: "/dashboard/volunteering", label: "Volunteering", icon: Heart },
+  { key: "c", href: "/dashboard/clicks", label: "Click Tracking", icon: MousePointerClick },
+  { key: "k", href: "/dashboard/skill-scores", label: "Skill Scores", icon: Shield },
+  { key: "x", href: "/dashboard/export", label: "Export PDF", icon: FileDown },
+  { key: "m", href: "/dashboard/messages", label: "Messages", icon: Mail },
+  { key: ",", href: "/dashboard/settings", label: "Settings", icon: CreditCard },
+];
+
 // ── Share Widget ──────────────────────────────────────────────────────────────
 
 function ShareCard({ slug }: { slug: string }) {
@@ -86,7 +125,7 @@ function ShareCard({ slug }: { slug: string }) {
 
   return (
     <Card className="border-primary/20 bg-primary/5">
-      <CardContent className="p-6">
+      <CardContent className="p-5">
         <div className="flex items-start gap-4">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
             <Share2 className="h-5 w-5" />
@@ -145,10 +184,49 @@ function ShareCard({ slug }: { slug: string }) {
   );
 }
 
+// ── Live Preview Card ─────────────────────────────────────────────────────────
+
+function LivePreviewCard({ slug }: { slug: string }) {
+  return (
+    <Link href="/dashboard/theme">
+      <Card className="group card-hover overflow-hidden border-primary/10">
+        <CardContent className="p-0">
+          <div className="relative aspect-[16/9] w-full overflow-hidden bg-gradient-to-br from-primary/5 via-background to-violet-500/5">
+            <iframe
+              src={`/u/${slug}`}
+              className="pointer-events-none h-[300%] w-[300%] origin-top-left scale-[0.3333] border-0"
+              tabIndex={-1}
+              aria-hidden
+              loading="lazy"
+              title="Portfolio preview"
+            />
+            {/* Hover overlay */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/40">
+              <div className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:scale-100 scale-90">
+                <Palette className="h-4 w-4" /> Open Theme Studio
+              </div>
+            </div>
+          </div>
+          <div className="border-t px-4 py-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium">Live Preview</p>
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                Live
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
   const { user } = useUser();
+  const router = useRouter();
   const convexUser = useQuery(api.users.getByClerkId, {
     clerkId: user?.id ?? "",
   });
@@ -159,32 +237,50 @@ export default function DashboardPage() {
   const onboardingState = useQuery(api.onboarding.getSelf);
   const viewCount = useQuery(api.analytics.getSelfViewCount);
   const profile = useQuery(api.profiles.getSelf);
+  const selfPlan = useQuery(api.subscriptions.getSelfPlan);
   const subscription = useQuery(api.subscriptions.getSelf);
   const referralStats = useQuery(api.referrals.getMyStats);
 
   const firstName = user?.firstName ?? "there";
 
+  // ── Keyboard shortcuts ────────────────────────────────────────────────────
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      // Ignore when typing in inputs / textareas or when modifiers are held (except shift for , key)
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      const match = SHORTCUTS.find((s) => s.key === e.key.toLowerCase());
+      if (match) {
+        e.preventDefault();
+        router.push(match.href);
+      }
+    },
+    [router]
+  );
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
   // Wait for primary queries to avoid layout shift
-  if (profile === undefined || subscription === undefined) {
+  if (profile === undefined || selfPlan === undefined) {
     return (
       <div className="space-y-8 animate-fade-in">
         <div>
           <div className="h-9 w-64 rounded-lg bg-muted animate-shimmer-pulse" />
           <div className="mt-2 h-5 w-80 rounded-lg bg-muted animate-shimmer-pulse" />
         </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-28 rounded-xl border bg-muted animate-shimmer-pulse" style={{ animationDelay: `${i * 100}ms` }} />
+          ))}
+        </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-32 rounded-xl border bg-muted animate-shimmer-pulse" style={{ animationDelay: `${i * 150}ms` }} />
-          ))}
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {[1, 2].map((i) => (
-            <div key={i} className="h-28 rounded-xl border bg-muted animate-shimmer-pulse" style={{ animationDelay: `${(i + 3) * 150}ms` }} />
-          ))}
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-28 rounded-xl border bg-muted animate-shimmer-pulse" style={{ animationDelay: `${(i + 5) * 150}ms` }} />
+            <div key={i} className="h-48 rounded-xl border bg-muted animate-shimmer-pulse" style={{ animationDelay: `${(i + 4) * 100}ms` }} />
           ))}
         </div>
       </div>
@@ -197,8 +293,18 @@ export default function DashboardPage() {
   const { score, items: completionItems } = calcCompletion(profile);
   const incomplete = completionItems.filter((i) => !i.done);
 
+  const planId = selfPlan?.plan ?? "free";
+  const planLabel = PLAN_LABELS[planId] ?? planId;
+  const isCreator = selfPlan?.isCreator ?? false;
+  const isFounder = selfPlan?.isFoundingUser ?? false;
+  const isPaid = planId !== "free";
+
+  // Time-based greeting
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Onboarding banner */}
       {showOnboardingBanner && (
         <div className="flex items-center justify-between rounded-lg border border-primary/30 bg-primary/5 p-4">
@@ -220,35 +326,42 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Welcome */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Welcome back, {firstName}</h1>
-        <p className="mt-1.5 text-base text-muted-foreground">
-          Here&apos;s an overview of your living portfolio.
-        </p>
+      {/* Welcome header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{greeting}, {firstName}</h1>
+          <p className="mt-1 text-sm text-muted-foreground flex items-center gap-2">
+            Your command center for everything mivitae
+            <span className="hidden sm:inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground/60">
+              <Command className="h-2.5 w-2.5" /> Press a key to navigate
+            </span>
+          </p>
+        </div>
+        {(isFounder || isCreator) && (
+          <div className={cn(
+            "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold",
+            isCreator
+              ? "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400"
+              : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
+          )}>
+            <Sparkles className="h-3 w-3" />
+            {isCreator ? "Creator" : "Founding Member"}
+          </div>
+        )}
       </div>
 
-      {/* Share card — shown when profile is public */}
-      {profile?.isPublic && profile.slug && (
-        <ShareCard slug={profile.slug} />
-      )}
-
-      {/* Stats bento grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Top stats row */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {/* Profile views */}
         <Link href="/dashboard/analytics">
           <Card className="card-hover overflow-hidden">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Eye className="h-4 w-4" />
-                </div>
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Views</span>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <Eye className="h-4 w-4 text-primary" />
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Views</span>
               </div>
-              <p className="text-4xl font-bold tracking-tight tabular-nums">{viewCount ?? "—"}</p>
-              <p className="mt-0.5 text-sm text-muted-foreground">Profile views all time</p>
-              {/* Mini bar chart */}
-              <div className="mt-4 flex items-end gap-0.5 h-8">
+              <p className="text-3xl font-bold tracking-tight tabular-nums">{viewCount ?? "—"}</p>
+              <div className="mt-2 flex items-end gap-px h-6">
                 {[30, 55, 40, 70, 50, 80, 65, 90, 75, 95].map((h, i) => (
                   <div
                     key={i}
@@ -264,63 +377,156 @@ export default function DashboardPage() {
           </Card>
         </Link>
 
-        {/* Completion score */}
-        <Card className="card-hover">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Strength</span>
-              <span className="text-xs font-semibold text-primary">{score}%</span>
-            </div>
-            {/* Large ring */}
-            <div className="flex items-center gap-4">
-              <div className="relative flex h-16 w-16 shrink-0 items-center justify-center">
-                <svg className="h-16 w-16 -rotate-90" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeOpacity={0.08} strokeWidth="2.5" />
-                  <circle
-                    cx="18" cy="18" r="15"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeOpacity={1}
-                    strokeWidth="2.5"
-                    strokeDasharray={`${(score / 100) * 94.25} 94.25`}
-                    strokeLinecap="round"
-                    className="text-primary transition-all duration-700"
-                  />
-                </svg>
-                <span className="absolute text-sm font-bold">{score}</span>
+        {/* Profile strength */}
+        <Link href="/dashboard/profile">
+          <Card className="card-hover">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Strength</span>
               </div>
-              <div>
-                <p className="font-semibold">Profile strength</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">
-                  {score === 100
-                    ? "Fully optimized"
-                    : `${incomplete.length} item${incomplete.length !== 1 ? "s" : ""} remaining`}
-                </p>
+              <div className="flex items-center gap-3">
+                <div className="relative flex h-11 w-11 shrink-0 items-center justify-center">
+                  <svg className="h-11 w-11 -rotate-90" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeOpacity={0.08} strokeWidth="3" />
+                    <circle
+                      cx="18" cy="18" r="15"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeOpacity={1}
+                      strokeWidth="3"
+                      strokeDasharray={`${(score / 100) * 94.25} 94.25`}
+                      strokeLinecap="round"
+                      className="text-primary transition-all duration-700"
+                    />
+                  </svg>
+                  <span className="absolute text-xs font-bold">{score}</span>
+                </div>
+                <div>
+                  <p className="text-xl font-bold">{score}%</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {score === 100 ? "Fully optimized" : `${incomplete.length} to go`}
+                  </p>
+                </div>
               </div>
-            </div>
-            {/* Progress bar */}
-            <div className="mt-4 h-1.5 w-full rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary transition-all duration-700"
-                style={{ width: `${score}%` }}
-              />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </Link>
 
-        {/* Resume status */}
+        {/* Plan badge */}
+        <Link href="/dashboard/settings">
+          <Card className={cn(
+            "card-hover",
+            isPaid && "border-primary/20"
+          )}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                {isPaid ? <Crown className="h-4 w-4 text-primary" /> : <CreditCard className="h-4 w-4 text-muted-foreground" />}
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Plan</span>
+              </div>
+              <p className="text-xl font-bold">{planLabel}</p>
+              <p className="text-[11px] text-muted-foreground">
+                {isCreator ? "Owner — unlimited access" :
+                 isFounder ? "Founding member — all features" :
+                 subscription?.status === "trialing" ? `Trial · ${Math.max(0, Math.ceil((subscription.currentPeriodEnd * 1000 - Date.now()) / 86400000))}d left` :
+                 subscription?.status === "active" ? `Renews ${new Date(subscription.currentPeriodEnd * 1000).toLocaleDateString(undefined, { month: "short", day: "numeric" })}` :
+                 "Upgrade for full access"}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Referrals */}
+        <Link href="/dashboard/referrals">
+          <Card className="card-hover">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <Gift className="h-4 w-4 text-primary" />
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Referrals</span>
+              </div>
+              <p className="text-xl font-bold">{referralStats?.total ?? 0}</p>
+              <p className="text-[11px] text-muted-foreground">
+                {referralStats?.credits
+                  ? `${referralStats.credits} credit${referralStats.credits !== 1 ? "s" : ""} earned`
+                  : "Invite friends to earn"}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+
+      {/* Share card — shown when profile is public */}
+      {profile?.isPublic && profile.slug && (
+        <ShareCard slug={profile.slug} />
+      )}
+
+      {/* Middle row: Live preview + Completion + Resume */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        {/* Live Preview */}
+        {profile?.isPublic && profile.slug && (
+          <LivePreviewCard slug={profile.slug} />
+        )}
+
+        {/* Completion checklist */}
+        {score < 100 && incomplete.length > 0 ? (
+          <Card className={cn(profile?.isPublic && profile.slug ? "lg:col-span-1" : "lg:col-span-2")}>
+            <CardContent className="p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-sm font-semibold">Complete your profile</h2>
+                <span className="text-xs text-muted-foreground">{score}%</span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-muted mb-4">
+                <div
+                  className="h-full rounded-full bg-primary transition-all"
+                  style={{ width: `${score}%` }}
+                />
+              </div>
+              <div className="space-y-1">
+                {completionItems.map(({ label, done, href }) => (
+                  <Link
+                    key={label}
+                    href={done ? "#" : href}
+                    className={cn(
+                      "flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-sm transition-colors",
+                      done ? "pointer-events-none opacity-40" : "hover:bg-muted"
+                    )}
+                  >
+                    <CheckCircle
+                      className={cn(
+                        "h-3.5 w-3.5 shrink-0",
+                        done ? "text-green-500" : "text-muted-foreground/30"
+                      )}
+                    />
+                    <span className={cn("text-xs", done && "line-through")}>{label}</span>
+                    {!done && <ArrowRight className="ml-auto h-3 w-3 text-muted-foreground" />}
+                  </Link>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ) : score === 100 ? (
+          <Card className={cn("border-green-500/20 bg-green-500/5", profile?.isPublic && profile.slug ? "lg:col-span-1" : "lg:col-span-2")}>
+            <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10 text-green-500 mb-3">
+                <CheckCircle className="h-6 w-6" />
+              </div>
+              <p className="font-semibold text-green-700 dark:text-green-400">Profile is fully optimized</p>
+              <p className="mt-1 text-xs text-muted-foreground">All items complete — you&apos;re making a great impression.</p>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {/* Resume card */}
         {latestResume ? (
           <Link href="/dashboard/upload">
-            <Card className="card-hover">
-              <CardContent className="p-6">
+            <Card className="card-hover h-full">
+              <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                    <FileText className="h-4 w-4" />
-                  </div>
+                  <FileText className="h-4 w-4 text-muted-foreground" />
                   <StatusBadge status={latestResume.parseStatus} />
                 </div>
-                <p className="truncate font-semibold">{latestResume.fileName}</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">
+                <p className="truncate font-semibold text-sm">{latestResume.fileName}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   Uploaded {new Date(latestResume.uploadedAt).toLocaleDateString()}
                 </p>
                 <p className="mt-3 text-xs text-primary font-medium">Upload a new version →</p>
@@ -329,160 +535,48 @@ export default function DashboardPage() {
           </Link>
         ) : (
           <Link href="/dashboard/upload">
-            <Card className="card-hover border-dashed">
-              <CardContent className="flex flex-col items-center justify-center p-6 text-center min-h-[172px]">
+            <Card className="card-hover border-dashed h-full">
+              <CardContent className="flex flex-col items-center justify-center p-6 text-center h-full">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-3">
                   <Upload className="h-5 w-5" />
                 </div>
                 <p className="font-semibold text-sm">Upload resume</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">AI parses your career in ~30s</p>
-                <ArrowRight className="mt-3 h-4 w-4 text-primary" />
               </CardContent>
             </Card>
           </Link>
         )}
       </div>
 
-      {/* Plan & Referral row */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        {/* Plan status */}
-        <Link href="/dashboard/settings">
-          <Card className="card-hover">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <CreditCard className="h-5 w-5" />
-                </div>
-                {(!subscription || subscription.plan === "free") && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
-                    <TrendingUp className="h-3 w-3" /> Upgrade
-                  </span>
-                )}
-              </div>
-              <p className="text-lg font-semibold capitalize">
-                {subscription?.plan ?? "Free"} plan
-              </p>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                {subscription?.status === "trialing" ? (
-                  <>
-                    Trial ends{" "}
-                    {new Date(subscription.currentPeriodEnd * 1000).toLocaleDateString()}
-                  </>
-                ) : subscription?.status === "active" ? (
-                  <>Active · renews {new Date(subscription.currentPeriodEnd * 1000).toLocaleDateString()}</>
-                ) : (
-                  "Upgrade for unlimited features"
-                )}
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        {/* Referral stats */}
-        <Link href="/dashboard/referrals">
-          <Card className="card-hover">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Gift className="h-5 w-5" />
-                </div>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <p className="text-lg font-semibold">Referrals</p>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                {referralStats
-                  ? `${referralStats.total} invited · ${referralStats.credits} credit${referralStats.credits !== 1 ? "s" : ""} earned`
-                  : "Invite friends, earn credits"}
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
-
-      {/* Completion checklist — only show if not 100% */}
-      {score < 100 && incomplete.length > 0 && (
-        <Card>
-          <CardContent className="p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-semibold">Complete your profile</h2>
-              <span className="text-sm text-muted-foreground">{score}% done</span>
-            </div>
-            <div className="h-1.5 w-full rounded-full bg-muted mb-5">
-              <div
-                className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${score}%` }}
-              />
-            </div>
-            <div className="space-y-2">
-              {completionItems.map(({ label, done, href }) => (
-                <Link
-                  key={label}
-                  href={done ? "#" : href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                    done
-                      ? "pointer-events-none opacity-50"
-                      : "hover:bg-muted"
-                  )}
-                >
-                  <CheckCircle
-                    className={cn(
-                      "h-4 w-4 shrink-0",
-                      done ? "text-green-500" : "text-muted-foreground/40"
-                    )}
-                  />
-                  <span className={done ? "line-through" : ""}>{label}</span>
-                  {!done && (
-                    <ArrowRight className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
-                  )}
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Quick Actions */}
+      {/* Command palette — all nav items with keyboard hints */}
       <div>
-        <h2 className="mb-4 text-lg font-semibold tracking-tight">Quick actions</h2>
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-          <QuickCard href="/dashboard/portfolio" icon={Briefcase} title="Work History" description="Edit your career timeline" />
-          <QuickCard href="/dashboard/education" icon={GraduationCap} title="Education" description="Degrees & certifications" />
-          <QuickCard href="/dashboard/demos" icon={Zap} title="Demos" description="Interactive showcases" />
-          <QuickCard href="/dashboard/profile" icon={User} title="Profile Info" description="Bio, links, and settings" />
-          <QuickCard href="/dashboard/theme" icon={Palette} title="Theme Studio" description="Customize your look" />
-          <QuickCard href="/dashboard/analytics" icon={BarChart3} title="Analytics" description="See who's viewing you" />
-          <QuickCard href="/dashboard/referrals" icon={Gift} title="Referrals" description="Invite & earn credits" />
-          <QuickCard href="/dashboard/settings" icon={CreditCard} title="Settings" description="Plan, billing & account" />
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-semibold tracking-tight">Quick Actions</h2>
+          <span className="hidden sm:flex items-center gap-1 text-[10px] text-muted-foreground">
+            <Command className="h-2.5 w-2.5" /> Keyboard shortcuts active
+          </span>
+        </div>
+        <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {SHORTCUTS.map(({ key, href, label, icon: Icon }) => (
+            <Link key={key} href={href}>
+              <Card className="card-hover h-full group">
+                <CardContent className="flex items-center gap-3 p-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary transition-colors group-hover:bg-primary/15">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold truncate">{label}</p>
+                  </div>
+                  <kbd className="hidden sm:inline-flex h-5 w-5 items-center justify-center rounded border bg-muted text-[10px] font-mono text-muted-foreground shrink-0">
+                    {key}
+                  </kbd>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
         </div>
       </div>
     </div>
-  );
-}
-
-function QuickCard({
-  href,
-  icon: Icon,
-  title,
-  description,
-}: {
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  description: string;
-}) {
-  return (
-    <Link href={href}>
-      <Card className="card-hover h-full">
-        <CardContent className="flex flex-col items-center justify-center p-5 text-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-3">
-            <Icon className="h-5 w-5" />
-          </div>
-          <h3 className="text-sm font-semibold">{title}</h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
-        </CardContent>
-      </Card>
-    </Link>
   );
 }
 

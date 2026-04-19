@@ -47,10 +47,17 @@ export const getByUserId = query({
 export const getBySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const profile = await ctx.db
       .query("profiles")
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
       .unique();
+    if (!profile) return null;
+    // Merge the Clerk imageUrl as a fallback avatar
+    const user = await ctx.db.get(profile.userId);
+    return {
+      ...profile,
+      avatarUrl: profile.avatarUrl ?? user?.imageUrl,
+    };
   },
 });
 

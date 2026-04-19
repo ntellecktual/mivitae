@@ -340,3 +340,25 @@ export const updateAvatar = mutation({
     return url;
   },
 });
+
+/**
+ * Backfill: copy users.imageUrl → profiles.avatarUrl for profiles missing an avatar.
+ * Run: npx convex run profiles:backfillAvatars
+ */
+export const backfillAvatars = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const profiles = await ctx.db.query("profiles").collect();
+    let updated = 0;
+    for (const p of profiles) {
+      if (p.avatarUrl) continue;
+      const user = await ctx.db.get(p.userId);
+      if (user?.imageUrl) {
+        await ctx.db.patch(p._id, { avatarUrl: user.imageUrl });
+        updated++;
+      }
+    }
+    console.log(`Backfilled avatarUrl for ${updated}/${profiles.length} profiles`);
+    return { updated, total: profiles.length };
+  },
+});

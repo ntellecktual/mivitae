@@ -368,3 +368,22 @@ export const backfillAvatars = internalMutation({
     return { updated, total: profiles.length };
   },
 });
+
+/**
+ * One-shot: clear a profile's avatarUrl by slug so the merge logic falls back
+ * to the Clerk imageUrl. Run: npx convex run profiles:clearAvatarBySlug --args '{"slug":"kieth"}'
+ */
+export const clearAvatarBySlug = internalMutation({
+  args: { slug: v.string() },
+  handler: async (ctx, { slug }) => {
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .unique();
+    if (!profile) return { error: "Profile not found" };
+    const user = await ctx.db.get(profile.userId);
+    const newUrl = user?.imageUrl ?? undefined;
+    await ctx.db.patch(profile._id, { avatarUrl: newUrl });
+    return { cleared: true, avatarUrl: newUrl ?? null };
+  },
+});

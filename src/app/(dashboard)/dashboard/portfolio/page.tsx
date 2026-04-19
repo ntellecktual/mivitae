@@ -323,6 +323,7 @@ export default function PortfolioPage() {
                     <CardContent className="p-0">
                       <ImageUploader
                         shape="panel"
+                        maxSize={15_000_000}
                         imageUrl={section.imageUrl ?? null}
                         generateUploadUrlRef={api.portfolioSections.generateImageUploadUrl}
                         updateImageRef={api.portfolioSections.updateImage}

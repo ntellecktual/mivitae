@@ -544,11 +544,11 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       border-radius: 16px;
       overflow: hidden;
       cursor: pointer;
-      aspect-ratio: 4/3;
+      aspect-ratio: 3/2;
       transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
     #${id} .pf-work-card--featured {
-      aspect-ratio: 16/9;
+      aspect-ratio: 4/3;
     }
     #${id} .pf-work-card:hover {
       transform: translateY(-4px);
@@ -793,12 +793,12 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     @container portfolio (max-width: 900px) {
       #${id} .pf-work-grid { grid-template-columns: repeat(2, 1fr); }
       #${id} .pf-work-card--featured { grid-column: span 1; }
-      #${id} .pf-work-card--featured { aspect-ratio: 4/3; }
+      #${id} .pf-work-card--featured { aspect-ratio: 3/2; }
     }
     @media (max-width: 900px) {
       #${id} .pf-work-grid { grid-template-columns: repeat(2, 1fr); }
       #${id} .pf-work-card--featured { grid-column: span 1; }
-      #${id} .pf-work-card--featured { aspect-ratio: 4/3; }
+      #${id} .pf-work-card--featured { aspect-ratio: 3/2; }
     }
 
     /* ── Education Cards (panel style) ────────────────────── */

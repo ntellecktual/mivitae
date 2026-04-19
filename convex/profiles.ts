@@ -342,9 +342,9 @@ export const updateAvatar = mutation({
 });
 
 /**
- * Backfill: copy users.imageUrl → profiles.avatarUrl for profiles that are missing
- * an avatar OR have a bad local-path value (e.g. "/favicon.ico").
- * Run: npx convex run profiles:backfillAvatars
+ * Backfill: copy users.imageUrl → profiles.avatarUrl for all profiles.
+ * Forces overwrite so any stale local or storage URLs are replaced with the Clerk photo.
+ * Run: npx convex run profiles:backfillAvatars --prod
  */
 export const backfillAvatars = internalMutation({
   args: {},
@@ -352,38 +352,13 @@ export const backfillAvatars = internalMutation({
     const profiles = await ctx.db.query("profiles").collect();
     let updated = 0;
     for (const p of profiles) {
-      // Skip profiles that already have a real remote URL
-      if (p.avatarUrl && p.avatarUrl.startsWith("http")) continue;
       const user = await ctx.db.get(p.userId);
-      if (user?.imageUrl) {
+      if (user?.imageUrl && user.imageUrl !== p.avatarUrl) {
         await ctx.db.patch(p._id, { avatarUrl: user.imageUrl });
-        updated++;
-      } else if (p.avatarUrl && !p.avatarUrl.startsWith("http")) {
-        // Clear the bad local-path value so the merge falls back gracefully
-        await ctx.db.patch(p._id, { avatarUrl: undefined });
         updated++;
       }
     }
     console.log(`Backfilled avatarUrl for ${updated}/${profiles.length} profiles`);
     return { updated, total: profiles.length };
-  },
-});
-
-/**
- * One-shot: clear a profile's avatarUrl by slug so the merge logic falls back
- * to the Clerk imageUrl. Run: npx convex run profiles:clearAvatarBySlug --args '{"slug":"kieth"}'
- */
-export const clearAvatarBySlug = internalMutation({
-  args: { slug: v.string() },
-  handler: async (ctx, { slug }) => {
-    const profile = await ctx.db
-      .query("profiles")
-      .withIndex("by_slug", (q) => q.eq("slug", slug))
-      .unique();
-    if (!profile) return { error: "Profile not found" };
-    const user = await ctx.db.get(profile.userId);
-    const newUrl = user?.imageUrl ?? undefined;
-    await ctx.db.patch(profile._id, { avatarUrl: newUrl });
-    return { cleared: true, avatarUrl: newUrl ?? null };
   },
 });

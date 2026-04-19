@@ -32,6 +32,14 @@ interface EducationEntry {
 interface ParsedResume {
   workHistory: WorkEntry[];
   education: EducationEntry[];
+  skills: SkillEntry[];
+}
+
+interface SkillEntry {
+  name: string;
+  category: string;           // e.g. "Technical", "Leadership", "Communication", "Design", "Analytics"
+  proficiency?: number | null; // 1-5 scale
+  yearsOfExperience?: number | null;
 }
 
 // ── Action ─────────────────────────────────────────────────────────────────
@@ -123,8 +131,23 @@ Return this exact JSON structure:
       "honors": "string or null",
       "activities": ["clubs, sports, organizations"]
     }
+  ],
+  "skills": [
+    {
+      "name": "string (e.g. Python, Project Management)",
+      "category": "string — one of: Technical, Leadership, Communication, Design, Analytics, Sales & Marketing, Operations, Finance, Engineering, Research",
+      "proficiency": number or null (1-5 scale: 1=Beginner, 2=Elementary, 3=Intermediate, 4=Advanced, 5=Expert — infer from context),
+      "yearsOfExperience": number or null (estimate from work history date ranges if possible)
+    }
   ]
-}`;
+}
+
+SKILLS EXTRACTION RULES:
+- Extract ALL distinct skills mentioned across work history, education, and any skills section of the resume.
+- Deduplicate — each skill name should appear only once, picking the highest proficiency if mentioned in multiple roles.
+- Estimate yearsOfExperience by summing the duration of roles where the skill is mentioned.
+- Assign a category from: Technical, Leadership, Communication, Design, Analytics, Sales & Marketing, Operations, Finance, Engineering, Research.
+- Return at most 50 skills, prioritizing the most significant ones.`;
 
         let messageContent: Anthropic.MessageParam["content"];
 
@@ -217,6 +240,9 @@ Return this exact JSON structure:
         portfolioId: portfolioId as never,
         userId: args.userId,
       });
+      await ctx.runMutation(internal.skills.deleteAllForPortfolioInternal, {
+        portfolioId: portfolioId as never,
+      });
 
       // 6. Insert work history
       for (let i = 0; i < uniqueWork.length; i++) {
@@ -253,7 +279,26 @@ Return this exact JSON structure:
         });
       }
 
-      // 7. Mark done
+      // 8. Insert skills
+      const uniqueSkills = parsed.skills ?? [];
+      const seenSkills = new Set<string>();
+      let skillOrder = 0;
+      for (const skill of uniqueSkills) {
+        const key = skill.name.toLowerCase().trim();
+        if (seenSkills.has(key)) continue;
+        seenSkills.add(key);
+        await ctx.runMutation(internal.skills.createInternal, {
+          userId: args.userId,
+          portfolioId: portfolioId as never,
+          name: skill.name,
+          category: skill.category || "Technical",
+          proficiency: skill.proficiency ?? undefined,
+          yearsOfExperience: skill.yearsOfExperience ?? undefined,
+          order: skillOrder++,
+        });
+      }
+
+      // 9. Mark done
       await ctx.runMutation(internal.resumes.setParseStatus, {
         resumeId: args.resumeId,
         parseStatus: "done",

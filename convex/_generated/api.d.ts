@@ -12,6 +12,8 @@ import type * as account from "../account.js";
 import type * as admin from "../admin.js";
 import type * as analytics from "../analytics.js";
 import type * as authHelpers from "../authHelpers.js";
+import type * as backfillSkills from "../backfillSkills.js";
+import type * as backfillSkillsHelpers from "../backfillSkillsHelpers.js";
 import type * as certificates from "../certificates.js";
 import type * as clickEvents from "../clickEvents.js";
 import type * as contactMessages from "../contactMessages.js";
@@ -57,6 +59,8 @@ declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   analytics: typeof analytics;
   authHelpers: typeof authHelpers;
+  backfillSkills: typeof backfillSkills;
+  backfillSkillsHelpers: typeof backfillSkillsHelpers;
   certificates: typeof certificates;
   clickEvents: typeof clickEvents;
   contactMessages: typeof contactMessages;

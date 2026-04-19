@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Pencil, X, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { Id } from "../../../../../convex/_generated/dataModel";
+import { ImageUploader } from "@/components/image-uploader";
 
 export default function VolunteeringPage() {
   const entries = useQuery(api.volunteering.getSelfEntries);
@@ -216,7 +217,16 @@ export default function VolunteeringPage() {
                 renderForm(() => handleUpdate(entry._id), "Update")
               ) : (
                 <div className="flex items-start justify-between">
-                  <div className="space-y-1">
+                  <div className="flex items-start gap-3">
+                    <ImageUploader
+                      imageUrl={entry.imageUrl ?? null}
+                      generateUploadUrlRef={api.volunteering.generateImageUploadUrl}
+                      updateImageRef={api.volunteering.updateImage}
+                      removeImageRef={api.volunteering.removeImage}
+                      updateArgs={{ id: entry._id }}
+                      removeArgs={{ id: entry._id }}
+                    />
+                    <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold">{entry.role}</span>
                       <span className="text-muted-foreground">at</span>
@@ -233,6 +243,7 @@ export default function VolunteeringPage() {
                     {entry.description && (
                       <p className="text-sm text-muted-foreground mt-2">{entry.description}</p>
                     )}
+                  </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <Button

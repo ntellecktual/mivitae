@@ -217,3 +217,55 @@ export const unlinkDemo = mutation({
     });
   },
 });
+
+// ── Image Upload ─────────────────────────────────────────────────────────
+
+export const generateImageUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await ensureAuthUser(ctx);
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const updateImage = mutation({
+  args: {
+    sectionId: v.id("portfolioSections"),
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    const user = await ensureAuthUser(ctx);
+    const section = await ctx.db.get(args.sectionId);
+    if (!section || section.userId !== user._id) throw new Error("Not authorized");
+
+    const url = await ctx.storage.getUrl(args.storageId);
+    if (!url) throw new Error("Storage URL not found");
+
+    // Delete old image if exists
+    if (section.imageStorageId) {
+      await ctx.storage.delete(section.imageStorageId);
+    }
+
+    await ctx.db.patch(args.sectionId, {
+      imageStorageId: args.storageId,
+      imageUrl: url,
+    });
+  },
+});
+
+export const removeImage = mutation({
+  args: { sectionId: v.id("portfolioSections") },
+  handler: async (ctx, args) => {
+    const user = await ensureAuthUser(ctx);
+    const section = await ctx.db.get(args.sectionId);
+    if (!section || section.userId !== user._id) throw new Error("Not authorized");
+
+    if (section.imageStorageId) {
+      await ctx.storage.delete(section.imageStorageId);
+    }
+    await ctx.db.patch(args.sectionId, {
+      imageStorageId: undefined,
+      imageUrl: undefined,
+    });
+  },
+});

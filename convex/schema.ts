@@ -71,6 +71,8 @@ export default defineSchema({
     achievements: v.array(v.string()),
     order: v.number(),
     demoIds: v.array(v.id("userDemos")),
+    imageStorageId: v.optional(v.id("_storage")),
+    imageUrl: v.optional(v.string()),
   })
     .index("by_portfolioId", ["portfolioId"])
     .index("by_userId", ["userId"]),
@@ -89,6 +91,8 @@ export default defineSchema({
     skills: v.optional(v.array(v.string())),
     relevantCoursework: v.optional(v.string()),
     order: v.number(),
+    imageStorageId: v.optional(v.id("_storage")),
+    imageUrl: v.optional(v.string()),
   })
     .index("by_userId", ["userId"])
     .index("by_portfolioId", ["portfolioId"]),
@@ -255,6 +259,8 @@ export default defineSchema({
     endDate: v.optional(v.string()),
     description: v.optional(v.string()),
     order: v.number(),
+    imageStorageId: v.optional(v.id("_storage")),
+    imageUrl: v.optional(v.string()),
   })
     .index("by_userId", ["userId"])
     .index("by_portfolioId", ["portfolioId"]),

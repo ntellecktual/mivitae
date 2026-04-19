@@ -178,3 +178,54 @@ export const removeSelf = mutation({
     await ctx.db.delete(args.entryId);
   },
 });
+
+// ── Image Upload ─────────────────────────────────────────────────────────
+
+export const generateImageUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await ensureAuthUser(ctx);
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const updateImage = mutation({
+  args: {
+    entryId: v.id("educationEntries"),
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    const user = await ensureAuthUser(ctx);
+    const entry = await ctx.db.get(args.entryId);
+    if (!entry || entry.userId !== user._id) throw new Error("Not authorized");
+
+    const url = await ctx.storage.getUrl(args.storageId);
+    if (!url) throw new Error("Storage URL not found");
+
+    if (entry.imageStorageId) {
+      await ctx.storage.delete(entry.imageStorageId);
+    }
+
+    await ctx.db.patch(args.entryId, {
+      imageStorageId: args.storageId,
+      imageUrl: url,
+    });
+  },
+});
+
+export const removeImage = mutation({
+  args: { entryId: v.id("educationEntries") },
+  handler: async (ctx, args) => {
+    const user = await ensureAuthUser(ctx);
+    const entry = await ctx.db.get(args.entryId);
+    if (!entry || entry.userId !== user._id) throw new Error("Not authorized");
+
+    if (entry.imageStorageId) {
+      await ctx.storage.delete(entry.imageStorageId);
+    }
+    await ctx.db.patch(args.entryId, {
+      imageStorageId: undefined,
+      imageUrl: undefined,
+    });
+  },
+});

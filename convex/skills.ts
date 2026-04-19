@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 
 export const getByPortfolioId = query({
   args: { portfolioId: v.id("portfolios") },
@@ -136,5 +136,41 @@ export const removeSelf = mutation({
     if (!skill || skill.userId !== user._id) throw new Error("Not authorized");
 
     await ctx.db.delete(args.id);
+  },
+});
+
+// ── Internal mutations (for resume parser + backfill) ─────────────────────
+
+export const deleteAllForPortfolioInternal = internalMutation({
+  args: { portfolioId: v.id("portfolios") },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("skills")
+      .withIndex("by_portfolioId", (q) => q.eq("portfolioId", args.portfolioId))
+      .take(500);
+    await Promise.all(existing.map((s) => ctx.db.delete(s._id)));
+  },
+});
+
+export const createInternal = internalMutation({
+  args: {
+    userId: v.id("users"),
+    portfolioId: v.id("portfolios"),
+    name: v.string(),
+    category: v.string(),
+    proficiency: v.optional(v.number()),
+    yearsOfExperience: v.optional(v.number()),
+    order: v.number(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("skills", {
+      userId: args.userId,
+      portfolioId: args.portfolioId,
+      name: args.name.trim().slice(0, 100),
+      category: args.category.trim().slice(0, 50),
+      proficiency: args.proficiency,
+      yearsOfExperience: args.yearsOfExperience,
+      order: args.order,
+    });
   },
 });

@@ -6,7 +6,7 @@ import { api } from "@/lib/convex";
 import {
   MapPin, Globe, ExternalLink, Briefcase, GraduationCap,
   Zap, Wrench, Heart, Mail, Home, Menu, X, Award,
-  Compass, User, Calendar,
+  Compass, User, Calendar, Target,
 } from "lucide-react";
 import {
   type ThemeConfig,
@@ -68,6 +68,7 @@ type Section = {
   achievements: string[];
   order: number;
   demoIds?: string[];
+  imageUrl?: string;
 };
 
 type Education = {
@@ -81,6 +82,7 @@ type Education = {
   honors?: string;
   activities?: string[];
   order: number;
+  imageUrl?: string;
 };
 
 type Demo = {
@@ -115,6 +117,7 @@ type VolunteeringEntry = {
   endDate?: string;
   description?: string;
   order: number;
+  imageUrl?: string;
 };
 
 type Certificate = {
@@ -524,6 +527,103 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     }
 
     /* ── Category Tabs ───────────────────────────────────────── */
+
+    /* ── Work History Grid ─────────────────────────────────── */
+    #${id} .pf-work-grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    }
+
+    #${id} .pf-work-card {
+      ${cardCss};
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    #${id} .pf-work-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px ${hexToRgba(theme.cardBorder, 0.35)};
+    }
+
+    #${id} .pf-work-card-img {
+      position: relative;
+      height: 140px;
+      overflow: hidden;
+      background: linear-gradient(135deg, ${hexToRgba(theme.accentColor, 0.08)}, ${hexToRgba(theme.accentColor, 0.02)});
+    }
+    #${id} .pf-work-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    #${id} .pf-work-card-img-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: ${theme.subtextColor};
+    }
+    #${id} .pf-work-card-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 10px 16px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    }
+    #${id} .pf-work-card-company {
+      color: #fff;
+      font-family: '${theme.headingFont}', sans-serif;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+    #${id} .pf-work-card-body {
+      padding: 16px 20px 20px;
+    }
+    #${id} .pf-work-card-body h3 {
+      margin: 0 0 4px;
+      font-family: '${theme.headingFont}', sans-serif;
+      font-weight: 600;
+      color: ${theme.textColor};
+    }
+
+    /* ── Education Cards ───────────────────────────────────── */
+    #${id} .pf-edu-card {
+      ${cardCss};
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 20px;
+    }
+    #${id} .pf-edu-card-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, ${hexToRgba(theme.accentColor, 0.1)}, ${hexToRgba(theme.accentColor, 0.04)});
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #${id} .pf-edu-card-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    #${id} .pf-edu-card-logo-placeholder {
+      color: ${theme.subtextColor};
+    }
+    #${id} .pf-edu-card-body {
+      flex: 1;
+    }
+    #${id} .pf-edu-card-body h3 {
+      margin: 0 0 2px;
+      font-family: '${theme.headingFont}', sans-serif;
+      font-weight: 600;
+      color: ${theme.textColor};
+    }
+
     #${id} .pf-cat-tabs {
       display: flex;
       flex-wrap: wrap;
@@ -554,6 +654,50 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       border-color: ${theme.accentColor};
       color: ${theme.accentColor};
       font-weight: 600;
+    }
+
+    /* ── Discover Hero ──────────────────────────────────────── */
+    #${id} .pf-discover-hero {
+      text-align: center;
+      padding: 40px 20px 32px;
+      margin-bottom: 24px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, ${hexToRgba(theme.accentColor, 0.06)}, ${hexToRgba(theme.accentColor, 0.02)});
+      border: 1px solid ${hexToRgba(theme.cardBorder, 0.2)};
+    }
+    #${id} .pf-discover-hero h2 {
+      margin: 0 0 8px;
+      font-family: '${theme.headingFont}', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: ${theme.textColor};
+    }
+    #${id} .pf-discover-hero p {
+      margin: 0 0 20px;
+      color: ${theme.subtextColor};
+      font-size: 0.9rem;
+    }
+    #${id} .pf-discover-search {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    #${id} .pf-discover-input {
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid ${hexToRgba(theme.cardBorder, 0.5)};
+      background: ${theme.cardBg};
+      color: ${theme.textColor};
+      font-size: 0.875rem;
+      font-family: '${theme.bodyFont}', sans-serif;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    #${id} .pf-discover-input:focus {
+      border-color: ${theme.accentColor};
+    }
+    #${id} .pf-discover-input::placeholder {
+      color: ${theme.subtextColor};
     }
 
     /* ── Demo Grid ───────────────────────────────────────────── */
@@ -806,6 +950,7 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       #${id} .pf-prof-label { width: 100px; font-size: 0.75rem; }
       #${id} .pf-prof-years { display: none; }
       #${id} .pf-demo-grid { grid-template-columns: 1fr; }
+      #${id} .pf-work-grid { grid-template-columns: 1fr; }
       #${id} .pf-stats { grid-template-columns: repeat(2, 1fr); }
     }
 
@@ -837,6 +982,7 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       #${id} .pf-prof-label { width: 100px; font-size: 0.75rem; }
       #${id} .pf-prof-years { display: none; }
       #${id} .pf-demo-grid { grid-template-columns: 1fr; }
+      #${id} .pf-work-grid { grid-template-columns: 1fr; }
       #${id} .pf-stats { grid-template-columns: repeat(2, 1fr); }
     }
 
@@ -890,6 +1036,7 @@ export default function PortfolioRenderer({
   const [expandedDemo, setExpandedDemo] = useState<string | null>(null);
   const [selectedDemoTag, setSelectedDemoTag] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [demoSearch, setDemoSearch] = useState("");
 
   // Inject Google Fonts into <head> on the real portfolio page
   useEffect(() => {
@@ -929,9 +1076,16 @@ export default function PortfolioRenderer({
 
   // Demo filtering
   const allDemoTags = Array.from(new Set(publicDemos.flatMap(d => d.tags ?? [])));
-  const filteredDemos = selectedDemoTag
-    ? publicDemos.filter(d => d.tags?.includes(selectedDemoTag))
-    : publicDemos;
+  const filteredDemos = publicDemos.filter(d => {
+    if (selectedDemoTag && !d.tags?.includes(selectedDemoTag)) return false;
+    if (demoSearch) {
+      const q = demoSearch.toLowerCase();
+      return d.title.toLowerCase().includes(q)
+        || d.description?.toLowerCase().includes(q)
+        || d.tags?.some(t => t.toLowerCase().includes(q));
+    }
+    return true;
+  });
 
   // Portfolio stats
   const stats = computePortfolioStats(
@@ -1176,6 +1330,120 @@ export default function PortfolioRenderer({
                 </div>
               )}
 
+              {/* Radar Chart (skill categories) */}
+              {hasSkills && skillCategories.length >= 3 && (() => {
+                // Compute average proficiency per category
+                const catData = skillCategories.map(cat => {
+                  const catSkills = skillsWithProficiency.filter(s => s.category === cat);
+                  const avg = catSkills.reduce((sum, s) => sum + s.pct, 0) / catSkills.length;
+                  return { category: cat, avg, count: catSkills.length };
+                }).sort((a, b) => b.avg - a.avg).slice(0, 8); // max 8 axes
+
+                const n = catData.length;
+                if (n < 3) return null;
+
+                const cx = 150, cy = 150, maxR = 110;
+                const angleStep = (2 * Math.PI) / n;
+                const levels = [20, 40, 60, 80, 100];
+
+                const getPoint = (i: number, pct: number) => {
+                  const angle = (i * angleStep) - Math.PI / 2;
+                  const r = (pct / 100) * maxR;
+                  return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+                };
+
+                const dataPoints = catData.map((d, i) => getPoint(i, d.avg));
+                const polygon = dataPoints.map(p => `${p.x},${p.y}`).join(" ");
+
+                return (
+                  <section style={{ marginBottom: 36 }}>
+                    <div className="pf-section-title" style={{ fontSize: "1.2rem" }}>
+                      <Target style={{ width: 18, height: 18, flexShrink: 0 }} className="pf-accent" />
+                      Skill Matrix
+                    </div>
+                    <div className="pf-divider" />
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                      <svg viewBox="0 0 300 300" width="300" height="300" style={{ maxWidth: "100%" }}>
+                        {/* Grid levels */}
+                        {levels.map(lvl => {
+                          const pts = Array.from({ length: n }, (_, i) => {
+                            const p = getPoint(i, lvl);
+                            return `${p.x},${p.y}`;
+                          }).join(" ");
+                          return (
+                            <polygon
+                              key={lvl}
+                              points={pts}
+                              fill="none"
+                              stroke={hexToRgba(theme.cardBorder, 0.3)}
+                              strokeWidth={1}
+                            />
+                          );
+                        })}
+
+                        {/* Axis lines */}
+                        {catData.map((_, i) => {
+                          const p = getPoint(i, 100);
+                          return (
+                            <line
+                              key={`axis-${i}`}
+                              x1={cx}
+                              y1={cy}
+                              x2={p.x}
+                              y2={p.y}
+                              stroke={hexToRgba(theme.cardBorder, 0.2)}
+                              strokeWidth={1}
+                            />
+                          );
+                        })}
+
+                        {/* Data polygon */}
+                        <polygon
+                          points={polygon}
+                          fill={hexToRgba(theme.accentColor, 0.15)}
+                          stroke={theme.accentColor}
+                          strokeWidth={2}
+                        />
+
+                        {/* Data points */}
+                        {dataPoints.map((p, i) => (
+                          <circle
+                            key={`dot-${i}`}
+                            cx={p.x}
+                            cy={p.y}
+                            r={4}
+                            fill={theme.accentColor}
+                          />
+                        ))}
+
+                        {/* Category labels */}
+                        {catData.map((d, i) => {
+                          const labelR = maxR + 22;
+                          const angle = (i * angleStep) - Math.PI / 2;
+                          const lx = cx + labelR * Math.cos(angle);
+                          const ly = cy + labelR * Math.sin(angle);
+                          const anchor = Math.abs(Math.cos(angle)) < 0.01 ? "middle" : Math.cos(angle) > 0 ? "start" : "end";
+                          return (
+                            <text
+                              key={`label-${i}`}
+                              x={lx}
+                              y={ly}
+                              textAnchor={anchor}
+                              dominantBaseline="middle"
+                              fill={theme.subtextColor}
+                              fontSize="9"
+                              fontFamily={`'${theme.bodyFont}', sans-serif`}
+                            >
+                              {d.category}
+                            </text>
+                          );
+                        })}
+                      </svg>
+                    </div>
+                  </section>
+                );
+              })()}
+
               {/* Skills Proficiency (top skills) */}
               {topSkills.length > 0 && (
                 <section style={{ marginBottom: 36 }}>
@@ -1266,39 +1534,54 @@ export default function PortfolioRenderer({
                 {sortedSections.length} position{sortedSections.length !== 1 ? "s" : ""} across my career
               </p>
               <div className="pf-divider" />
-              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div className="pf-work-grid">
                 {sortedSections.map(s => {
                   const linkedDemos = publicDemos.filter(d => s.demoIds?.includes(d._id));
                   return (
-                    <div key={s._id} className="pf-card">
-                      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "4px" }}>
+                    <div key={s._id} className="pf-work-card">
+                      {s.imageUrl ? (
+                        <div className="pf-work-card-img">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={s.imageUrl} alt={s.companyName} />
+                          <div className="pf-work-card-overlay">
+                            <span className="pf-work-card-company">{s.companyName}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="pf-work-card-img pf-work-card-img-placeholder">
+                          <Briefcase style={{ width: 32, height: 32, opacity: 0.3 }} />
+                          <div className="pf-work-card-overlay">
+                            <span className="pf-work-card-company">{s.companyName}</span>
+                          </div>
+                        </div>
+                      )}
+                      <div className="pf-work-card-body">
                         <h3>{s.role}</h3>
                         <span className="pf-card-meta">
                           <Calendar style={{ width: 12, height: 12, display: "inline", verticalAlign: "middle", marginRight: 4 }} />
                           {s.startDate} — {s.endDate ?? "Present"}
                         </span>
+                        {s.description && <p className="pf-card-desc">{s.description}</p>}
+                        {s.achievements.length > 0 && (
+                          <ul className="pf-achievements">
+                            {s.achievements.map((a, i) => <li key={i}>{a}</li>)}
+                          </ul>
+                        )}
+                        {s.skills.length > 0 && (
+                          <div className="pf-tags">
+                            {s.skills.map(skill => <span key={skill} className="pf-tag">{skill}</span>)}
+                          </div>
+                        )}
+                        {linkedDemos.length > 0 && (
+                          <div className="pf-tags">
+                            {linkedDemos.map(d => (
+                              <span key={d._id} className="pf-demo-tag">
+                                <Zap style={{ width: 10, height: 10 }} /> {d.title}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <p className="pf-card-sub">{s.companyName}</p>
-                      {s.description && <p className="pf-card-desc">{s.description}</p>}
-                      {s.achievements.length > 0 && (
-                        <ul className="pf-achievements">
-                          {s.achievements.map((a, i) => <li key={i}>{a}</li>)}
-                        </ul>
-                      )}
-                      {s.skills.length > 0 && (
-                        <div className="pf-tags">
-                          {s.skills.map(skill => <span key={skill} className="pf-tag">{skill}</span>)}
-                        </div>
-                      )}
-                      {linkedDemos.length > 0 && (
-                        <div className="pf-tags">
-                          {linkedDemos.map(d => (
-                            <span key={d._id} className="pf-demo-tag">
-                              <Zap style={{ width: 10, height: 10 }} /> {d.title}
-                            </span>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   );
                 })}
@@ -1319,21 +1602,33 @@ export default function PortfolioRenderer({
               {sortedEducation.length > 0 && (
                 <div className="pf-grid" style={{ marginBottom: sortedCertificates.length > 0 ? 36 : 0 }}>
                   {sortedEducation.map(e => (
-                    <div key={e._id} className="pf-card">
-                      <h3>{e.institution}</h3>
-                      <p className="pf-card-sub">
-                        {e.degree}{e.fieldOfStudy ? ` in ${e.fieldOfStudy}` : ""}
-                      </p>
-                      <p className="pf-card-meta" style={{ marginTop: 2 }}>
-                        {e.startYear} — {e.endYear ?? "Present"}
-                      </p>
-                      {e.gpa && <p className="pf-card-meta" style={{ marginTop: 4 }}>GPA: {e.gpa}</p>}
-                      {e.honors && <p className="pf-card-meta" style={{ marginTop: 4, fontStyle: "italic" }}>{e.honors}</p>}
-                      {e.activities && e.activities.length > 0 && (
-                        <p className="pf-card-meta" style={{ marginTop: 8 }}>
-                          {e.activities.join(" · ")}
-                        </p>
+                    <div key={e._id} className="pf-edu-card">
+                      {e.imageUrl ? (
+                        <div className="pf-edu-card-logo">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={e.imageUrl} alt={e.institution} />
+                        </div>
+                      ) : (
+                        <div className="pf-edu-card-logo pf-edu-card-logo-placeholder">
+                          <GraduationCap style={{ width: 28, height: 28, opacity: 0.4 }} />
+                        </div>
                       )}
+                      <div className="pf-edu-card-body">
+                        <h3>{e.institution}</h3>
+                        <p className="pf-card-sub">
+                          {e.degree}{e.fieldOfStudy ? ` in ${e.fieldOfStudy}` : ""}
+                        </p>
+                        <p className="pf-card-meta" style={{ marginTop: 2 }}>
+                          {e.startYear} — {e.endYear ?? "Present"}
+                        </p>
+                        {e.gpa && <p className="pf-card-meta" style={{ marginTop: 4 }}>GPA: {e.gpa}</p>}
+                        {e.honors && <p className="pf-card-meta" style={{ marginTop: 4, fontStyle: "italic" }}>{e.honors}</p>}
+                        {e.activities && e.activities.length > 0 && (
+                          <p className="pf-card-meta" style={{ marginTop: 8 }}>
+                            {e.activities.join(" · ")}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1380,18 +1675,28 @@ export default function PortfolioRenderer({
           {/* ── DISCOVER (Demos) ─────────────────────────────── */}
           {activeSection === "discover" && hasDemos && (
             <section className="pf-animate">
-              <div className="pf-section-title">
-                <Compass style={{ width: 22, height: 22, flexShrink: 0 }} className="pf-accent" />
-                Interactive Demos
+              {/* Hero banner */}
+              <div className="pf-discover-hero">
+                <Compass style={{ width: 36, height: 36, marginBottom: 12 }} className="pf-accent" />
+                <h2>Discover Demos</h2>
+                <p>
+                  {publicDemos.length} interactive demo{publicDemos.length !== 1 ? "s" : ""} showcasing real skills
+                </p>
+                {/* Search bar */}
+                <div className="pf-discover-search">
+                  <input
+                    type="text"
+                    placeholder="Search demos..."
+                    value={demoSearch}
+                    onChange={e => setDemoSearch(e.target.value)}
+                    className="pf-discover-input"
+                  />
+                </div>
               </div>
-              <p className="pf-section-subtitle">
-                {publicDemos.length} interactive demo{publicDemos.length !== 1 ? "s" : ""} showcasing real skills
-              </p>
-              <div className="pf-divider" />
 
               {/* Tag filters */}
               {allDemoTags.length > 1 && (
-                <div className="pf-cat-tabs">
+                <div className="pf-cat-tabs" style={{ justifyContent: "center" }}>
                   <button
                     className={`pf-cat-tab ${selectedDemoTag === null ? "active" : ""}`}
                     onClick={() => setSelectedDemoTag(null)}
@@ -1557,18 +1862,30 @@ export default function PortfolioRenderer({
               <div className="pf-divider" />
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 {sortedVolunteering.map(v => (
-                  <div key={v._id} className="pf-card">
-                    <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "4px" }}>
-                      <h3>{v.role}</h3>
-                      <span className="pf-card-meta">
-                        {v.startDate} — {v.endDate ?? "Present"}
-                      </span>
-                    </div>
-                    <p className="pf-card-sub">{v.organization}</p>
-                    {v.cause && (
-                      <span className="pf-tag" style={{ marginTop: 6, display: "inline-block" }}>{v.cause}</span>
+                  <div key={v._id} className="pf-card" style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+                    {v.imageUrl ? (
+                      <div style={{ width: 56, height: 56, borderRadius: 12, overflow: "hidden", flexShrink: 0 }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={v.imageUrl} alt={v.organization} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </div>
+                    ) : (
+                      <div style={{ width: 56, height: 56, borderRadius: 12, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `${hexToRgba(theme.accentColor, 0.1)}` }}>
+                        <Heart style={{ width: 24, height: 24, opacity: 0.4 }} />
+                      </div>
                     )}
-                    {v.description && <p className="pf-card-desc">{v.description}</p>}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "4px" }}>
+                        <h3>{v.role}</h3>
+                        <span className="pf-card-meta">
+                          {v.startDate} — {v.endDate ?? "Present"}
+                        </span>
+                      </div>
+                      <p className="pf-card-sub">{v.organization}</p>
+                      {v.cause && (
+                        <span className="pf-tag" style={{ marginTop: 6, display: "inline-block" }}>{v.cause}</span>
+                      )}
+                      {v.description && <p className="pf-card-desc">{v.description}</p>}
+                    </div>
                   </div>
                 ))}
               </div>

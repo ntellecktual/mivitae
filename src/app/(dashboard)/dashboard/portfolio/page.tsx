@@ -25,6 +25,7 @@ import {
 import type { Id } from "../../../../../convex/_generated/dataModel";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
+import { ImageUploader } from "@/components/image-uploader";
 
 interface SectionForm {
   companyName: string;
@@ -321,9 +322,25 @@ export default function PortfolioPage() {
                   <Card className="card-hover">
                     <CardContent className="p-5">
                       <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                          <Briefcase className="h-5 w-5" />
-                        </div>
+                        {section.imageUrl ? (
+                          <ImageUploader
+                            imageUrl={section.imageUrl}
+                            generateUploadUrlRef={api.portfolioSections.generateImageUploadUrl}
+                            updateImageRef={api.portfolioSections.updateImage}
+                            removeImageRef={api.portfolioSections.removeImage}
+                            updateArgs={{ sectionId: section._id }}
+                            removeArgs={{ sectionId: section._id }}
+                          />
+                        ) : (
+                          <ImageUploader
+                            imageUrl={null}
+                            generateUploadUrlRef={api.portfolioSections.generateImageUploadUrl}
+                            updateImageRef={api.portfolioSections.updateImage}
+                            removeImageRef={api.portfolioSections.removeImage}
+                            updateArgs={{ sectionId: section._id }}
+                            removeArgs={{ sectionId: section._id }}
+                          />
+                        )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex flex-wrap items-center gap-2 min-w-0">

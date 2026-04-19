@@ -137,3 +137,71 @@ export const removeSelf = mutation({
     await ctx.db.delete(args.id);
   },
 });
+
+// ── Image Upload ─────────────────────────────────────────────────────────
+
+export const generateImageUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const updateImage = mutation({
+  args: {
+    id: v.id("volunteeringEntries"),
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) throw new Error("User not found");
+
+    const entry = await ctx.db.get(args.id);
+    if (!entry || entry.userId !== user._id) throw new Error("Not authorized");
+
+    const url = await ctx.storage.getUrl(args.storageId);
+    if (!url) throw new Error("Storage URL not found");
+
+    if (entry.imageStorageId) {
+      await ctx.storage.delete(entry.imageStorageId);
+    }
+
+    await ctx.db.patch(args.id, {
+      imageStorageId: args.storageId,
+      imageUrl: url,
+    });
+  },
+});
+
+export const removeImage = mutation({
+  args: { id: v.id("volunteeringEntries") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) throw new Error("User not found");
+
+    const entry = await ctx.db.get(args.id);
+    if (!entry || entry.userId !== user._id) throw new Error("Not authorized");
+
+    if (entry.imageStorageId) {
+      await ctx.storage.delete(entry.imageStorageId);
+    }
+    await ctx.db.patch(args.id, {
+      imageStorageId: undefined,
+      imageUrl: undefined,
+    });
+  },
+});

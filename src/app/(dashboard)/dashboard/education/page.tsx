@@ -23,6 +23,7 @@ import {
 import type { Id } from "../../../../../convex/_generated/dataModel";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
+import { ImageUploader } from "@/components/image-uploader";
 
 interface EduForm {
   institution: string;
@@ -520,9 +521,14 @@ export default function EducationPage() {
                   <CardContent className="p-5">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                          <GraduationCap className="h-5 w-5" />
-                        </div>
+                        <ImageUploader
+                          imageUrl={entry.imageUrl ?? null}
+                          generateUploadUrlRef={api.educationEntries.generateImageUploadUrl}
+                          updateImageRef={api.educationEntries.updateImage}
+                          removeImageRef={api.educationEntries.removeImage}
+                          updateArgs={{ entryId: entry._id }}
+                          removeArgs={{ entryId: entry._id }}
+                        />
                         <div>
                           <h3 className="font-semibold leading-tight">{entry.institution}</h3>
                           <p className="text-sm text-muted-foreground">

@@ -957,6 +957,15 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     /* ── Accent ───────────────────────────────────────────────── */
     #${id} .pf-accent { color: ${theme.accentColor}; }
 
+    /* ── Home 2-col layout (bars + radar side by side) ──────── */
+    #${id} .pf-home-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: start;
+      margin-bottom: 28px;
+    }
+
     /* ── Animations ──────────────────────────────────────────── */
     @keyframes pf-bar-fill-in {
       from { width: 0; }
@@ -1004,6 +1013,7 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       #${id} .pf-demo-grid { grid-template-columns: 1fr; }
       #${id} .pf-work-grid { grid-template-columns: 1fr; }
       #${id} .pf-stats { grid-template-columns: repeat(2, 1fr); }
+      #${id} .pf-home-2col { grid-template-columns: 1fr; gap: 16px; }
     }
 
     /* Fallback for viewport-level mobile */
@@ -1036,6 +1046,7 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       #${id} .pf-demo-grid { grid-template-columns: 1fr; }
       #${id} .pf-work-grid { grid-template-columns: 1fr; }
       #${id} .pf-stats { grid-template-columns: repeat(2, 1fr); }
+      #${id} .pf-home-2col { grid-template-columns: 1fr; gap: 16px; }
     }
 
     /* ── Print ────────────────────────────────────────────────── */
@@ -1295,7 +1306,7 @@ export default function PortfolioRenderer({
               <div className="pf-home-hero">
                 <p className="pf-home-welcome">Welcome to</p>
                 <h1 className="pf-home-name">
-                  {profile.displayName || profile.slug}&apos;s Portfolio
+                  {(() => { const raw = profile.displayName || profile.slug; const first = raw.split(" ")[0]; return first.charAt(0).toUpperCase() + first.slice(1); })()}&apos;s Portfolio
                 </h1>
                 {profile.headline && (
                   <p className="pf-home-headline">{profile.headline}</p>
@@ -1382,147 +1393,108 @@ export default function PortfolioRenderer({
                 </div>
               )}
 
-              {/* Radar Chart (skill categories) */}
-              {hasSkills && skillCategories.length >= 3 && (() => {
-                // Compute average proficiency per category
-                const catData = skillCategories.map(cat => {
-                  const catSkills = skillsWithProficiency.filter(s => s.category === cat);
-                  const avg = catSkills.reduce((sum, s) => sum + s.pct, 0) / catSkills.length;
-                  return { category: cat, avg, count: catSkills.length };
-                }).sort((a, b) => b.avg - a.avg).slice(0, 8); // max 8 axes
-
-                const n = catData.length;
-                if (n < 3) return null;
-
-                const cx = 150, cy = 150, maxR = 110;
-                const angleStep = (2 * Math.PI) / n;
-                const levels = [20, 40, 60, 80, 100];
-
-                const getPoint = (i: number, pct: number) => {
-                  const angle = (i * angleStep) - Math.PI / 2;
-                  const r = (pct / 100) * maxR;
-                  return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
-                };
-
-                const dataPoints = catData.map((d, i) => getPoint(i, d.avg));
-                const polygon = dataPoints.map(p => `${p.x},${p.y}`).join(" ");
-
-                return (
-                  <section style={{ marginBottom: 24 }}>
-                    <div className="pf-section-title" style={{ fontSize: "1.2rem" }}>
-                      <Target style={{ width: 18, height: 18, flexShrink: 0 }} className="pf-accent" />
-                      Skill Matrix
-                    </div>
-                    <div className="pf-divider" />
-                    <div className="pf-radar-wrap">
-                      <svg viewBox="0 0 300 300" width="260" height="260" style={{ maxWidth: "100%" }}>
-                        {/* Grid levels */}
-                        {levels.map(lvl => {
-                          const pts = Array.from({ length: n }, (_, i) => {
-                            const p = getPoint(i, lvl);
-                            return `${p.x},${p.y}`;
-                          }).join(" ");
-                          return (
-                            <polygon
-                              key={lvl}
-                              points={pts}
-                              fill="none"
-                              stroke={hexToRgba(theme.cardBorder, 0.3)}
-                              strokeWidth={1}
-                            />
-                          );
-                        })}
-
-                        {/* Axis lines */}
-                        {catData.map((_, i) => {
-                          const p = getPoint(i, 100);
-                          return (
-                            <line
-                              key={`axis-${i}`}
-                              x1={cx}
-                              y1={cy}
-                              x2={p.x}
-                              y2={p.y}
-                              stroke={hexToRgba(theme.cardBorder, 0.2)}
-                              strokeWidth={1}
-                            />
-                          );
-                        })}
-
-                        {/* Data polygon */}
-                        <polygon
-                          points={polygon}
-                          fill={hexToRgba(theme.accentColor, 0.15)}
-                          stroke={theme.accentColor}
-                          strokeWidth={2}
-                        />
-
-                        {/* Data points */}
-                        {dataPoints.map((p, i) => (
-                          <circle
-                            key={`dot-${i}`}
-                            cx={p.x}
-                            cy={p.y}
-                            r={4}
-                            fill={theme.accentColor}
-                          />
-                        ))}
-
-                        {/* Category labels */}
-                        {catData.map((d, i) => {
-                          const labelR = maxR + 22;
-                          const angle = (i * angleStep) - Math.PI / 2;
-                          const lx = cx + labelR * Math.cos(angle);
-                          const ly = cy + labelR * Math.sin(angle);
-                          const anchor = Math.abs(Math.cos(angle)) < 0.01 ? "middle" : Math.cos(angle) > 0 ? "start" : "end";
-                          return (
-                            <text
-                              key={`label-${i}`}
-                              x={lx}
-                              y={ly}
-                              textAnchor={anchor}
-                              dominantBaseline="middle"
-                              fill={theme.subtextColor}
-                              fontSize="9"
-                              fontFamily={`'${theme.bodyFont}', sans-serif`}
-                            >
-                              {d.category}
-                            </text>
-                          );
-                        })}
-                      </svg>
-                    </div>
-                  </section>
-                );
-              })()}
-
-              {/* Skills Proficiency (top skills) */}
-              {topSkills.length > 0 && (
-                <section style={{ marginBottom: 24 }}>
-                  <div className="pf-section-title" style={{ fontSize: "1.2rem" }}>
-                    <Wrench style={{ width: 18, height: 18, flexShrink: 0 }} className="pf-accent" />
-                    Skills Proficiency
-                  </div>
-                  <div className="pf-divider" />
-                  {topSkills.map(s => {
-                    const dPct = Math.min(99, Math.round(s.pct + (100 - s.pct) * 0.3));
-                    return (
-                      <div key={s._id} className="pf-prof-row">
-                        <span className="pf-prof-label">{s.name}</span>
-                        <div className="pf-prof-bar-bg">
-                          <div className="pf-prof-bar-fill" style={{ '--bar-w': `${dPct}%` } as React.CSSProperties} />
-                        </div>
-                        <span className="pf-prof-pct">{dPct}%</span>
-                        {s.yrsLabel && <span className="pf-prof-years">{s.yrsLabel}</span>}
+              {/* Skills + Radar side-by-side */}
+              {(topSkills.length > 0 || (hasSkills && skillCategories.length >= 3)) && (
+                <div className="pf-home-2col">
+                  {/* Left col: Skills Proficiency */}
+                  {topSkills.length > 0 && (
+                    <section>
+                      <div className="pf-section-title" style={{ fontSize: "1.2rem" }}>
+                        <Wrench style={{ width: 18, height: 18, flexShrink: 0 }} className="pf-accent" />
+                        Skills Proficiency
                       </div>
-                    );
-                  })}
-                  {sortedSkills.length > 8 && (
-                    <button className="pf-view-all" onClick={() => nav("skills")}>
-                      View all {sortedSkills.length} skills →
-                    </button>
+                      <div className="pf-divider" />
+                      {topSkills.map(s => {
+                        const dPct = Math.min(99, Math.round(s.pct + (100 - s.pct) * 0.3));
+                        return (
+                          <div key={s._id} className="pf-prof-row">
+                            <span className="pf-prof-label">{s.name}</span>
+                            <div className="pf-prof-bar-bg">
+                              <div className="pf-prof-bar-fill" style={{ '--bar-w': `${dPct}%` } as React.CSSProperties} />
+                            </div>
+                            <span className="pf-prof-pct">{dPct}%</span>
+                            {s.yrsLabel && <span className="pf-prof-years">{s.yrsLabel}</span>}
+                          </div>
+                        );
+                      })}
+                      {sortedSkills.length > 8 && (
+                        <button className="pf-view-all" onClick={() => nav("skills")}>
+                          View all {sortedSkills.length} skills →
+                        </button>
+                      )}
+                    </section>
                   )}
-                </section>
+
+                  {/* Right col: Radar Chart */}
+                  {hasSkills && skillCategories.length >= 3 && (() => {
+                    const catData = skillCategories.map(cat => {
+                      const catSkills = skillsWithProficiency.filter(s => s.category === cat);
+                      const avg = catSkills.reduce((sum, s) => sum + s.pct, 0) / catSkills.length;
+                      return { category: cat, avg, count: catSkills.length };
+                    }).sort((a, b) => b.avg - a.avg).slice(0, 8);
+
+                    const n = catData.length;
+                    if (n < 3) return null;
+
+                    const cx = 150, cy = 150, maxR = 110;
+                    const angleStep = (2 * Math.PI) / n;
+                    const levels = [20, 40, 60, 80, 100];
+
+                    const getPoint = (i: number, pct: number) => {
+                      const angle = (i * angleStep) - Math.PI / 2;
+                      const r = (pct / 100) * maxR;
+                      return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+                    };
+
+                    const dataPoints = catData.map((d, i) => getPoint(i, d.avg));
+                    const polygon = dataPoints.map(p => `${p.x},${p.y}`).join(" ");
+
+                    return (
+                      <section key="radar">
+                        <div className="pf-section-title" style={{ fontSize: "1.2rem" }}>
+                          <Target style={{ width: 18, height: 18, flexShrink: 0 }} className="pf-accent" />
+                          Skill Matrix
+                        </div>
+                        <div className="pf-divider" />
+                        <div className="pf-radar-wrap">
+                          <svg viewBox="0 0 300 300" width="240" height="240" style={{ maxWidth: "100%" }}>
+                            {levels.map(lvl => {
+                              const pts = Array.from({ length: n }, (_, i) => {
+                                const p = getPoint(i, lvl);
+                                return `${p.x},${p.y}`;
+                              }).join(" ");
+                              return (
+                                <polygon key={lvl} points={pts} fill="none" stroke={hexToRgba(theme.cardBorder, 0.3)} strokeWidth={1} />
+                              );
+                            })}
+                            {catData.map((_, i) => {
+                              const p = getPoint(i, 100);
+                              return (
+                                <line key={`axis-${i}`} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke={hexToRgba(theme.cardBorder, 0.2)} strokeWidth={1} />
+                              );
+                            })}
+                            <polygon points={polygon} fill={hexToRgba(theme.accentColor, 0.15)} stroke={theme.accentColor} strokeWidth={2} />
+                            {dataPoints.map((p, i) => (
+                              <circle key={`dot-${i}`} cx={p.x} cy={p.y} r={4} fill={theme.accentColor} />
+                            ))}
+                            {catData.map((d, i) => {
+                              const labelR = maxR + 22;
+                              const angle = (i * angleStep) - Math.PI / 2;
+                              const lx = cx + labelR * Math.cos(angle);
+                              const ly = cy + labelR * Math.sin(angle);
+                              const anchor = Math.abs(Math.cos(angle)) < 0.01 ? "middle" : Math.cos(angle) > 0 ? "start" : "end";
+                              return (
+                                <text key={`label-${i}`} x={lx} y={ly} textAnchor={anchor} dominantBaseline="middle" fill={theme.subtextColor} fontSize="9" fontFamily={`'${theme.bodyFont}', sans-serif`}>
+                                  {d.category}
+                                </text>
+                              );
+                            })}
+                          </svg>
+                        </div>
+                      </section>
+                    );
+                  })()}
+                </div>
               )}
 
               {/* Featured Demos */}

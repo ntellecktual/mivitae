@@ -25,8 +25,8 @@ interface ImageUploaderProps {
   storageIdKey?: string;
   /** Max file size in bytes (default 5MB) */
   maxSize?: number;
-  /** Shape of the thumbnail */
-  shape?: "rounded" | "square";
+  /** Shape of the thumbnail. "panel" renders a 4:3 wide preview matching portfolio cards */
+  shape?: "rounded" | "square" | "panel";
   /** Additional class names */
   className?: string;
 }
@@ -98,7 +98,79 @@ export function ImageUploader({
     }
   }, [removeImage, removeArgs]);
 
+  const isPanel = shape === "panel";
   const rounding = shape === "rounded" ? "rounded-xl" : "rounded-lg";
+
+  if (isPanel) {
+    return (
+      <div className={`relative w-full ${className}`}>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleUpload(file);
+            e.target.value = "";
+          }}
+        />
+        {imageUrl ? (
+          <div className="group relative w-full overflow-hidden rounded-xl border" style={{ aspectRatio: "4/3" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imageUrl}
+              alt=""
+              className="h-full w-full object-cover object-center"
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+              <p className="text-xs text-white/70">Panel preview (4:3)</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => inputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-1 rounded-md bg-white/20 px-3 py-1.5 text-xs text-white hover:bg-white/30"
+                  title="Replace image"
+                >
+                  <ImagePlus className="h-3.5 w-3.5" /> Replace
+                </button>
+                <button
+                  onClick={handleRemove}
+                  disabled={removing}
+                  className="flex items-center gap-1 rounded-md bg-red-500/60 px-3 py-1.5 text-xs text-white hover:bg-red-500/80"
+                  title="Remove image"
+                >
+                  {removing ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <X className="h-3.5 w-3.5" />
+                  )}
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+            className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/30 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+            style={{ aspectRatio: "4/3" }}
+            title="Upload cover image"
+          >
+            {uploading ? (
+              <Loader2 className="h-6 w-6 animate-spin" />
+            ) : (
+              <>
+                <ImagePlus className="h-6 w-6" />
+                <span className="text-xs">Upload cover image</span>
+              </>
+            )}
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={`relative inline-block ${className}`}>

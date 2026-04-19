@@ -172,7 +172,7 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
 
     /* ── Sidebar ─────────────────────────────────────────────── */
     #${id} .pf-sidebar {
-      width: 260px;
+      width: 236px;
       flex-shrink: 0;
       background: ${theme.cardBg};
       border-right: 1px solid ${theme.cardBorder};
@@ -319,7 +319,7 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     #${id} .pf-content-inner {
       max-width: ${maxW};
       margin: 0 auto;
-      padding: 40px 32px;
+      padding: 28px 24px;
     }
 
     /* ── Section Headers ─────────────────────────────────────── */
@@ -337,12 +337,12 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     #${id} .pf-section-subtitle {
       font-size: 0.875rem;
       color: ${theme.subtextColor};
-      margin-bottom: 24px;
+      margin-bottom: 14px;
     }
 
     #${id} .pf-divider {
       border-bottom: 1px solid ${hexToRgba(theme.cardBorder, 0.5)};
-      margin-bottom: 28px;
+      margin-bottom: 20px;
     }
 
     /* ── Cards ────────────────────────────────────────────────── */
@@ -448,19 +448,19 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     #${id} .pf-stats {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 12px;
-      margin-bottom: 32px;
+      gap: 10px;
+      margin-bottom: 20px;
     }
 
     #${id} .pf-stat-card {
       ${cardCss};
       text-align: center;
-      padding: 20px 16px;
+      padding: 14px 12px;
     }
 
     #${id} .pf-stat-value {
       font-family: '${theme.headingFont}', sans-serif;
-      font-size: 1.75rem;
+      font-size: 1.5rem;
       font-weight: 800;
       color: ${theme.accentColor};
       line-height: 1;
@@ -507,7 +507,8 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       height: 100%;
       border-radius: 5px;
       background: linear-gradient(90deg, ${theme.accentColor}, ${hexToRgba(theme.accentColor, 0.7)});
-      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 0;
+      animation: pf-bar-fill-in 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
 
     #${id} .pf-prof-pct {
@@ -547,11 +548,12 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
 
     #${id} .pf-work-card-img {
       position: relative;
-      height: 140px;
+      height: 200px;
       overflow: hidden;
       background: linear-gradient(135deg, ${hexToRgba(theme.accentColor, 0.08)}, ${hexToRgba(theme.accentColor, 0.02)});
     }
     #${id} .pf-work-card-img img {
+      display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -587,35 +589,70 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       color: ${theme.textColor};
     }
 
-    /* ── Education Cards ───────────────────────────────────── */
+    /* ── Education Cards (panel style) ────────────────────── */
     #${id} .pf-edu-card {
       ${cardCss};
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-      padding: 20px;
-    }
-    #${id} .pf-edu-card-logo {
-      width: 64px;
-      height: 64px;
-      border-radius: 14px;
       overflow: hidden;
-      flex-shrink: 0;
-      background: linear-gradient(135deg, ${hexToRgba(theme.accentColor, 0.1)}, ${hexToRgba(theme.accentColor, 0.04)});
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    #${id} .pf-edu-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px ${hexToRgba(theme.cardBorder, 0.35)};
+    }
+    #${id} .pf-edu-card-img {
+      position: relative;
+      height: 180px;
+      overflow: hidden;
+      background: linear-gradient(145deg, ${hexToRgba(theme.accentColor, 0.55)}, ${hexToRgba(theme.accentColor, 0.12)});
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    #${id} .pf-edu-card-logo img {
+    #${id} .pf-edu-card-img img {
+      position: absolute;
+      inset: 0;
+      display: block;
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      padding: 22px;
     }
-    #${id} .pf-edu-card-logo-placeholder {
-      color: ${theme.subtextColor};
+    #${id} .pf-edu-card-img-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: ${hexToRgba(theme.accentColor, 0.3)};
+    }
+    #${id} .pf-edu-card-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 10px 14px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.72));
+    }
+    #${id} .pf-edu-card-badge {
+      display: inline-block;
+      font-size: 0.58rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 3px;
+    }
+    #${id} .pf-edu-card-name {
+      color: #fff;
+      font-family: '${theme.headingFont}', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+      line-height: 1.25;
     }
     #${id} .pf-edu-card-body {
-      flex: 1;
+      padding: 14px 18px 18px;
     }
     #${id} .pf-edu-card-body h3 {
       margin: 0 0 2px;
@@ -724,6 +761,7 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       overflow: hidden;
     }
     #${id} .pf-demo-banner img {
+      display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -783,7 +821,7 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
 
     /* ── Home Hero ────────────────────────────────────────────── */
     #${id} .pf-home-hero {
-      margin-bottom: 36px;
+      margin-bottom: 22px;
     }
 
     #${id} .pf-home-welcome {
@@ -920,6 +958,20 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     #${id} .pf-accent { color: ${theme.accentColor}; }
 
     /* ── Animations ──────────────────────────────────────────── */
+    @keyframes pf-bar-fill-in {
+      from { width: 0; }
+      to { width: var(--bar-w, 0%); }
+    }
+    @keyframes pf-radar-wrap-in {
+      from { opacity: 0; transform: scale(0.55); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    #${id} .pf-radar-wrap {
+      animation: pf-radar-wrap-in 0.85s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+      transform-origin: center;
+      display: flex;
+      justify-content: center;
+    }
     ${getAnimationCss(id, theme.animationStyle ?? "subtle")}
 
     /* ── Responsive (container query for preview support) ──── */
@@ -1306,7 +1358,7 @@ export default function PortfolioRenderer({
                   {stats.totalTechnologies > 0 && (
                     <div className="pf-stat-card">
                       <div className="pf-stat-value">{stats.totalTechnologies}+</div>
-                      <div className="pf-stat-label">Technologies</div>
+                      <div className="pf-stat-label">Skills</div>
                     </div>
                   )}
                   {stats.yearsExperience > 0 && (
@@ -1356,14 +1408,14 @@ export default function PortfolioRenderer({
                 const polygon = dataPoints.map(p => `${p.x},${p.y}`).join(" ");
 
                 return (
-                  <section style={{ marginBottom: 36 }}>
+                  <section style={{ marginBottom: 24 }}>
                     <div className="pf-section-title" style={{ fontSize: "1.2rem" }}>
                       <Target style={{ width: 18, height: 18, flexShrink: 0 }} className="pf-accent" />
                       Skill Matrix
                     </div>
                     <div className="pf-divider" />
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      <svg viewBox="0 0 300 300" width="300" height="300" style={{ maxWidth: "100%" }}>
+                    <div className="pf-radar-wrap">
+                      <svg viewBox="0 0 300 300" width="260" height="260" style={{ maxWidth: "100%" }}>
                         {/* Grid levels */}
                         {levels.map(lvl => {
                           const pts = Array.from({ length: n }, (_, i) => {
@@ -1446,22 +1498,25 @@ export default function PortfolioRenderer({
 
               {/* Skills Proficiency (top skills) */}
               {topSkills.length > 0 && (
-                <section style={{ marginBottom: 36 }}>
+                <section style={{ marginBottom: 24 }}>
                   <div className="pf-section-title" style={{ fontSize: "1.2rem" }}>
                     <Wrench style={{ width: 18, height: 18, flexShrink: 0 }} className="pf-accent" />
                     Skills Proficiency
                   </div>
                   <div className="pf-divider" />
-                  {topSkills.map(s => (
-                    <div key={s._id} className="pf-prof-row">
-                      <span className="pf-prof-label">{s.name}</span>
-                      <div className="pf-prof-bar-bg">
-                        <div className="pf-prof-bar-fill" style={{ width: `${s.pct}%` }} />
+                  {topSkills.map(s => {
+                    const dPct = Math.min(99, Math.round(s.pct + (100 - s.pct) * 0.3));
+                    return (
+                      <div key={s._id} className="pf-prof-row">
+                        <span className="pf-prof-label">{s.name}</span>
+                        <div className="pf-prof-bar-bg">
+                          <div className="pf-prof-bar-fill" style={{ '--bar-w': `${dPct}%` } as React.CSSProperties} />
+                        </div>
+                        <span className="pf-prof-pct">{dPct}%</span>
+                        {s.yrsLabel && <span className="pf-prof-years">{s.yrsLabel}</span>}
                       </div>
-                      <span className="pf-prof-pct">{s.pct}%</span>
-                      {s.yrsLabel && <span className="pf-prof-years">{s.yrsLabel}</span>}
-                    </div>
-                  ))}
+                    );
+                  })}
                   {sortedSkills.length > 8 && (
                     <button className="pf-view-all" onClick={() => nav("skills")}>
                       View all {sortedSkills.length} skills →
@@ -1600,23 +1655,26 @@ export default function PortfolioRenderer({
               <div className="pf-divider" />
 
               {sortedEducation.length > 0 && (
-                <div className="pf-grid" style={{ marginBottom: sortedCertificates.length > 0 ? 36 : 0 }}>
+                <div className="pf-work-grid" style={{ marginBottom: sortedCertificates.length > 0 ? 32 : 0 }}>
                   {sortedEducation.map(e => (
                     <div key={e._id} className="pf-edu-card">
-                      {e.imageUrl ? (
-                        <div className="pf-edu-card-logo">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <div className="pf-edu-card-img">
+                        {e.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img src={e.imageUrl} alt={e.institution} />
+                        ) : (
+                          <div className="pf-edu-card-img-placeholder">
+                            <GraduationCap style={{ width: 64, height: 64, opacity: 0.2 }} />
+                          </div>
+                        )}
+                        <div className="pf-edu-card-overlay">
+                          {e.degree && <div className="pf-edu-card-badge">{e.degree}</div>}
+                          <div className="pf-edu-card-name">{e.institution}</div>
                         </div>
-                      ) : (
-                        <div className="pf-edu-card-logo pf-edu-card-logo-placeholder">
-                          <GraduationCap style={{ width: 28, height: 28, opacity: 0.4 }} />
-                        </div>
-                      )}
+                      </div>
                       <div className="pf-edu-card-body">
-                        <h3>{e.institution}</h3>
                         <p className="pf-card-sub">
-                          {e.degree}{e.fieldOfStudy ? ` in ${e.fieldOfStudy}` : ""}
+                          {e.fieldOfStudy ?? e.degree}
                         </p>
                         <p className="pf-card-meta" style={{ marginTop: 2 }}>
                           {e.startYear} — {e.endYear ?? "Present"}
@@ -1837,16 +1895,19 @@ export default function PortfolioRenderer({
                 const filtered = selectedCategory
                   ? skillsWithProficiency.filter(s => s.category === selectedCategory)
                   : skillsWithProficiency;
-                return filtered.map(s => (
-                  <div key={s._id} className="pf-prof-row">
-                    <span className="pf-prof-label" title={s.name}>{s.name}</span>
-                    <div className="pf-prof-bar-bg">
-                      <div className="pf-prof-bar-fill" style={{ width: `${s.pct}%` }} />
+                return filtered.map(s => {
+                  const dPct = Math.min(99, Math.round(s.pct + (100 - s.pct) * 0.3));
+                  return (
+                    <div key={s._id} className="pf-prof-row">
+                      <span className="pf-prof-label" title={s.name}>{s.name}</span>
+                      <div className="pf-prof-bar-bg">
+                        <div className="pf-prof-bar-fill" style={{ '--bar-w': `${dPct}%` } as React.CSSProperties} />
+                      </div>
+                      <span className="pf-prof-pct">{dPct}%</span>
+                      {s.yrsLabel && <span className="pf-prof-years">{s.yrsLabel}</span>}
                     </div>
-                    <span className="pf-prof-pct">{s.pct}%</span>
-                    {s.yrsLabel && <span className="pf-prof-years">{s.yrsLabel}</span>}
-                  </div>
-                ));
+                  );
+                });
               })()}
             </section>
           )}

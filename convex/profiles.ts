@@ -125,10 +125,16 @@ export const getSelf = query({
       .unique();
     if (!user) return null;
 
-    return await ctx.db
+    const profile = await ctx.db
       .query("profiles")
       .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .unique();
+    if (!profile) return null;
+
+    return {
+      ...profile,
+      avatarUrl: profile.avatarUrl ?? user.imageUrl,
+    };
   },
 });
 
@@ -279,16 +285,22 @@ export const listPublicGallery = query({
   args: {},
   handler: async (ctx) => {
     const profiles = await ctx.db.query("profiles").take(500);
-    return profiles
-      .filter((p) => p.isPublic && p.headline)
-      .map((p) => ({
-        slug: p.slug,
-        headline: p.headline,
-        bio: p.bio?.slice(0, 120),
-        location: p.location,
-        avatarUrl: p.avatarUrl,
-        viewCount: p.viewCount ?? 0,
-      }))
+    const results = await Promise.all(
+      profiles
+        .filter((p) => p.isPublic && p.headline)
+        .map(async (p) => {
+          const user = await ctx.db.get(p.userId);
+          return {
+            slug: p.slug,
+            headline: p.headline,
+            bio: p.bio?.slice(0, 120),
+            location: p.location,
+            avatarUrl: p.avatarUrl ?? user?.imageUrl,
+            viewCount: p.viewCount ?? 0,
+          };
+        })
+    );
+    return results
       .sort((a, b) => b.viewCount - a.viewCount)
       .slice(0, 50);
   },

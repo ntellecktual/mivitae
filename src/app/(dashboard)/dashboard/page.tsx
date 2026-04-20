@@ -184,44 +184,6 @@ function ShareCard({ slug }: { slug: string }) {
   );
 }
 
-// ── Live Preview Card ─────────────────────────────────────────────────────────
-
-function LivePreviewCard({ slug }: { slug: string }) {
-  return (
-    <Link href="/dashboard/theme">
-      <Card className="group card-hover overflow-hidden border-primary/10">
-        <CardContent className="p-0">
-          <div className="relative aspect-[16/9] w-full overflow-hidden bg-gradient-to-br from-primary/5 via-background to-violet-500/5">
-            <iframe
-              src={`/u/${slug}`}
-              className="pointer-events-none h-[300%] w-[300%] origin-top-left scale-[0.3333] border-0"
-              tabIndex={-1}
-              aria-hidden
-              loading="lazy"
-              title="Portfolio preview"
-            />
-            {/* Hover overlay */}
-            <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/40">
-              <div className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:scale-100 scale-90">
-                <Palette className="h-4 w-4" /> Open Theme Studio
-              </div>
-            </div>
-          </div>
-          <div className="border-t px-4 py-3">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium">Live Preview</p>
-              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                Live
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
-  );
-}
-
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -350,203 +312,252 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Top stats row */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Profile views */}
-        <Link href="/dashboard/analytics">
-          <Card className="card-hover overflow-hidden">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <Eye className="h-4 w-4 text-primary" />
-                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Views</span>
-              </div>
-              <p className="text-3xl font-bold tracking-tight tabular-nums">{viewCount ?? "—"}</p>
-              <div className="mt-2 flex items-end gap-px h-6">
-                {[30, 55, 40, 70, 50, 80, 65, 90, 75, 95].map((h, i) => (
+      {/* Hero row: Live preview (dominant) + sidebar cards */}
+      <div className="grid gap-4 lg:grid-cols-5">
+        {/* Left column: condensed cards */}
+        <div className="flex flex-col gap-4 lg:col-span-2 order-2 lg:order-1">
+          {/* Completion checklist */}
+          {score < 100 && incomplete.length > 0 ? (
+            <Card>
+              <CardContent className="p-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-sm font-semibold">Complete your profile</h2>
+                  <span className="text-xs text-muted-foreground">{score}%</span>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-muted mb-4">
                   <div
-                    key={i}
-                    className="flex-1 rounded-sm"
-                    style={{
-                      height: `${h}%`,
-                      background: `color-mix(in srgb, var(--primary) ${30 + i * 7}%, transparent)`,
-                    }}
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${score}%` }}
                   />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        {/* Profile strength */}
-        <Link href="/dashboard/profile">
-          <Card className="card-hover">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <TrendingUp className="h-4 w-4 text-primary" />
-                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Strength</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="relative flex h-11 w-11 shrink-0 items-center justify-center">
-                  <svg className="h-11 w-11 -rotate-90" viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeOpacity={0.08} strokeWidth="3" />
-                    <circle
-                      cx="18" cy="18" r="15"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeOpacity={1}
-                      strokeWidth="3"
-                      strokeDasharray={`${(score / 100) * 94.25} 94.25`}
-                      strokeLinecap="round"
-                      className="text-primary transition-all duration-700"
-                    />
-                  </svg>
-                  <span className="absolute text-xs font-bold">{score}</span>
                 </div>
-                <div>
-                  <p className="text-xl font-bold">{score}%</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    {score === 100 ? "Fully optimized" : `${incomplete.length} to go`}
+                <div className="space-y-1">
+                  {completionItems.map(({ label, done, href }) => (
+                    <Link
+                      key={label}
+                      href={done ? "#" : href}
+                      className={cn(
+                        "flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-sm transition-colors",
+                        done ? "pointer-events-none opacity-40" : "hover:bg-muted"
+                      )}
+                    >
+                      <CheckCircle
+                        className={cn(
+                          "h-3.5 w-3.5 shrink-0",
+                          done ? "text-green-500" : "text-muted-foreground/30"
+                        )}
+                      />
+                      <span className={cn("text-xs", done && "line-through")}>{label}</span>
+                      {!done && <ArrowRight className="ml-auto h-3 w-3 text-muted-foreground" />}
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : score === 100 ? (
+            <Card className="border-green-500/20 bg-green-500/5">
+              <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10 text-green-500 mb-3">
+                  <CheckCircle className="h-6 w-6" />
+                </div>
+                <p className="font-semibold text-green-700 dark:text-green-400">Profile is fully optimized</p>
+                <p className="mt-1 text-xs text-muted-foreground">All items complete — you&apos;re making a great impression.</p>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {/* Resume card */}
+          {latestResume ? (
+            <Link href="/dashboard/upload">
+              <Card className="card-hover h-full">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <StatusBadge status={latestResume.parseStatus} />
+                  </div>
+                  <p className="truncate font-semibold text-sm">{latestResume.fileName}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Uploaded {new Date(latestResume.uploadedAt).toLocaleDateString()}
                   </p>
+                  <p className="mt-3 text-xs text-primary font-medium">Upload a new version →</p>
+                </CardContent>
+              </Card>
+            </Link>
+          ) : (
+            <Link href="/dashboard/upload">
+              <Card className="card-hover border-dashed h-full">
+                <CardContent className="flex flex-col items-center justify-center p-6 text-center h-full">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-3">
+                    <Upload className="h-5 w-5" />
+                  </div>
+                  <p className="font-semibold text-sm">Upload resume</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">AI parses your career in ~30s</p>
+                </CardContent>
+              </Card>
+            </Link>
+          )}
+
+          {/* Compact stats: Views + Strength */}
+          <div className="grid gap-3 grid-cols-2">
+            <Link href="/dashboard/analytics">
+              <Card className="card-hover overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <Eye className="h-4 w-4 text-primary" />
+                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Views</span>
+                  </div>
+                  <p className="text-2xl font-bold tracking-tight tabular-nums">{viewCount ?? "—"}</p>
+                  <div className="mt-2 flex items-end gap-px h-5">
+                    {[30, 55, 40, 70, 50, 80, 65, 90, 75, 95].map((h, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 rounded-sm"
+                        style={{
+                          height: `${h}%`,
+                          background: `color-mix(in srgb, var(--primary) ${30 + i * 7}%, transparent)`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/dashboard/profile">
+              <Card className="card-hover">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Strength</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex h-9 w-9 shrink-0 items-center justify-center">
+                      <svg className="h-9 w-9 -rotate-90" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeOpacity={0.08} strokeWidth="3" />
+                        <circle
+                          cx="18" cy="18" r="15"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeOpacity={1}
+                          strokeWidth="3"
+                          strokeDasharray={`${(score / 100) * 94.25} 94.25`}
+                          strokeLinecap="round"
+                          className="text-primary transition-all duration-700"
+                        />
+                      </svg>
+                      <span className="absolute text-[10px] font-bold">{score}</span>
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold">{score}%</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {score === 100 ? "Optimized" : `${incomplete.length} to go`}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+
+          {/* Compact stats: Plan + Referrals */}
+          <div className="grid gap-3 grid-cols-2">
+            <Link href="/dashboard/settings">
+              <Card className={cn("card-hover", isPaid && "border-primary/20")}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    {isPaid ? <Crown className="h-4 w-4 text-primary" /> : <CreditCard className="h-4 w-4 text-muted-foreground" />}
+                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Plan</span>
+                  </div>
+                  <p className="text-lg font-bold">{planLabel}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {isCreator ? "Owner — unlimited" :
+                     isFounder ? "Founding member" :
+                     subscription?.status === "trialing" ? `Trial · ${Math.max(0, Math.ceil((subscription.currentPeriodEnd * 1000 - Date.now()) / 86400000))}d left` :
+                     subscription?.status === "active" ? `Renews ${new Date(subscription.currentPeriodEnd * 1000).toLocaleDateString(undefined, { month: "short", day: "numeric" })}` :
+                     "Upgrade for full access"}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/dashboard/referrals">
+              <Card className="card-hover">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <Gift className="h-4 w-4 text-primary" />
+                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Referrals</span>
+                  </div>
+                  <p className="text-lg font-bold">{referralStats?.total ?? 0}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {referralStats?.credits
+                      ? `${referralStats.credits} credit${referralStats.credits !== 1 ? "s" : ""} earned`
+                      : "Invite friends to earn"}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+
+        {/* Right column: Live Preview (dominant) */}
+        <div className="lg:col-span-3 order-1 lg:order-2">
+          {profile?.isPublic && profile.slug ? (
+            <Link href="/dashboard/theme" className="block h-full">
+              <Card className="group card-hover overflow-hidden border-primary/10 h-full">
+                <CardContent className="p-0 h-full flex flex-col">
+                  <div className="relative flex-1 min-h-[400px] overflow-hidden bg-gradient-to-br from-primary/5 via-background to-violet-500/5">
+                    <iframe
+                      src={`/u/${profile.slug}`}
+                      className="pointer-events-none h-[300%] w-[300%] origin-top-left scale-[0.3333] border-0"
+                      tabIndex={-1}
+                      aria-hidden
+                      loading="lazy"
+                      title="Portfolio preview"
+                    />
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/40">
+                      <div className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:scale-100 scale-90">
+                        <Palette className="h-4 w-4" /> Open Theme Studio
+                      </div>
+                    </div>
+                  </div>
+                  <div className="border-t px-4 py-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium">Live Preview</p>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                        Live
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ) : (
+            <Card className="border-dashed h-full">
+              <CardContent className="flex flex-col items-center justify-center p-8 text-center h-full min-h-[400px]">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
+                  <Eye className="h-7 w-7" />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        {/* Plan badge */}
-        <Link href="/dashboard/settings">
-          <Card className={cn(
-            "card-hover",
-            isPaid && "border-primary/20"
-          )}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                {isPaid ? <Crown className="h-4 w-4 text-primary" /> : <CreditCard className="h-4 w-4 text-muted-foreground" />}
-                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Plan</span>
-              </div>
-              <p className="text-xl font-bold">{planLabel}</p>
-              <p className="text-[11px] text-muted-foreground">
-                {isCreator ? "Owner — unlimited access" :
-                 isFounder ? "Founding member — all features" :
-                 subscription?.status === "trialing" ? `Trial · ${Math.max(0, Math.ceil((subscription.currentPeriodEnd * 1000 - Date.now()) / 86400000))}d left` :
-                 subscription?.status === "active" ? `Renews ${new Date(subscription.currentPeriodEnd * 1000).toLocaleDateString(undefined, { month: "short", day: "numeric" })}` :
-                 "Upgrade for full access"}
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        {/* Referrals */}
-        <Link href="/dashboard/referrals">
-          <Card className="card-hover">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <Gift className="h-4 w-4 text-primary" />
-                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Referrals</span>
-              </div>
-              <p className="text-xl font-bold">{referralStats?.total ?? 0}</p>
-              <p className="text-[11px] text-muted-foreground">
-                {referralStats?.credits
-                  ? `${referralStats.credits} credit${referralStats.credits !== 1 ? "s" : ""} earned`
-                  : "Invite friends to earn"}
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
+                <p className="font-semibold">Your Live Preview</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Complete your profile and make it public to see a live preview of your portfolio here.
+                </p>
+                <Link
+                  href="/dashboard/profile"
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                  Set up profile <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
 
       {/* Share card — shown when profile is public */}
       {profile?.isPublic && profile.slug && (
         <ShareCard slug={profile.slug} />
       )}
-
-      {/* Middle row: Live preview + Completion + Resume */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        {/* Live Preview */}
-        {profile?.isPublic && profile.slug && (
-          <LivePreviewCard slug={profile.slug} />
-        )}
-
-        {/* Completion checklist */}
-        {score < 100 && incomplete.length > 0 ? (
-          <Card className={cn(profile?.isPublic && profile.slug ? "lg:col-span-1" : "lg:col-span-2")}>
-            <CardContent className="p-5">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-sm font-semibold">Complete your profile</h2>
-                <span className="text-xs text-muted-foreground">{score}%</span>
-              </div>
-              <div className="h-1.5 w-full rounded-full bg-muted mb-4">
-                <div
-                  className="h-full rounded-full bg-primary transition-all"
-                  style={{ width: `${score}%` }}
-                />
-              </div>
-              <div className="space-y-1">
-                {completionItems.map(({ label, done, href }) => (
-                  <Link
-                    key={label}
-                    href={done ? "#" : href}
-                    className={cn(
-                      "flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-sm transition-colors",
-                      done ? "pointer-events-none opacity-40" : "hover:bg-muted"
-                    )}
-                  >
-                    <CheckCircle
-                      className={cn(
-                        "h-3.5 w-3.5 shrink-0",
-                        done ? "text-green-500" : "text-muted-foreground/30"
-                      )}
-                    />
-                    <span className={cn("text-xs", done && "line-through")}>{label}</span>
-                    {!done && <ArrowRight className="ml-auto h-3 w-3 text-muted-foreground" />}
-                  </Link>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ) : score === 100 ? (
-          <Card className={cn("border-green-500/20 bg-green-500/5", profile?.isPublic && profile.slug ? "lg:col-span-1" : "lg:col-span-2")}>
-            <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10 text-green-500 mb-3">
-                <CheckCircle className="h-6 w-6" />
-              </div>
-              <p className="font-semibold text-green-700 dark:text-green-400">Profile is fully optimized</p>
-              <p className="mt-1 text-xs text-muted-foreground">All items complete — you&apos;re making a great impression.</p>
-            </CardContent>
-          </Card>
-        ) : null}
-
-        {/* Resume card */}
-        {latestResume ? (
-          <Link href="/dashboard/upload">
-            <Card className="card-hover h-full">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <StatusBadge status={latestResume.parseStatus} />
-                </div>
-                <p className="truncate font-semibold text-sm">{latestResume.fileName}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Uploaded {new Date(latestResume.uploadedAt).toLocaleDateString()}
-                </p>
-                <p className="mt-3 text-xs text-primary font-medium">Upload a new version →</p>
-              </CardContent>
-            </Card>
-          </Link>
-        ) : (
-          <Link href="/dashboard/upload">
-            <Card className="card-hover border-dashed h-full">
-              <CardContent className="flex flex-col items-center justify-center p-6 text-center h-full">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-3">
-                  <Upload className="h-5 w-5" />
-                </div>
-                <p className="font-semibold text-sm">Upload resume</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">AI parses your career in ~30s</p>
-              </CardContent>
-            </Card>
-          </Link>
-        )}
-      </div>
 
       {/* Command palette — all nav items with keyboard hints */}
       <div>

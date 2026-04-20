@@ -46,6 +46,7 @@ const PLANS = [
       "1 portfolio",
       "3 demo cards",
       "Public profile page",
+      "Theme Studio presets",
       "Resume parsing",
     ],
   },
@@ -59,6 +60,7 @@ const PLANS = [
     features: [
       "Unlimited portfolios",
       "Unlimited demo cards",
+      "Full Theme Studio",
       "Custom slug",
       "Profile analytics",
       "Priority support",
@@ -73,6 +75,7 @@ const PLANS = [
     features: [
       "Everything in Pro",
       "5 team seats",
+      "Team Theme Studio",
       "Shared demo library",
       "White-label subdomain",
       "Admin dashboard",

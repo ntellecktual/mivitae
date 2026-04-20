@@ -1067,62 +1067,106 @@ export default function ThemePage() {
 
   const previewWidth = viewportWidth ?? "100%";
 
-  const TOOLS: { id: ToolbarPanel; icon: React.ElementType; label: string }[] = [
+  // Free tools available to all users; pro tools require upgrade
+  const FREE_PANELS: Set<ToolbarPanel> = new Set(["presets"]);
+
+  const TOOLS: { id: ToolbarPanel; icon: React.ElementType; label: string; pro?: boolean }[] = [
     { id: "presets", icon: Sparkles, label: "Presets" },
-    { id: "colors", icon: Palette, label: "Colors" },
-    { id: "fonts", icon: Type, label: "Fonts" },
-    { id: "layout", icon: LayoutGrid, label: "Layout" },
-    { id: "sections", icon: Layers, label: "Sections" },
-    { id: "advanced", icon: Code2, label: "CSS" },
+    { id: "colors", icon: Palette, label: "Colors", pro: true },
+    { id: "fonts", icon: Type, label: "Fonts", pro: true },
+    { id: "layout", icon: LayoutGrid, label: "Layout", pro: true },
+    { id: "sections", icon: Layers, label: "Sections", pro: true },
+    { id: "advanced", icon: Code2, label: "CSS", pro: true },
   ];
+
+  const isToolLocked = (toolId: ToolbarPanel) => !isPro && !FREE_PANELS.has(toolId);
 
   /* ── Sidebar inner (shared between desktop and mobile overlay) ─── */
   const sidebarContent = (
     <>
       {/* Tool tabs — horizontal row */}
       <div className="flex border-b border-white/10 px-2 py-2 gap-0.5 shrink-0">
-        {TOOLS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setActivePanel((prev) => (prev === t.id ? null : t.id))}
-            className={cn(
-              "flex flex-1 flex-col items-center gap-0.5 rounded-lg py-2 transition-all",
-              activePanel === t.id
-                ? "bg-white/15 text-white"
-                : "text-white/50 hover:text-white hover:bg-white/10"
-            )}
-          >
-            <t.icon className="h-4 w-4" />
-            <span className="text-[9px] font-medium leading-none">{t.label}</span>
-          </button>
-        ))}
+        {TOOLS.map((t) => {
+          const locked = isToolLocked(t.id);
+          return (
+            <button
+              key={t.id}
+              onClick={() => setActivePanel((prev) => (prev === t.id ? null : t.id))}
+              className={cn(
+                "relative flex flex-1 flex-col items-center gap-0.5 rounded-lg py-2 transition-all",
+                activePanel === t.id
+                  ? locked
+                    ? "bg-amber-500/15 text-amber-400"
+                    : "bg-white/15 text-white"
+                  : locked
+                    ? "text-white/30 hover:text-white/50 hover:bg-white/5"
+                    : "text-white/50 hover:text-white hover:bg-white/10"
+              )}
+            >
+              <t.icon className="h-4 w-4" />
+              <span className="text-[9px] font-medium leading-none">{t.label}</span>
+              {locked && (
+                <Crown className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 text-amber-400" />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Panel content — scrollable middle area */}
-      <div className="flex-1 overflow-y-auto p-3 scrollbar-none">
-        {activePanel === "presets" && (
-          <PresetsPanel theme={resolvedTheme} onSelect={(config) => { pushTheme(config); setSavedAt(null); }} />
-        )}
-        {activePanel === "colors" && (
-          <ColorsPanel theme={resolvedTheme} update={update} />
-        )}
-        {activePanel === "fonts" && (
-          <FontsPanel theme={resolvedTheme} update={update} />
-        )}
-        {activePanel === "layout" && (
-          <LayoutPanel theme={resolvedTheme} update={update} />
-        )}
-        {activePanel === "sections" && (
-          <SectionsPanel theme={resolvedTheme} update={update} />
-        )}
-        {activePanel === "advanced" && (
-          <AdvancedPanel theme={resolvedTheme} update={update} isPro={isPro} />
-        )}
-        {!activePanel && (
-          <div className="flex flex-col items-center justify-center h-48 text-center">
-            <Palette className="h-8 w-8 text-white/20 mb-3" />
-            <p className="text-sm text-white/40">Select a tool above to start editing</p>
+      <div className="flex-1 overflow-y-auto p-4 scrollbar-none">
+        {activePanel && isToolLocked(activePanel) ? (
+          /* Pro upgrade prompt */
+          <div className="flex flex-col items-center justify-center text-center py-12 px-4">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30">
+              <Crown className="h-8 w-8 text-amber-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">
+              Unlock {activePanel === "advanced" ? "Custom CSS" : activePanel.charAt(0).toUpperCase() + activePanel.slice(1)}
+            </h3>
+            <p className="text-sm text-white/50 mb-6 max-w-[240px]">
+              {activePanel === "colors" && "Custom color palettes, AI-powered palette generation, and granular control over every color in your portfolio."}
+              {activePanel === "fonts" && "Premium font pairings, advanced typography controls, and access to the full Google Fonts library."}
+              {activePanel === "layout" && "Hero layouts, card styles, container width controls, and animation presets."}
+              {activePanel === "sections" && "Toggle visibility of individual portfolio sections for a curated presentation."}
+              {activePanel === "advanced" && "Inject custom CSS to fine-tune every pixel of your portfolio design."}
+            </p>
+            <Link
+              href="/dashboard/settings"
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-amber-500/25 hover:scale-105"
+            >
+              <Crown className="h-4 w-4" />
+              Upgrade to Pro
+            </Link>
+            <p className="mt-3 text-[11px] text-white/30">Starting at $12/month</p>
           </div>
+        ) : (
+          <>
+            {activePanel === "presets" && (
+              <PresetsPanel theme={resolvedTheme} onSelect={(config) => { pushTheme(config); setSavedAt(null); }} />
+            )}
+            {activePanel === "colors" && (
+              <ColorsPanel theme={resolvedTheme} update={update} />
+            )}
+            {activePanel === "fonts" && (
+              <FontsPanel theme={resolvedTheme} update={update} />
+            )}
+            {activePanel === "layout" && (
+              <LayoutPanel theme={resolvedTheme} update={update} />
+            )}
+            {activePanel === "sections" && (
+              <SectionsPanel theme={resolvedTheme} update={update} />
+            )}
+            {activePanel === "advanced" && (
+              <AdvancedPanel theme={resolvedTheme} update={update} isPro={isPro} />
+            )}
+            {!activePanel && (
+              <div className="flex flex-col items-center justify-center h-48 text-center">
+                <Palette className="h-8 w-8 text-white/20 mb-3" />
+                <p className="text-sm text-white/40">Select a tool above to start editing</p>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -1284,7 +1328,7 @@ export default function ThemePage() {
       {/* ── Sidebar (desktop: static, mobile: slide-in overlay) ─ */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-80 flex flex-col border-r border-white/10 bg-neutral-900/95 backdrop-blur-xl transition-transform duration-300 ease-out lg:relative lg:translate-x-0 lg:z-auto",
+          "fixed inset-y-0 left-0 z-50 w-80 lg:w-[360px] flex flex-col border-r border-white/10 bg-neutral-900/95 backdrop-blur-xl transition-transform duration-300 ease-out lg:relative lg:translate-x-0 lg:z-auto",
           mobileToolsOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >

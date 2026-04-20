@@ -25,6 +25,8 @@ export const PLAN_LIMITS = {
     maxResumeParsesPerDay: 2,
     analyticsAccess: false,
     customTheme: false,
+    themePresets: true,        // free users can apply preset themes
+    fullThemeStudio: false,    // colors, fonts, layout, sections, CSS
   },
   pro: {
     maxPortfolioSections: 50,
@@ -33,6 +35,8 @@ export const PLAN_LIMITS = {
     maxResumeParsesPerDay: 10,
     analyticsAccess: true,
     customTheme: true,
+    themePresets: true,
+    fullThemeStudio: true,
   },
   team: {
     maxPortfolioSections: 50,
@@ -41,6 +45,8 @@ export const PLAN_LIMITS = {
     maxResumeParsesPerDay: 20,
     analyticsAccess: true,
     customTheme: true,
+    themePresets: true,
+    fullThemeStudio: true,
   },
 } as const;
 

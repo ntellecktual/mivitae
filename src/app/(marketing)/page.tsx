@@ -508,6 +508,7 @@ export default function HomePage() {
                   `AI r\u00e9sum\u00e9 parsing (2 parses/day)`,
                   "AI demo generation",
                   "Public profile link",
+                  "Theme Studio with preset themes",
                   "5 work history sections",
                   "3 education entries",
                 ]}
@@ -525,7 +526,8 @@ export default function HomePage() {
                   "Unlimited demo cards",
                   "Unlimited portfolios",
                   "Analytics dashboard & referrer tracking",
-                  "Theme Studio with 12 presets + custom CSS",
+                  "Full Theme Studio: colors, fonts, layouts, sections & custom CSS",
+                  "AI-powered color palettes",
                   "50 work history sections",
                   "20 education entries",
                   `AI r\u00e9sum\u00e9 parsing (10 parses/day)`,
@@ -547,7 +549,7 @@ export default function HomePage() {
                 features={[
                   "5 team member seats",
                   "Branded org page (mivitae.org/org/name)",
-                  "Team Theme Studio",
+                  "Team Theme Studio with shared branding",
                   "Shared demo library",
                   "Team analytics dashboard",
                   "Individual Pro portfolios for all members",
@@ -613,7 +615,7 @@ export default function HomePage() {
             />
             <FaqItem
               question="What happens to my portfolio if I cancel?"
-              answer="Your public portfolio at mivitae.org/u/yourname stays live on the free plan forever. You keep your profile, work history, and education. Pro features like unlimited demos, analytics, and Theme Studio are paused until you re-subscribe."
+              answer="Your public portfolio at mivitae.org/u/yourname stays live on the free plan forever. You keep your profile, work history, and education. Pro features like unlimited demos, analytics, and full Theme Studio customization (colors, fonts, layouts, custom CSS) are paused until you re-subscribe."
             />
             <FaqItem
               question={`How does the AI r\u00e9sum\u00e9 parsing work?`}

@@ -1723,20 +1723,24 @@ export default function PortfolioRenderer({
         <style dangerouslySetInnerHTML={{ __html: sanitizeCss(theme.customCss) }} />
       )}
 
-      {/* Mobile hamburger */}
-      <button
-        className="pf-hamburger"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        aria-label="Toggle navigation"
-      >
-        {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
-      </button>
+      {/* Mobile hamburger — hidden in preview (theme studio) */}
+      {!preview && (
+        <button
+          className="pf-hamburger"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label="Toggle navigation"
+        >
+          {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
+        </button>
+      )}
 
       {/* Mobile overlay */}
-      <div
-        className={`pf-sidebar-overlay ${sidebarOpen ? "open" : ""}`}
-        onClick={() => setSidebarOpen(false)}
-      />
+      {!preview && (
+        <div
+          className={`pf-sidebar-overlay ${sidebarOpen ? "open" : ""}`}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* ── Sidebar ──────────────────────────────────────────── */}
       <aside className={`pf-sidebar ${sidebarOpen ? "open" : ""}`}>

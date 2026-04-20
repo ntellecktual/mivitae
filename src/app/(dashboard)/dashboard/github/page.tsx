@@ -156,7 +156,7 @@ export default function GitHubImportPage() {
       </div>
 
       {/* Source selection */}
-      <Card>
+      <Card data-tour="github-connect">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <GitBranch className="h-5 w-5" />

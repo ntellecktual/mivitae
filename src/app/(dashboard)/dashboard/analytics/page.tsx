@@ -345,7 +345,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div data-tour="analytics-stats" className="grid gap-4 sm:grid-cols-3">
         <StatCard
           label="Views (30 days)"
           value={loading ? "—" : totalThirty}

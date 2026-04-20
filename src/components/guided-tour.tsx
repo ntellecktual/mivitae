@@ -183,12 +183,40 @@ const ALL_TOUR_STEPS: TourStep[] = [
 
   // ── GitHub Import ──
   {
-    section: "demos",
+    section: "github",
     phase: "nav",
     target: '[href="/dashboard/github"]',
     title: "Import from GitHub",
     content: "Connect GitHub and import repos directly as portfolio demos. Each one gets a live preview card.",
     placement: "right",
+  },
+  {
+    section: "github",
+    phase: "page",
+    href: "/dashboard/github",
+    target: '[data-tour="github-connect"]',
+    title: "Connect Your GitHub",
+    content: "Enter your GitHub username or connect your account. We'll fetch your repositories so you can import them as portfolio demos.",
+    placement: "bottom",
+  },
+
+  // ── Volunteering ──
+  {
+    section: "volunteering",
+    phase: "nav",
+    target: '[href="/dashboard/volunteering"]',
+    title: "Volunteering",
+    content: "Showcase community involvement, leadership, and causes you care about.",
+    placement: "right",
+  },
+  {
+    section: "volunteering",
+    phase: "page",
+    href: "/dashboard/volunteering",
+    target: '[data-tour="volunteering-add"]',
+    title: "Add Volunteering",
+    content: "Add volunteer roles with the organization, your position, cause area, dates, and a description of your impact.",
+    placement: "bottom",
   },
 
   // ── Theme Studio ──
@@ -197,16 +225,70 @@ const ALL_TOUR_STEPS: TourStep[] = [
     phase: "nav",
     target: '[href="/dashboard/theme"]',
     title: "Theme Studio",
-    content: "Make your portfolio look like you — not a template. Let's customize.",
+    content: "Make your portfolio look like you — not a template. Let's walk through the tools.",
     placement: "right",
   },
   {
     section: "theme",
     phase: "page",
     href: "/dashboard/theme",
-    target: '[data-tour="theme-presets"]',
-    title: "Theme Presets",
-    content: "Pick from 18+ presets as a starting point. Then fine-tune colors, fonts, spacing, and layout to make it truly yours.",
+    target: '[data-tour="theme-tab-presets"]',
+    title: "Presets",
+    content: "Start here — pick from 18+ curated presets as your base. Each one sets colors, fonts, and layout in one click.",
+    placement: "bottom",
+  },
+  {
+    section: "theme",
+    phase: "page",
+    href: "/dashboard/theme",
+    target: '[data-tour="theme-tab-colors"]',
+    title: "Colors",
+    content: "Fine-tune your palette — accent, background, text, and card colors. Choose from swatches or use AI-generated palettes.",
+    placement: "bottom",
+  },
+  {
+    section: "theme",
+    phase: "page",
+    href: "/dashboard/theme",
+    target: '[data-tour="theme-tab-fonts"]',
+    title: "Fonts",
+    content: "Choose a heading + body font pairing, or pick individual fonts. Adjust the font scale for readability.",
+    placement: "bottom",
+  },
+  {
+    section: "theme",
+    phase: "page",
+    href: "/dashboard/theme",
+    target: '[data-tour="theme-tab-layout"]',
+    title: "Layout",
+    content: "Select your hero layout, card template, content width, and section spacing. See changes instantly in the live preview.",
+    placement: "bottom",
+  },
+  {
+    section: "theme",
+    phase: "page",
+    href: "/dashboard/theme",
+    target: '[data-tour="theme-tab-style"]',
+    title: "Style",
+    content: "Customize navigation, button styles, social icons, image filters, and splash screens.",
+    placement: "bottom",
+  },
+  {
+    section: "theme",
+    phase: "page",
+    href: "/dashboard/theme",
+    target: '[data-tour="theme-preview"]',
+    title: "Live Preview",
+    content: "This is your live portfolio preview. Every change you make shows here instantly. Use the device switcher at the bottom to see mobile and tablet views.",
+    placement: "left",
+  },
+  {
+    section: "theme",
+    phase: "page",
+    href: "/dashboard/theme",
+    target: '[data-tour="theme-publish"]',
+    title: "Publish Your Theme",
+    content: "When you're happy with your design, hit Publish. Your changes go live immediately on your public portfolio.",
     placement: "top",
   },
 
@@ -216,8 +298,17 @@ const ALL_TOUR_STEPS: TourStep[] = [
     phase: "nav",
     target: '[href="/dashboard/skill-scores"]',
     title: "Skill Scores",
-    content: "After you create demos, our AI evaluates them on 5 dimensions: depth, relevance, clarity, problem-solving, and innovation. Verified scores you can share.",
+    content: "After you create demos, our AI evaluates them. Let's see how scoring works.",
     placement: "right",
+  },
+  {
+    section: "skill-scores",
+    phase: "page",
+    href: "/dashboard/skill-scores",
+    target: '[data-tour="scores-summary"]',
+    title: "Your Score Overview",
+    content: "See your average score, verified demo count, and ungraded demos at a glance. Each demo is scored on depth, relevance, clarity, problem-solving, and innovation.",
+    placement: "bottom",
   },
 
   // ── Analytics ──
@@ -226,8 +317,36 @@ const ALL_TOUR_STEPS: TourStep[] = [
     phase: "nav",
     target: '[href="/dashboard/analytics"]',
     title: "Analytics",
-    content: "See who's viewing your portfolio, which demos get the most attention, and track views over time. Know when recruiters are looking.",
+    content: "See who's viewing your portfolio and which demos get the most attention.",
     placement: "right",
+  },
+  {
+    section: "analytics",
+    phase: "page",
+    href: "/dashboard/analytics",
+    target: '[data-tour="analytics-stats"]',
+    title: "Track Your Views",
+    content: "See 30-day views, all-time views, and your best day. The chart shows daily traffic so you know when recruiters are looking.",
+    placement: "bottom",
+  },
+
+  // ── Settings ──
+  {
+    section: "settings",
+    phase: "nav",
+    target: '[href="/dashboard/settings"]',
+    title: "Settings",
+    content: "Manage your account, subscription, and preferences.",
+    placement: "right",
+  },
+  {
+    section: "settings",
+    phase: "page",
+    href: "/dashboard/settings",
+    target: '[data-tour="settings-plan"]',
+    title: "Your Plan",
+    content: "View your current plan and upgrade to Pro for full access to colors, fonts, layout, motion, custom CSS, and analytics.",
+    placement: "bottom",
   },
 ];
 
@@ -238,9 +357,12 @@ export const TOUR_SECTIONS = [
   { id: "education", label: "Education" },
   { id: "skills", label: "Skills" },
   { id: "demos", label: "Demos" },
+  { id: "github", label: "GitHub Import" },
+  { id: "volunteering", label: "Volunteering" },
   { id: "theme", label: "Theme Studio" },
   { id: "skill-scores", label: "Skill Scores" },
   { id: "analytics", label: "Analytics" },
+  { id: "settings", label: "Settings" },
 ] as const;
 
 const STORAGE_KEY = "mivitae_tour_completed";
@@ -312,37 +434,42 @@ function getTooltipStyle(
   placement: TourStep["placement"] = "right"
 ): React.CSSProperties {
   const gap = 12;
+  const tooltipW = 320; // matches w-80
+  const tooltipH = 200; // approximate max height
+  const pad = 12; // viewport edge padding
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  let style: React.CSSProperties = { position: "fixed" };
+
   switch (placement) {
     case "top":
-      return {
-        position: "fixed",
-        bottom: window.innerHeight - targetRect.top + gap,
-        left: targetRect.left + targetRect.width / 2,
-        transform: "translateX(-50%)",
-      };
+      style.bottom = vh - targetRect.top + gap;
+      style.left = Math.max(pad, Math.min(targetRect.left + targetRect.width / 2 - tooltipW / 2, vw - tooltipW - pad));
+      break;
     case "bottom":
-      return {
-        position: "fixed",
-        top: targetRect.bottom + gap,
-        left: targetRect.left + targetRect.width / 2,
-        transform: "translateX(-50%)",
-      };
+      style.top = Math.min(targetRect.bottom + gap, vh - tooltipH - pad);
+      style.left = Math.max(pad, Math.min(targetRect.left + targetRect.width / 2 - tooltipW / 2, vw - tooltipW - pad));
+      break;
     case "left":
-      return {
-        position: "fixed",
-        top: targetRect.top + targetRect.height / 2,
-        right: window.innerWidth - targetRect.left + gap,
-        transform: "translateY(-50%)",
-      };
+      style.top = Math.max(pad, Math.min(targetRect.top + targetRect.height / 2 - tooltipH / 2, vh - tooltipH - pad));
+      style.right = vw - targetRect.left + gap;
+      break;
     case "right":
-    default:
-      return {
-        position: "fixed",
-        top: targetRect.top + targetRect.height / 2,
-        left: targetRect.right + gap,
-        transform: "translateY(-50%)",
-      };
+    default: {
+      style.top = Math.max(pad, Math.min(targetRect.top + targetRect.height / 2 - tooltipH / 2, vh - tooltipH - pad));
+      const idealLeft = targetRect.right + gap;
+      if (idealLeft + tooltipW > vw - pad) {
+        // Flip to left side if not enough room on right
+        style.right = vw - targetRect.left + gap;
+      } else {
+        style.left = idealLeft;
+      }
+      break;
+    }
   }
+
+  return style;
 }
 
 // ── Main GuidedTour component ─────────────────────────────────────────

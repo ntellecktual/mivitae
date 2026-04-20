@@ -1607,6 +1607,7 @@ export default function ThemePage() {
           return (
             <button
               key={t.id}
+              data-tour={`theme-tab-${t.id}`}
               onClick={() => setActivePanel((prev) => (prev === t.id ? null : t.id))}
               className={cn(
                 "relative flex flex-1 flex-col items-center gap-0.5 rounded-lg py-2 transition-all",
@@ -1760,6 +1761,7 @@ export default function ThemePage() {
           )}
           <Button
             size="sm"
+            data-tour="theme-publish"
             onClick={handleSave}
             disabled={saving || !isDirty}
             className={cn(
@@ -1788,7 +1790,7 @@ export default function ThemePage() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-neutral-950" data-tour="theme-presets">
+    <div className="flex h-screen overflow-hidden bg-neutral-950">
       {/* ── Mobile top bar ──────────────────────────────────────── */}
       <div className="fixed top-0 left-0 right-0 z-30 flex h-12 items-center justify-between border-b border-white/10 bg-neutral-900/95 backdrop-blur-xl px-3 lg:hidden">
         <Link
@@ -1880,6 +1882,7 @@ export default function ThemePage() {
       {/* ── Preview area ───────────────────────────────────────── */}
       <div
         ref={containerRef}
+        data-tour="theme-preview"
         className="flex-1 flex items-start justify-center overflow-auto p-4 pt-16 lg:pt-6"
       >
         <div

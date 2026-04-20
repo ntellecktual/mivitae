@@ -206,7 +206,7 @@ function SettingsContent() {
       </section>
 
       {/* ── Current Plan ─────────────────────────────────────────────── */}
-      <section>
+      <section data-tour="settings-plan">
         <h2 className="mb-4 text-xl font-semibold flex items-center gap-2">
           <CreditCard className="h-5 w-5" /> Subscription
         </h2>

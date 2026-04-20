@@ -181,7 +181,7 @@ export default function VolunteeringPage() {
             Highlight your community involvement and volunteer experience.
           </p>
         </div>
-        <Button onClick={() => { setIsAdding(true); setEditingId(null); resetForm(); }} disabled={isAdding}>
+        <Button data-tour="volunteering-add" onClick={() => { setIsAdding(true); setEditingId(null); resetForm(); }} disabled={isAdding}>
           <Plus className="mr-2 h-4 w-4" /> Add Entry
         </Button>
       </div>

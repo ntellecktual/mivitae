@@ -369,7 +369,7 @@ export default function SkillScoresPage() {
 
       {/* Summary stats */}
       {!loading && graded.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div data-tour="scores-summary" className="grid gap-4 sm:grid-cols-3">
           <Card>
             <CardContent className="flex items-center gap-4 p-6">
               <ScoreRing score={avgScore!} />

@@ -377,6 +377,16 @@ export default function DashboardLayout({
   // Only switch to minimal layout once auth is confirmed — while auth is still
   // loading, onboardingState is null (no identity) which would incorrectly
   // trigger the minimal layout on every refresh.
+  // Theme Studio takes over the entire viewport — no sidebar, no topbar.
+  const isThemeStudio = pathname === "/dashboard/theme";
+  if (isThemeStudio) {
+    return (
+      <ErrorBoundary>
+        {children}
+      </ErrorBoundary>
+    );
+  }
+
   const showOnboardingLayout =
     isOnboarding ||
     (isAuthenticated && onboardingState !== undefined && !onboardingState?.isComplete);

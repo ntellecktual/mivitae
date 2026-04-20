@@ -22,6 +22,7 @@ import {
   resolveTheme,
 } from "@/lib/theme";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import {
   Palette,
   Type,
@@ -46,6 +47,8 @@ import {
   EyeOff,
   Sun,
   Moon,
+  ArrowLeft,
+  Menu,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -905,33 +908,6 @@ function AdvancedPanel({
   );
 }
 
-// ── Toolbar button ────────────────────────────────────────────────────────
-
-function ToolbarBtn({
-  icon: Icon,
-  label,
-  active,
-  onClick,
-}: {
-  icon: React.ElementType;
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition-all",
-        active ? "bg-white/20 text-white" : "text-white/60 hover:text-white hover:bg-white/10"
-      )}
-    >
-      <Icon className="h-4 w-4" />
-      <span className="text-[9px] font-medium leading-none">{label}</span>
-    </button>
-  );
-}
-
 // ── Main Page ─────────────────────────────────────────────────────────────
 
 export default function ThemePage() {
@@ -1012,11 +988,12 @@ export default function ThemePage() {
     }
   }, [dbTheme, resetStack]);
 
-  const [activePanel, setActivePanel] = useState<ToolbarPanel>(null);
+  const [activePanel, setActivePanel] = useState<ToolbarPanel>("presets");
   const [device, setDevice] = useState<DeviceMode>("desktop");
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [viewportWidth, setViewportWidth] = useState<number | null>(null);
+  const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
   const isDraggingRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -1041,10 +1018,6 @@ export default function ThemePage() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const togglePanel = (panel: ToolbarPanel) => {
-    setActivePanel((p) => (p === panel ? null : panel));
   };
 
   // Resizable viewport drag
@@ -1094,10 +1067,253 @@ export default function ThemePage() {
 
   const previewWidth = viewportWidth ?? "100%";
 
+  const TOOLS: { id: ToolbarPanel; icon: React.ElementType; label: string }[] = [
+    { id: "presets", icon: Sparkles, label: "Presets" },
+    { id: "colors", icon: Palette, label: "Colors" },
+    { id: "fonts", icon: Type, label: "Fonts" },
+    { id: "layout", icon: LayoutGrid, label: "Layout" },
+    { id: "sections", icon: Layers, label: "Sections" },
+    { id: "advanced", icon: Code2, label: "CSS" },
+  ];
+
+  /* ── Sidebar inner (shared between desktop and mobile overlay) ─── */
+  const sidebarContent = (
+    <>
+      {/* Tool tabs — horizontal row */}
+      <div className="flex border-b border-white/10 px-2 py-2 gap-0.5 shrink-0">
+        {TOOLS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setActivePanel((prev) => (prev === t.id ? null : t.id))}
+            className={cn(
+              "flex flex-1 flex-col items-center gap-0.5 rounded-lg py-2 transition-all",
+              activePanel === t.id
+                ? "bg-white/15 text-white"
+                : "text-white/50 hover:text-white hover:bg-white/10"
+            )}
+          >
+            <t.icon className="h-4 w-4" />
+            <span className="text-[9px] font-medium leading-none">{t.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Panel content — scrollable middle area */}
+      <div className="flex-1 overflow-y-auto p-3 scrollbar-none">
+        {activePanel === "presets" && (
+          <PresetsPanel theme={resolvedTheme} onSelect={(config) => { pushTheme(config); setSavedAt(null); }} />
+        )}
+        {activePanel === "colors" && (
+          <ColorsPanel theme={resolvedTheme} update={update} />
+        )}
+        {activePanel === "fonts" && (
+          <FontsPanel theme={resolvedTheme} update={update} />
+        )}
+        {activePanel === "layout" && (
+          <LayoutPanel theme={resolvedTheme} update={update} />
+        )}
+        {activePanel === "sections" && (
+          <SectionsPanel theme={resolvedTheme} update={update} />
+        )}
+        {activePanel === "advanced" && (
+          <AdvancedPanel theme={resolvedTheme} update={update} isPro={isPro} />
+        )}
+        {!activePanel && (
+          <div className="flex flex-col items-center justify-center h-48 text-center">
+            <Palette className="h-8 w-8 text-white/20 mb-3" />
+            <p className="text-sm text-white/40">Select a tool above to start editing</p>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom bar — undo/redo, devices, view live, publish */}
+      <div className="border-t border-white/10 p-3 shrink-0 space-y-2.5">
+        {/* Row 1: Undo/Redo + Device switcher */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={undo}
+              disabled={!canUndo}
+              className={cn(
+                "rounded-lg p-1.5 transition-all",
+                canUndo ? "text-white/70 hover:text-white hover:bg-white/10" : "text-white/20 cursor-not-allowed"
+              )}
+              aria-label="Undo"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={redo}
+              disabled={!canRedo}
+              className={cn(
+                "rounded-lg p-1.5 transition-all",
+                canRedo ? "text-white/70 hover:text-white hover:bg-white/10" : "text-white/20 cursor-not-allowed"
+              )}
+              aria-label="Redo"
+            >
+              <Redo2 className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="flex items-center gap-0.5 rounded-lg bg-white/5 p-0.5">
+            {([
+              { mode: "desktop" as DeviceMode, icon: Monitor },
+              { mode: "tablet" as DeviceMode, icon: Tablet },
+              { mode: "mobile" as DeviceMode, icon: Smartphone },
+            ]).map((d) => (
+              <button
+                key={d.mode}
+                onClick={() => setDevice(d.mode)}
+                className={cn(
+                  "rounded-md p-1.5 transition-all",
+                  device === d.mode
+                    ? "bg-white/15 text-white"
+                    : "text-white/40 hover:text-white hover:bg-white/10"
+                )}
+                aria-label={d.mode}
+              >
+                <d.icon className="h-3.5 w-3.5" />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Row 2: View Live + Publish */}
+        <div className="flex items-center gap-2">
+          {profile?.slug && (
+            <a
+              href={`/u/${profile.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              View Live
+            </a>
+          )}
+          <Button
+            size="sm"
+            onClick={handleSave}
+            disabled={saving || !isDirty}
+            className={cn(
+              "flex-1 h-9 rounded-lg text-xs font-semibold transition-all",
+              isDirty
+                ? "bg-linear-to-r from-primary to-violet-500 text-white hover:shadow-lg hover:shadow-primary/30"
+                : savedAt
+                  ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                  : "bg-white/10 text-white/40"
+            )}
+          >
+            {saving ? (
+              <div className="h-3 w-3 animate-spin rounded-full border-2 border-white/60 border-t-transparent" />
+            ) : savedAt && !isDirty ? (
+              <>
+                <Check className="mr-1 h-3 w-3" />
+                Published
+              </>
+            ) : (
+              "Publish"
+            )}
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+
   return (
-    <div className="-m-4 lg:-m-8 flex flex-col h-[calc(100vh-3.5rem)] overflow-hidden bg-neutral-950 relative" data-tour="theme-presets">
-      {/* ── Full-screen Live Preview ─────────────────────────────── */}
-      <div ref={containerRef} className="flex-1 flex items-start justify-center overflow-auto p-4 pt-6">
+    <div className="flex h-screen overflow-hidden bg-neutral-950" data-tour="theme-presets">
+      {/* ── Mobile top bar ──────────────────────────────────────── */}
+      <div className="fixed top-0 left-0 right-0 z-30 flex h-12 items-center justify-between border-b border-white/10 bg-neutral-900/95 backdrop-blur-xl px-3 lg:hidden">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="text-sm font-medium">Dashboard</span>
+        </Link>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={undo}
+            disabled={!canUndo}
+            className={cn(
+              "rounded-lg p-1.5",
+              canUndo ? "text-white/70" : "text-white/20"
+            )}
+            aria-label="Undo"
+          >
+            <Undo2 className="h-4 w-4" />
+          </button>
+          <Button
+            size="sm"
+            onClick={handleSave}
+            disabled={saving || !isDirty}
+            className={cn(
+              "h-8 rounded-lg px-3 text-xs font-semibold",
+              isDirty
+                ? "bg-linear-to-r from-primary to-violet-500 text-white"
+                : savedAt
+                  ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                  : "bg-white/10 text-white/40"
+            )}
+          >
+            {saving ? (
+              <div className="h-3 w-3 animate-spin rounded-full border-2 border-white/60 border-t-transparent" />
+            ) : savedAt && !isDirty ? (
+              <Check className="h-3 w-3" />
+            ) : (
+              "Publish"
+            )}
+          </Button>
+          <button
+            onClick={() => setMobileToolsOpen(true)}
+            className="rounded-lg p-2 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            aria-label="Open theme tools"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* ── Mobile sidebar overlay ─────────────────────────────── */}
+      {mobileToolsOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          onClick={() => setMobileToolsOpen(false)}
+        />
+      )}
+
+      {/* ── Sidebar (desktop: static, mobile: slide-in overlay) ─ */}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-80 flex flex-col border-r border-white/10 bg-neutral-900/95 backdrop-blur-xl transition-transform duration-300 ease-out lg:relative lg:translate-x-0 lg:z-auto",
+          mobileToolsOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        {/* Sidebar header */}
+        <div className="flex h-14 items-center gap-3 px-4 border-b border-white/10 shrink-0">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 text-white/60 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+          <h1 className="text-sm font-semibold text-white tracking-tight">Theme Studio</h1>
+          <button
+            onClick={() => setMobileToolsOpen(false)}
+            className="ml-auto rounded-lg p-1.5 text-white/40 hover:text-white hover:bg-white/10 transition-colors lg:hidden"
+            aria-label="Close tools"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {sidebarContent}
+      </aside>
+
+      {/* ── Preview area ───────────────────────────────────────── */}
+      <div
+        ref={containerRef}
+        className="flex-1 flex items-start justify-center overflow-auto p-4 pt-16 lg:pt-6"
+      >
         <div
           className="relative transition-all duration-300 ease-out"
           style={{
@@ -1105,7 +1321,7 @@ export default function ThemePage() {
             maxWidth: "100%",
           }}
         >
-          {/* Device frame */}
+          {/* Device frame label */}
           {viewportWidth && (
             <div className="mx-auto" style={{ maxWidth: viewportWidth }}>
               <div className="mb-2 flex items-center justify-center gap-2">
@@ -1158,144 +1374,6 @@ export default function ThemePage() {
             </>
           )}
         </div>
-      </div>
-
-      {/* ── Floating Panel (to the right of toolbar) ───────────── */}
-      {activePanel && (
-        <div className="absolute left-24 top-1/2 -translate-y-1/2 z-50 w-96 max-w-[calc(100vw-8rem)] max-h-[80vh] overflow-y-auto rounded-2xl border border-white/10 bg-neutral-900/95 backdrop-blur-xl p-4 shadow-2xl shadow-black/60 animate-in fade-in-0 slide-in-from-left-4 duration-200 scrollbar-none">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-white capitalize">{activePanel}</h3>
-            <button
-              onClick={() => setActivePanel(null)}
-              className="rounded-full p-1 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </div>
-          {activePanel === "presets" && (
-            <PresetsPanel theme={resolvedTheme} onSelect={(config) => { pushTheme(config); setSavedAt(null); }} />
-          )}
-          {activePanel === "colors" && (
-            <ColorsPanel theme={resolvedTheme} update={update} />
-          )}
-          {activePanel === "fonts" && (
-            <FontsPanel theme={resolvedTheme} update={update} />
-          )}
-          {activePanel === "layout" && (
-            <LayoutPanel theme={resolvedTheme} update={update} />
-          )}
-          {activePanel === "sections" && (
-            <SectionsPanel theme={resolvedTheme} update={update} />
-          )}
-          {activePanel === "advanced" && (
-            <AdvancedPanel theme={resolvedTheme} update={update} isPro={isPro} />
-          )}
-        </div>
-      )}
-
-      {/* ── Floating Toolbar (left vertical) ───────────────────── */}
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-1 rounded-2xl border border-white/10 bg-neutral-900/90 backdrop-blur-xl px-1.5 py-2 shadow-2xl shadow-black/60">
-        {/* Undo / Redo */}
-        <button
-          onClick={undo}
-          disabled={!canUndo}
-          className={cn(
-            "rounded-xl p-2 transition-all",
-            canUndo ? "text-white/70 hover:text-white hover:bg-white/10" : "text-white/20 cursor-not-allowed"
-          )}
-          aria-label="Undo"
-        >
-          <Undo2 className="h-4 w-4" />
-        </button>
-        <button
-          onClick={redo}
-          disabled={!canRedo}
-          className={cn(
-            "rounded-xl p-2 transition-all",
-            canRedo ? "text-white/70 hover:text-white hover:bg-white/10" : "text-white/20 cursor-not-allowed"
-          )}
-          aria-label="Redo"
-        >
-          <Redo2 className="h-4 w-4" />
-        </button>
-
-        <div className="my-1 h-px w-6 bg-white/10" />
-
-        {/* Tool buttons */}
-        <ToolbarBtn icon={Sparkles} label="Presets" active={activePanel === "presets"} onClick={() => togglePanel("presets")} />
-        <ToolbarBtn icon={Palette} label="Colors" active={activePanel === "colors"} onClick={() => togglePanel("colors")} />
-        <ToolbarBtn icon={Type} label="Fonts" active={activePanel === "fonts"} onClick={() => togglePanel("fonts")} />
-        <ToolbarBtn icon={LayoutGrid} label="Layout" active={activePanel === "layout"} onClick={() => togglePanel("layout")} />
-        <ToolbarBtn icon={Layers} label="Sections" active={activePanel === "sections"} onClick={() => togglePanel("sections")} />
-        <ToolbarBtn icon={Code2} label="CSS" active={activePanel === "advanced"} onClick={() => togglePanel("advanced")} />
-
-        <div className="my-1 h-px w-6 bg-white/10" />
-
-        {/* Device switcher */}
-        <div className="flex flex-col items-center gap-0.5">
-          {([
-            { mode: "desktop" as DeviceMode, icon: Monitor },
-            { mode: "tablet" as DeviceMode, icon: Tablet },
-            { mode: "mobile" as DeviceMode, icon: Smartphone },
-          ]).map((d) => (
-            <button
-              key={d.mode}
-              onClick={() => setDevice(d.mode)}
-              className={cn(
-                "rounded-lg p-1.5 transition-all",
-                device === d.mode && !viewportWidth
-                  ? "text-white bg-white/15"
-                  : device === d.mode
-                    ? "text-white bg-white/15"
-                    : "text-white/40 hover:text-white hover:bg-white/10"
-              )}
-              aria-label={d.mode}
-            >
-              <d.icon className="h-3.5 w-3.5" />
-            </button>
-          ))}
-        </div>
-
-        <div className="my-1 h-px w-6 bg-white/10" />
-
-        {/* View Live */}
-        {profile?.slug && (
-          <a
-            href={`/u/${profile.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-xl p-2 text-white/60 hover:text-white hover:bg-white/10 transition-all"
-            aria-label="View live portfolio"
-          >
-            <ExternalLink className="h-4 w-4" />
-          </a>
-        )}
-
-        {/* Publish button */}
-        <Button
-          size="sm"
-          onClick={handleSave}
-          disabled={saving || !isDirty}
-          className={cn(
-            "h-8 rounded-xl px-4 text-xs font-semibold transition-all",
-            isDirty
-              ? "bg-linear-to-r from-primary to-violet-500 text-white hover:shadow-lg hover:shadow-primary/30"
-              : savedAt
-                ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                : "bg-white/10 text-white/40"
-          )}
-        >
-          {saving ? (
-            <div className="h-3 w-3 animate-spin rounded-full border-2 border-white/60 border-t-transparent" />
-          ) : savedAt && !isDirty ? (
-            <>
-              <Check className="mr-1 h-3 w-3" />
-              Published
-            </>
-          ) : (
-            "Publish"
-          )}
-        </Button>
       </div>
     </div>
   );

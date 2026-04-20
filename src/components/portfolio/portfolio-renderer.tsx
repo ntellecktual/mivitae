@@ -1,12 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState } from "react";
+import React, { useCallback, useEffect, useId, useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/lib/convex";
 import {
   MapPin, Globe, ExternalLink, Briefcase, GraduationCap,
   Zap, Wrench, Heart, Mail, Home, Menu, X, Award,
-  Compass, User, Calendar, Target,
+  Compass, User, Calendar, Target, Code2, Palette, DollarSign,
+  BarChart3, Megaphone, Settings, Users, Scale, HeadphonesIcon,
+  Stethoscope, BookOpen, HardHat, UtensilsCrossed, ShoppingBag,
+  Building, Landmark, HandHeart, Film,
 } from "lucide-react";
 import {
   type ThemeConfig,
@@ -36,6 +39,101 @@ import {
   computePortfolioStats,
   getDemoGradient,
 } from "@/lib/skill-proficiency";
+
+// ── Category Gradients & Icons (Discord-style demo cards) ─────────────────
+
+const DEMO_CATEGORY_GRADIENTS: Record<string, string> = {
+  engineering: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #4f46e5 100%)",
+  data: "linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ea580c 100%)",
+  design: "linear-gradient(135deg, #ec4899 0%, #f43f5e 50%, #e11d48 100%)",
+  sales: "linear-gradient(135deg, #22c55e 0%, #10b981 50%, #059669 100%)",
+  marketing: "linear-gradient(135deg, #a855f7 0%, #9333ea 50%, #7c3aed 100%)",
+  finance: "linear-gradient(135deg, #14b8a6 0%, #0d9488 50%, #0891b2 100%)",
+  operations: "linear-gradient(135deg, #f97316 0%, #ea580c 50%, #dc2626 100%)",
+  hr: "linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #be123c 100%)",
+  pm: "linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%)",
+  legal: "linear-gradient(135deg, #64748b 0%, #475569 50%, #334155 100%)",
+  support: "linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0284c7 100%)",
+  healthcare: "linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)",
+  education: "linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)",
+  construction: "linear-gradient(135deg, #eab308 0%, #ca8a04 50%, #a16207 100%)",
+  hospitality: "linear-gradient(135deg, #fb923c 0%, #f97316 50%, #ea580c 100%)",
+  retail: "linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #9333ea 100%)",
+  realestate: "linear-gradient(135deg, #2dd4bf 0%, #14b8a6 50%, #0d9488 100%)",
+  government: "linear-gradient(135deg, #475569 0%, #334155 50%, #1e293b 100%)",
+  nonprofit: "linear-gradient(135deg, #fb7185 0%, #f43f5e 50%, #e11d48 100%)",
+  media: "linear-gradient(135deg, #d946ef 0%, #c026d3 50%, #a21caf 100%)",
+  general: "linear-gradient(135deg, #6b7280 0%, #4b5563 50%, #374151 100%)",
+};
+
+// Icon component lookup by category
+const DEMO_CATEGORY_ICONS: Record<string, React.ComponentType<{ style?: React.CSSProperties }>> = {
+  engineering: Code2,
+  data: BarChart3,
+  design: Palette,
+  sales: DollarSign,
+  marketing: Megaphone,
+  finance: DollarSign,
+  operations: Settings,
+  hr: Users,
+  pm: Target,
+  legal: Scale,
+  support: HeadphonesIcon,
+  healthcare: Stethoscope,
+  education: BookOpen,
+  construction: HardHat,
+  hospitality: UtensilsCrossed,
+  retail: ShoppingBag,
+  realestate: Building,
+  government: Landmark,
+  nonprofit: HandHeart,
+  media: Film,
+  general: Zap,
+};
+
+function getDemoCategoryFromTags(tags?: string[]): string {
+  if (!tags || tags.length === 0) return "general";
+  const lowerTags = tags.map(t => t.toLowerCase());
+  
+  // Check for exact category matches
+  for (const tag of lowerTags) {
+    if (DEMO_CATEGORY_GRADIENTS[tag]) return tag;
+  }
+  
+  // Check for partial matches
+  const categoryKeywords: Record<string, string[]> = {
+    engineering: ["react", "typescript", "python", "node", "api", "code", "software", "dev", "programming", "machine learning", "ai", "ml"],
+    data: ["data", "analytics", "dashboard", "chart", "metrics", "sql", "database"],
+    design: ["design", "ui", "ux", "figma", "brand", "creative", "visual"],
+    sales: ["sales", "pipeline", "crm", "deal", "revenue", "business development"],
+    marketing: ["marketing", "campaign", "seo", "content", "social media", "ads"],
+    finance: ["finance", "accounting", "budget", "investment", "financial"],
+    operations: ["operations", "supply chain", "logistics", "process"],
+    hr: ["hr", "human resources", "recruiting", "talent", "people"],
+    pm: ["project", "product", "agile", "scrum", "roadmap", "management"],
+    legal: ["legal", "compliance", "contract", "policy"],
+    support: ["support", "customer success", "service", "help"],
+    healthcare: ["healthcare", "health", "medical", "patient", "clinical"],
+    education: ["education", "training", "learning", "course", "curriculum", "teaching"],
+    construction: ["construction", "building", "trade", "contractor"],
+    hospitality: ["hospitality", "food", "restaurant", "hotel", "event"],
+    retail: ["retail", "ecommerce", "store", "shopping", "inventory"],
+    realestate: ["real estate", "property", "housing", "rental"],
+    government: ["government", "public", "policy", "civic"],
+    nonprofit: ["nonprofit", "charity", "volunteer", "social impact"],
+    media: ["media", "entertainment", "video", "film", "content creation"],
+  };
+  
+  for (const [category, keywords] of Object.entries(categoryKeywords)) {
+    for (const tag of lowerTags) {
+      for (const keyword of keywords) {
+        if (tag.includes(keyword)) return category;
+      }
+    }
+  }
+  
+  return "general";
+}
 
 // ── CSS Sanitizer ──────────────────────────────────────────────────────────
 
@@ -748,7 +846,13 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       line-height: 1.3;
     }
 
-    /* ── Work Detail Panel ─────────────────────────────────── */
+    /* ── Work Detail Panel (inline, spans all grid columns) ── */
+    #${id} .pf-work-detail-inline {
+      grid-column: 1 / -1;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      animation: pf-detail-in 0.35s ease both;
+    }
     #${id} .pf-work-detail {
       margin-top: 20px;
       animation: pf-detail-in 0.35s ease both;
@@ -1004,7 +1108,12 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       transform: translate(0, 0);
     }
 
-    /* ── Education Detail Panel ───────────────────────────── */
+    /* ── Education Detail Panel (inline, spans all grid columns) ── */
+    #${id} .pf-edu-detail-inline {
+      grid-column: 1 / -1;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
     #${id} .pf-edu-detail {
       margin-top: 1.5rem;
     }
@@ -1170,16 +1279,159 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     }
 
     #${id} .pf-demo-card {
-      ${cardCss};
+      position: relative;
       overflow: hidden;
+      border-radius: 20px;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
       cursor: default;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     #${id} .pf-demo-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px ${hexToRgba(theme.cardBorder, 0.35)};
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.2);
     }
 
+    #${id} .pf-demo-card-bg {
+      position: absolute;
+      inset: 0;
+      transition: transform 0.5s ease;
+    }
+    #${id} .pf-demo-card:hover .pf-demo-card-bg {
+      transform: scale(1.05);
+    }
+
+    #${id} .pf-demo-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%);
+    }
+
+    #${id} .pf-demo-card-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -70%);
+      width: 64px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.6);
+      z-index: 1;
+      filter: drop-shadow(0 4px 16px rgba(0,0,0,0.3));
+    }
+
+    #${id} .pf-demo-card-logo {
+      position: absolute;
+      bottom: 100px;
+      right: 16px;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.15);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      z-index: 2;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(8px);
+    }
+
+    #${id} .pf-demo-card-badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(12px);
+      color: rgba(255,255,255,0.9);
+      border: 1px solid rgba(255,255,255,0.15);
+      z-index: 2;
+    }
+
+    #${id} .pf-demo-card-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 20px;
+      z-index: 2;
+    }
+
+    #${id} .pf-demo-card-content h3 {
+      color: #fff;
+      font-family: '${theme.headingFont}', sans-serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      margin: 0 0 6px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    #${id} .pf-demo-card-content p {
+      color: rgba(255,255,255,0.75);
+      font-size: 0.82rem;
+      line-height: 1.5;
+      margin: 0 0 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    #${id} .pf-demo-card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    #${id} .pf-demo-card-tags span {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.85);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    #${id} .pf-demo-card-links {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    #${id} .pf-demo-card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+    #${id} .pf-demo-card-link:hover {
+      background: rgba(255,255,255,0.25);
+      transform: translateY(-1px);
+    }
+
+    /* Legacy demo banner styles (for fallback) */
     #${id} .pf-demo-banner {
       height: 160px;
       position: relative;
@@ -2122,32 +2374,46 @@ export default function PortfolioRenderer({
                   </div>
                   <div className="pf-divider" />
                   <div className="pf-demo-grid">
-                    {featuredDemos.map(d => (
-                      <div key={d._id} className="pf-demo-card">
-                        <div className="pf-demo-banner">
-                          {d.bannerUrl ? (
+                    {featuredDemos.map(d => {
+                      const cat = getDemoCategoryFromTags(d.tags);
+                      const gradient = DEMO_CATEGORY_GRADIENTS[cat] ?? getDemoGradient(d.title, theme.accentColor);
+                      const IconComp = DEMO_CATEGORY_ICONS[cat] ?? Zap;
+                      return (
+                        <div key={d._id} className="pf-demo-card">
+                          <div className="pf-demo-card-bg" style={{ background: gradient }} />
+                          <div className="pf-demo-card-overlay" />
+                          <div className="pf-demo-card-icon">
+                            <IconComp style={{ width: 56, height: 56 }} />
+                          </div>
+                          {d.bannerUrl && (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={d.bannerUrl} alt={d.title} />
-                          ) : (
-                            <div
-                              className="pf-demo-banner-gradient"
-                              style={{ background: getDemoGradient(d.title, theme.accentColor) }}
-                            >
-                              <Zap size={32} style={{ color: "rgba(255,255,255,0.5)" }} />
-                            </div>
+                            <img src={d.bannerUrl} alt="" className="pf-demo-card-logo" />
                           )}
-                        </div>
-                        <div className="pf-demo-info">
-                          <h3>{d.title}</h3>
-                          {d.description && <p>{d.description}</p>}
-                          {d.tags && d.tags.length > 0 && (
-                            <div className="pf-tags" style={{ marginTop: 8 }}>
-                              {d.tags.slice(0, 3).map(t => <span key={t} className="pf-tag">{t}</span>)}
+                          <span className="pf-demo-card-badge">Featured</span>
+                          <div className="pf-demo-card-content">
+                            <h3>{d.title}</h3>
+                            {d.description && <p>{d.description}</p>}
+                            {d.tags && d.tags.length > 0 && (
+                              <div className="pf-demo-card-tags">
+                                {d.tags.slice(0, 3).map(t => <span key={t}>{t}</span>)}
+                              </div>
+                            )}
+                            <div className="pf-demo-card-links">
+                              {d.demoUrl && (
+                                <a href={d.demoUrl} target="_blank" rel="noopener noreferrer" className="pf-demo-card-link">
+                                  <Globe style={{ width: 11, height: 11 }} /> Live
+                                </a>
+                              )}
+                              {d.githubUrl && (
+                                <a href={d.githubUrl} target="_blank" rel="noopener noreferrer" className="pf-demo-card-link">
+                                  <ExternalLink style={{ width: 11, height: 11 }} /> Code
+                                </a>
+                              )}
                             </div>
-                          )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   {publicDemos.length > 3 && (
                     <button className="pf-view-all" onClick={() => nav("discover")}>
@@ -2220,127 +2486,125 @@ export default function PortfolioRenderer({
 
               {/* ── Image Card Grid ── */}
               <div className="pf-work-grid">
-                {sortedSections.map((s, i) => (
-                  <div
-                    key={s._id}
-                    className={`pf-work-card ${i === 0 && sortedSections.length >= 3 ? "pf-work-card--featured" : ""} ${expandedWork === s._id ? "active" : ""}`}
-                    onClick={() => setExpandedWork(expandedWork === s._id ? null : s._id)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpandedWork(expandedWork === s._id ? null : s._id); }}}
-                  >
-                    <div className="pf-work-card-img">
-                      {s.imageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={s.imageUrl} alt={s.companyName} />
-                      ) : (
-                        <div className="pf-work-card-img-placeholder">
-                          <Briefcase style={{ width: 48, height: 48, opacity: 0.2 }} />
+                {sortedSections.map((s, i) => {
+                  const linkedDemos = publicDemos.filter(d => s.demoIds?.includes(d._id));
+                  return (
+                    <React.Fragment key={s._id}>
+                      <div
+                        className={`pf-work-card ${i === 0 && sortedSections.length >= 3 ? "pf-work-card--featured" : ""} ${expandedWork === s._id ? "active" : ""}`}
+                        onClick={() => setExpandedWork(expandedWork === s._id ? null : s._id)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpandedWork(expandedWork === s._id ? null : s._id); }}}
+                      >
+                        <div className="pf-work-card-img">
+                          {s.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={s.imageUrl} alt={s.companyName} />
+                          ) : (
+                            <div className="pf-work-card-img-placeholder">
+                              <Briefcase style={{ width: 48, height: 48, opacity: 0.2 }} />
+                            </div>
+                          )}
+                        </div>
+                        <div className="pf-work-card-overlay">
+                          {s.skills.length > 0 && (
+                            <span className="pf-work-card-domain">
+                              🏷️ {s.skills.slice(0, 2).join(" · ")}
+                            </span>
+                          )}
+                          <span className="pf-work-card-company">{s.companyName}</span>
+                          <span className="pf-work-card-role">{s.role}</span>
+                        </div>
+                        <div className="pf-work-card-arrow">↗</div>
+                      </div>
+                      {/* Inline detail panel */}
+                      {expandedWork === s._id && (
+                        <div className="pf-work-detail-inline">
+                          <div className="pf-work-detail-card">
+                            <div className="pf-work-detail-header">
+                              {s.imageUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={s.imageUrl} alt={s.companyName} className="pf-work-detail-logo" />
+                              ) : (
+                                <div style={{ width: 48, height: 48, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", background: hexToRgba(theme.accentColor, 0.1), flexShrink: 0 }}>
+                                  <Briefcase style={{ width: 20, height: 20, opacity: 0.5 }} />
+                                </div>
+                              )}
+                              <div className="pf-work-detail-info">
+                                <h2>{s.companyName}</h2>
+                                <p>{s.role} · 📅 {s.startDate} — {s.endDate ?? "Present"}</p>
+                              </div>
+                              <button
+                                className="pf-work-detail-close"
+                                onClick={(e) => { e.stopPropagation(); setExpandedWork(null); }}
+                                aria-label="Close details"
+                              >
+                                <X size={16} />
+                              </button>
+                            </div>
+
+                            {s.skills.length > 0 && (
+                              <div style={{ padding: "12px 24px 0", display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                                {s.skills.slice(0, 5).map(skill => (
+                                  <span key={skill} className="pf-tag">{skill}</span>
+                                ))}
+                              </div>
+                            )}
+
+                            <div className="pf-work-detail-body">
+                              {s.description && (
+                                <div className="pf-work-detail-section">
+                                  <h5>📋 Overview</h5>
+                                  <p>{s.description}</p>
+                                </div>
+                              )}
+
+                              {s.achievements.length > 0 && (
+                                <div className="pf-work-detail-section">
+                                  <h5>🎯 Key Achievements</h5>
+                                  <ul>
+                                    {s.achievements.map((a, idx) => (
+                                      <li key={idx}>
+                                        <span style={{ flexShrink: 0, fontSize: "0.75rem" }}>✅</span>
+                                        {a}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {s.skills.length > 0 && (
+                                <div className="pf-work-detail-section">
+                                  <h5>🛠️ Tech Stack</h5>
+                                  <div className="pf-tags" style={{ marginTop: 0 }}>
+                                    {s.skills.map(skill => (
+                                      <span key={skill} className="pf-tag">{skill}</span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {linkedDemos.length > 0 && (
+                                <div className="pf-work-detail-section">
+                                  <h5>⚡ Related Demos</h5>
+                                  <div className="pf-tags" style={{ marginTop: 0 }}>
+                                    {linkedDemos.map(d => (
+                                      <span key={d._id} className="pf-demo-tag">
+                                        <Zap style={{ width: 10, height: 10 }} /> {d.title}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       )}
-                    </div>
-                    <div className="pf-work-card-overlay">
-                      {s.skills.length > 0 && (
-                        <span className="pf-work-card-domain">
-                          🏷️ {s.skills.slice(0, 2).join(" · ")}
-                        </span>
-                      )}
-                      <span className="pf-work-card-company">{s.companyName}</span>
-                      <span className="pf-work-card-role">{s.role}</span>
-                    </div>
-                    <div className="pf-work-card-arrow">↗</div>
-                  </div>
-                ))}
+                    </React.Fragment>
+                  );
+                })}
               </div>
-
-              {/* ── Expanded Detail Panel ── */}
-              {expandedWork && (() => {
-                const s = sortedSections.find(sec => sec._id === expandedWork);
-                if (!s) return null;
-                const linkedDemos = publicDemos.filter(d => s.demoIds?.includes(d._id));
-                return (
-                  <div className="pf-work-detail">
-                    <div className="pf-work-detail-card">
-                      <div className="pf-work-detail-header">
-                        {s.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={s.imageUrl} alt={s.companyName} className="pf-work-detail-logo" />
-                        ) : (
-                          <div style={{ width: 48, height: 48, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", background: hexToRgba(theme.accentColor, 0.1), flexShrink: 0 }}>
-                            <Briefcase style={{ width: 20, height: 20, opacity: 0.5 }} />
-                          </div>
-                        )}
-                        <div className="pf-work-detail-info">
-                          <h2>{s.companyName}</h2>
-                          <p>{s.role} · 📅 {s.startDate} — {s.endDate ?? "Present"}</p>
-                        </div>
-                        <button
-                          className="pf-work-detail-close"
-                          onClick={(e) => { e.stopPropagation(); setExpandedWork(null); }}
-                          aria-label="Close details"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-
-                      {s.skills.length > 0 && (
-                        <div style={{ padding: "12px 24px 0", display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                          {s.skills.slice(0, 5).map(skill => (
-                            <span key={skill} className="pf-tag">{skill}</span>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="pf-work-detail-body">
-                        {s.description && (
-                          <div className="pf-work-detail-section">
-                            <h5>📋 Overview</h5>
-                            <p>{s.description}</p>
-                          </div>
-                        )}
-
-                        {s.achievements.length > 0 && (
-                          <div className="pf-work-detail-section">
-                            <h5>🎯 Key Achievements</h5>
-                            <ul>
-                              {s.achievements.map((a, idx) => (
-                                <li key={idx}>
-                                  <span style={{ flexShrink: 0, fontSize: "0.75rem" }}>✅</span>
-                                  {a}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {s.skills.length > 0 && (
-                          <div className="pf-work-detail-section">
-                            <h5>🛠️ Tech Stack</h5>
-                            <div className="pf-tags" style={{ marginTop: 0 }}>
-                              {s.skills.map(skill => (
-                                <span key={skill} className="pf-tag">{skill}</span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {linkedDemos.length > 0 && (
-                          <div className="pf-work-detail-section">
-                            <h5>⚡ Related Demos</h5>
-                            <div className="pf-tags" style={{ marginTop: 0 }}>
-                              {linkedDemos.map(d => (
-                                <span key={d._id} className="pf-demo-tag">
-                                  <Zap style={{ width: 10, height: 10 }} /> {d.title}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
             </section>
           )}
 
@@ -2357,116 +2621,112 @@ export default function PortfolioRenderer({
               {sortedEducation.length > 0 && (
                 <div className="pf-edu-grid" style={{ marginBottom: sortedCertificates.length > 0 ? 32 : 0 }}>
                   {sortedEducation.map(e => (
-                    <div
-                      key={e._id}
-                      className={`pf-edu-card ${expandedEdu === e._id ? "active" : ""}`}
-                      onClick={() => setExpandedEdu(expandedEdu === e._id ? null : e._id)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); setExpandedEdu(expandedEdu === e._id ? null : e._id); }}}
-                    >
+                    <React.Fragment key={e._id}>
                       <div
-                        className="pf-edu-card-bg"
-                        style={{
-                          background: eduColors[e._id]
-                            ?? `linear-gradient(150deg, ${hexToRgba(theme.accentColor, 0.8)} 0%, ${hexToRgba(theme.accentColor, 0.3)} 55%, rgba(0,0,0,0.9) 100%)`,
-                        }}
-                      />
-                      <div className="pf-edu-card-overlay" />
-                      <div className="pf-edu-card-logo-wrap">
-                        {e.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={e.imageUrl} alt={e.institution} className="pf-edu-card-logo" />
-                        ) : (
-                          <div className="pf-edu-card-logo-placeholder">
-                            <GraduationCap style={{ width: 64, height: 64 }} />
+                        className={`pf-edu-card ${expandedEdu === e._id ? "active" : ""}`}
+                        onClick={() => setExpandedEdu(expandedEdu === e._id ? null : e._id)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); setExpandedEdu(expandedEdu === e._id ? null : e._id); }}}
+                      >
+                        <div
+                          className="pf-edu-card-bg"
+                          style={{
+                            background: eduColors[e._id]
+                              ?? `linear-gradient(150deg, ${hexToRgba(theme.accentColor, 0.8)} 0%, ${hexToRgba(theme.accentColor, 0.3)} 55%, rgba(0,0,0,0.9) 100%)`,
+                          }}
+                        />
+                        <div className="pf-edu-card-overlay" />
+                        <div className="pf-edu-card-logo-wrap">
+                          {e.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={e.imageUrl} alt={e.institution} className="pf-edu-card-logo" />
+                          ) : (
+                            <div className="pf-edu-card-logo-placeholder">
+                              <GraduationCap style={{ width: 64, height: 64 }} />
+                            </div>
+                          )}
+                        </div>
+                        <div className="pf-edu-card-arrow">→</div>
+                        <div className="pf-edu-card-content">
+                          {e.degree && <span className="pf-edu-card-badge">🎓 {e.degree}</span>}
+                          <span className="pf-edu-card-name">{e.institution}</span>
+                          <span className="pf-edu-card-degree">
+                            {e.fieldOfStudy ?? e.degree}{e.fieldOfStudy && e.degree && e.fieldOfStudy !== e.degree ? ` · ${e.degree}` : ""}
+                          </span>
+                        </div>
+                      </div>
+                      {/* Inline detail panel */}
+                      {expandedEdu === e._id && (
+                        <div className="pf-edu-detail-inline">
+                          <div className="pf-edu-detail-card">
+                            <div className="pf-edu-detail-header">
+                              {e.imageUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={e.imageUrl} alt={e.institution} className="pf-edu-detail-logo" />
+                              ) : (
+                                <div style={{ width: 56, height: 56, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", background: hexToRgba(theme.accentColor, 0.1), flexShrink: 0 }}>
+                                  <GraduationCap style={{ width: 24, height: 24, opacity: 0.5 }} />
+                                </div>
+                              )}
+                              <div className="pf-edu-detail-info">
+                                <h2>{e.institution}</h2>
+                                <p>{e.fieldOfStudy ?? e.degree} · 📅 {e.startYear} — {e.endYear ?? "Present"}</p>
+                              </div>
+                              <button
+                                className="pf-edu-detail-close"
+                                onClick={(ev) => { ev.stopPropagation(); setExpandedEdu(null); }}
+                                aria-label="Close"
+                              >
+                                <X style={{ width: 14, height: 14 }} />
+                              </button>
+                            </div>
+                            <div className="pf-edu-detail-body">
+                              {e.degree && <span className="pf-edu-badge">🎓 {e.degree}</span>}
+                              {e.gpa && <span className="pf-edu-badge">📊 GPA: {e.gpa}</span>}
+                              {e.honors && <span className="pf-edu-badge">🏆 {e.honors}</span>}
+
+                              {e.fieldOfStudy && (
+                                <div className="pf-work-detail-section">
+                                  <h5>📋 Field of Study</h5>
+                                  <p style={{ fontSize: "0.88rem", lineHeight: 1.75, color: theme.subtextColor }}>
+                                    {e.fieldOfStudy}
+                                  </p>
+                                </div>
+                              )}
+
+                              {e.relevantCoursework && (
+                                <div className="pf-work-detail-section">
+                                  <h5>📚 Relevant Coursework</h5>
+                                  <div className="pf-tags" style={{ marginTop: 0 }}>
+                                    {e.relevantCoursework.split(/[,;|\n]+/).map(c => c.trim()).filter(Boolean).map((course, idx) => (
+                                      <span key={idx} className="pf-tag">{course}</span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {e.activities && e.activities.length > 0 && (
+                                <div className="pf-work-detail-section">
+                                  <h5>🎯 Activities &amp; Involvement</h5>
+                                  <ul>
+                                    {e.activities.map((a, idx) => (
+                                      <li key={idx}>
+                                        <span style={{ flexShrink: 0, fontSize: "0.75rem" }}>✅</span>
+                                        {a}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        )}
-                      </div>
-                      <div className="pf-edu-card-arrow">→</div>
-                      <div className="pf-edu-card-content">
-                        {e.degree && <span className="pf-edu-card-badge">🎓 {e.degree}</span>}
-                        <span className="pf-edu-card-name">{e.institution}</span>
-                        <span className="pf-edu-card-degree">
-                          {e.fieldOfStudy ?? e.degree}{e.fieldOfStudy && e.degree && e.fieldOfStudy !== e.degree ? ` · ${e.degree}` : ""}
-                        </span>
-                      </div>
-                    </div>
+                        </div>
+                      )}
+                    </React.Fragment>
                   ))}
                 </div>
               )}
-
-              {/* Education detail panel */}
-              {expandedEdu && (() => {
-                const e = sortedEducation.find(ed => ed._id === expandedEdu);
-                if (!e) return null;
-                return (
-                  <div className="pf-edu-detail">
-                    <div className="pf-edu-detail-card">
-                      <div className="pf-edu-detail-header">
-                        {e.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={e.imageUrl} alt={e.institution} className="pf-edu-detail-logo" />
-                        ) : (
-                          <div style={{ width: 56, height: 56, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", background: hexToRgba(theme.accentColor, 0.1), flexShrink: 0 }}>
-                            <GraduationCap style={{ width: 24, height: 24, opacity: 0.5 }} />
-                          </div>
-                        )}
-                        <div className="pf-edu-detail-info">
-                          <h2>{e.institution}</h2>
-                          <p>{e.fieldOfStudy ?? e.degree} · 📅 {e.startYear} — {e.endYear ?? "Present"}</p>
-                        </div>
-                        <button
-                          className="pf-edu-detail-close"
-                          onClick={(ev) => { ev.stopPropagation(); setExpandedEdu(null); }}
-                          aria-label="Close"
-                        >
-                          <X style={{ width: 14, height: 14 }} />
-                        </button>
-                      </div>
-                      <div className="pf-edu-detail-body">
-                        {e.degree && <span className="pf-edu-badge">🎓 {e.degree}</span>}
-                        {e.gpa && <span className="pf-edu-badge">📊 GPA: {e.gpa}</span>}
-                        {e.honors && <span className="pf-edu-badge">🏆 {e.honors}</span>}
-
-                        {e.fieldOfStudy && (
-                          <div className="pf-work-detail-section">
-                            <h5>📋 Field of Study</h5>
-                            <p style={{ fontSize: "0.88rem", lineHeight: 1.75, color: theme.subtextColor }}>
-                              {e.fieldOfStudy}
-                            </p>
-                          </div>
-                        )}
-
-                        {e.relevantCoursework && (
-                          <div className="pf-work-detail-section">
-                            <h5>📚 Relevant Coursework</h5>
-                            <div className="pf-tags" style={{ marginTop: 0 }}>
-                              {e.relevantCoursework.split(/[,;|\n]+/).map(c => c.trim()).filter(Boolean).map((course, idx) => (
-                                <span key={idx} className="pf-tag">{course}</span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {e.activities && e.activities.length > 0 && (
-                          <div className="pf-work-detail-section">
-                            <h5>🎯 Activities &amp; Involvement</h5>
-                            <ul>
-                              {e.activities.map((a, idx) => (
-                                <li key={idx}>
-                                  <span style={{ flexShrink: 0, fontSize: "0.75rem" }}>✅</span>
-                                  {a}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
 
               {/* Certificates */}
               {showCertificates && sortedCertificates.length > 0 && (
@@ -2554,52 +2814,58 @@ export default function PortfolioRenderer({
 
               {/* Demo grid */}
               <div className="pf-demo-grid">
-                {filteredDemos.map(d => (
-                  <div key={d._id} className="pf-demo-card">
-                    <div className="pf-demo-banner">
-                      {d.bannerUrl ? (
+                {filteredDemos.map(d => {
+                  const cat = getDemoCategoryFromTags(d.tags);
+                  const gradient = DEMO_CATEGORY_GRADIENTS[cat] ?? getDemoGradient(d.title, theme.accentColor);
+                  const IconComp = DEMO_CATEGORY_ICONS[cat] ?? Zap;
+                  return (
+                    <div key={d._id} className="pf-demo-card">
+                      <div className="pf-demo-card-bg" style={{ background: gradient }} />
+                      <div className="pf-demo-card-overlay" />
+                      <div className="pf-demo-card-icon">
+                        <IconComp style={{ width: 56, height: 56 }} />
+                      </div>
+                      {d.bannerUrl && (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={d.bannerUrl} alt={d.title} />
-                      ) : (
-                        <div
-                          className="pf-demo-banner-gradient"
-                          style={{ background: getDemoGradient(d.title, theme.accentColor) }}
-                        >
-                          <Zap size={32} style={{ color: "rgba(255,255,255,0.5)" }} />
-                        </div>
+                        <img src={d.bannerUrl} alt="" className="pf-demo-card-logo" />
                       )}
-                    </div>
-                    <div className="pf-demo-info">
-                      <h3>{d.title}</h3>
-                      {d.description && <p>{d.description}</p>}
-                      {d.tags && d.tags.length > 0 && (
-                        <div className="pf-tags" style={{ marginTop: 8 }}>
-                          {d.tags.map(t => <span key={t} className="pf-tag">{t}</span>)}
-                        </div>
+                      {d.status && (
+                        <span className="pf-demo-card-badge">
+                          {d.status === "live" ? "● Live" : d.status === "wip" ? "In Progress" : d.status}
+                        </span>
                       )}
-                      <div className="pf-demo-links">
-                        {d.htmlContent && (
-                          <button
-                            className="pf-demo-link"
-                            onClick={() => setExpandedDemo(expandedDemo === d._id ? null : d._id)}
-                          >
-                            {expandedDemo === d._id ? "Hide Preview" : "Preview →"}
-                          </button>
+                      <div className="pf-demo-card-content">
+                        <h3>{d.title}</h3>
+                        {d.description && <p>{d.description}</p>}
+                        {d.tags && d.tags.length > 0 && (
+                          <div className="pf-demo-card-tags">
+                            {d.tags.slice(0, 3).map(t => <span key={t}>{t}</span>)}
+                          </div>
                         )}
-                        {d.demoUrl && (
-                          <a href={d.demoUrl} target="_blank" rel="noopener noreferrer" className="pf-demo-link">
-                            <Globe style={{ width: 12, height: 12 }} /> Live
-                          </a>
-                        )}
-                        {d.githubUrl && (
-                          <a href={d.githubUrl} target="_blank" rel="noopener noreferrer" className="pf-demo-link">
-                            <ExternalLink style={{ width: 12, height: 12 }} /> Code
-                          </a>
-                        )}
+                        <div className="pf-demo-card-links">
+                          {d.htmlContent && (
+                            <button
+                              className="pf-demo-card-link"
+                              onClick={() => setExpandedDemo(expandedDemo === d._id ? null : d._id)}
+                            >
+                              {expandedDemo === d._id ? "Hide Preview" : "Preview →"}
+                            </button>
+                          )}
+                          {d.demoUrl && (
+                            <a href={d.demoUrl} target="_blank" rel="noopener noreferrer" className="pf-demo-card-link">
+                              <Globe style={{ width: 11, height: 11 }} /> Live
+                            </a>
+                          )}
+                          {d.githubUrl && (
+                            <a href={d.githubUrl} target="_blank" rel="noopener noreferrer" className="pf-demo-card-link">
+                              <ExternalLink style={{ width: 11, height: 11 }} /> Code
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Expanded demo iframe */}

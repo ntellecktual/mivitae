@@ -119,6 +119,7 @@ type Education = {
   gpa?: string;
   honors?: string;
   activities?: string[];
+  relevantCoursework?: string;
   order: number;
   imageUrl?: string;
 };
@@ -1233,8 +1234,82 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     #${id} .pf-demo-link:hover { text-decoration: underline; }
 
     /* ── Home Hero ────────────────────────────────────────────── */
+    #${id} .pf-home-split {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 40px;
+      align-items: start;
+      margin-bottom: 32px;
+    }
+
+    #${id} .pf-home-left {
+      min-width: 0;
+    }
+
+    #${id} .pf-home-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      min-width: 190px;
+    }
+
+    #${id} .pf-home-avatar {
+      width: 148px;
+      height: 148px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid ${theme.accentColor};
+      box-shadow: 0 0 0 6px ${hexToRgba(theme.accentColor, 0.15)}, 0 8px 28px rgba(0,0,0,0.18);
+      display: block;
+    }
+
+    #${id} .pf-home-avatar-placeholder {
+      width: 148px;
+      height: 148px;
+      border-radius: 50%;
+      background: ${hexToRgba(theme.accentColor, 0.08)};
+      border: 2px dashed ${hexToRgba(theme.accentColor, 0.3)};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #${id} .pf-home-stats-col {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    #${id} .pf-home-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    #${id} .pf-home-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      border: 1.5px solid ${hexToRgba(theme.accentColor, 0.35)};
+      color: ${theme.accentColor};
+      background: ${hexToRgba(theme.accentColor, 0.08)};
+    }
+    #${id} .pf-home-action-btn:hover {
+      background: ${hexToRgba(theme.accentColor, 0.16)};
+      transform: translateY(-1px);
+    }
+
     #${id} .pf-home-hero {
-      margin-bottom: 22px;
+      margin-bottom: 0;
     }
 
     #${id} .pf-home-welcome {
@@ -1428,6 +1503,10 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       #${id} .pf-edu-grid { grid-template-columns: 1fr; }
       #${id} .pf-stats { grid-template-columns: repeat(2, 1fr); }
       #${id} .pf-home-2col { grid-template-columns: 1fr; gap: 16px; }
+      #${id} .pf-home-split { grid-template-columns: 1fr; gap: 24px; }
+      #${id} .pf-home-right { flex-direction: row; justify-content: center; gap: 24px; min-width: 0; }
+      #${id} .pf-home-avatar, #${id} .pf-home-avatar-placeholder { width: 90px; height: 90px; }
+      #${id} .pf-home-stats-col { grid-template-columns: repeat(2, 1fr); }
     }
 
     /* Fallback for viewport-level mobile */
@@ -1462,6 +1541,10 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       #${id} .pf-edu-grid { grid-template-columns: 1fr; }
       #${id} .pf-stats { grid-template-columns: repeat(2, 1fr); }
       #${id} .pf-home-2col { grid-template-columns: 1fr; gap: 16px; }
+      #${id} .pf-home-split { grid-template-columns: 1fr; gap: 24px; }
+      #${id} .pf-home-right { flex-direction: row; justify-content: center; gap: 24px; min-width: 0; }
+      #${id} .pf-home-avatar, #${id} .pf-home-avatar-placeholder { width: 90px; height: 90px; }
+      #${id} .pf-home-stats-col { grid-template-columns: repeat(2, 1fr); }
     }
 
     /* ── Print ────────────────────────────────────────────────── */
@@ -1509,7 +1592,14 @@ export default function PortfolioRenderer({
   const theme: ThemeConfig = themeOverride ?? resolveTheme(profile.themeConfig, profile.theme);
   const scopeId = `pf-${useId().replace(/:/g, "")}`;
 
-  const [activeSection, setActiveSection] = useState<ActiveSection>("home");
+  const validSections: ActiveSection[] = ["home", "portfolio", "education", "discover", "skills", "volunteering", "contact"];
+  const [activeSection, setActiveSection] = useState<ActiveSection>(() => {
+    if (!preview && typeof window !== "undefined") {
+      const hash = window.location.hash.replace("#", "") as ActiveSection;
+      if (validSections.includes(hash)) return hash;
+    }
+    return "home";
+  });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedDemo, setExpandedDemo] = useState<string | null>(null);
   const [expandedWork, setExpandedWork] = useState<string | null>(null);
@@ -1614,6 +1704,9 @@ export default function PortfolioRenderer({
   function nav(section: ActiveSection) {
     setActiveSection(section);
     setSidebarOpen(false);
+    if (!preview && typeof window !== "undefined") {
+      window.history.replaceState(null, "", `#${section}`);
+    }
   }
 
   return (
@@ -1739,96 +1832,141 @@ export default function PortfolioRenderer({
           {/* ── HOME ─────────────────────────────────────────── */}
           {activeSection === "home" && (
             <div className="pf-animate">
-              {/* Welcome hero */}
-              <div className="pf-home-hero">
-                <p className="pf-home-welcome">Welcome to</p>
-                <h1 className="pf-home-name">
-                  {(() => { const raw = profile.displayName || profile.slug; const first = raw.split(" ")[0]; return first.charAt(0).toUpperCase() + first.slice(1); })()}&apos;s Portfolio
-                </h1>
-                {profile.headline && (
-                  <p className="pf-home-headline">{profile.headline}</p>
-                )}
-                {profile.bio && (
-                  <p className="pf-home-bio">{profile.bio}</p>
-                )}
+              {/* Two-column hero */}
+              <div className="pf-home-split">
+                {/* Left: bio content */}
+                <div className="pf-home-left">
+                  <div className="pf-home-hero">
+                    <p className="pf-home-welcome">Welcome to</p>
+                    <h1 className="pf-home-name">
+                      {(() => { const raw = profile.displayName || profile.slug; const first = raw.split(" ")[0]; return first.charAt(0).toUpperCase() + first.slice(1); })()}&apos;s Portfolio
+                    </h1>
+                    {profile.headline && (
+                      <p className="pf-home-headline">{profile.headline}</p>
+                    )}
+                    {profile.bio && (
+                      <p className="pf-home-bio">{profile.bio}</p>
+                    )}
 
-                {/* Meta links */}
-                <div className="pf-home-meta">
-                  {profile.location && (
-                    <span>
-                      <MapPin style={{ width: 14, height: 14 }} className="pf-accent" />
-                      {profile.location}
-                    </span>
-                  )}
-                  {profile.websiteUrl && (
-                    <a href={profile.websiteUrl} target="_blank" rel="noopener noreferrer">
-                      <Globe style={{ width: 14, height: 14 }} />
-                      {(() => {
-                        try {
-                          const u = new URL(profile.websiteUrl);
-                          return (u.hostname + (u.pathname !== "/" ? u.pathname : "")).replace(/\/$/, "");
-                        } catch {
-                          return profile.websiteUrl;
-                        }
-                      })()}
-                    </a>
-                  )}
-                  {profile.linkedinUrl && (
-                    <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink style={{ width: 14, height: 14 }} /> LinkedIn
-                    </a>
-                  )}
-                  {profile.githubUrl && (
-                    <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink style={{ width: 14, height: 14 }} /> GitHub
-                    </a>
-                  )}
-                </div>
+                    {/* Meta links */}
+                    <div className="pf-home-meta">
+                      {profile.location && (
+                        <span>
+                          <MapPin style={{ width: 14, height: 14 }} className="pf-accent" />
+                          {profile.location}
+                        </span>
+                      )}
+                      {profile.websiteUrl && (
+                        <a href={profile.websiteUrl} target="_blank" rel="noopener noreferrer">
+                          <Globe style={{ width: 14, height: 14 }} />
+                          {(() => {
+                            try {
+                              const u = new URL(profile.websiteUrl);
+                              return (u.hostname + (u.pathname !== "/" ? u.pathname : "")).replace(/\/$/, "");
+                            } catch {
+                              return profile.websiteUrl;
+                            }
+                          })()}
+                        </a>
+                      )}
+                      {profile.linkedinUrl && (
+                        <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink style={{ width: 14, height: 14 }} /> LinkedIn
+                        </a>
+                      )}
+                      {profile.githubUrl && (
+                        <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink style={{ width: 14, height: 14 }} /> GitHub
+                        </a>
+                      )}
+                    </div>
 
-                {/* Skill chips */}
-                {hasSkills && (
-                  <div className="pf-skill-chips">
-                    {sortedSkills.slice(0, 12).map(s => (
-                      <span key={s._id} className="pf-tag">{s.name}</span>
-                    ))}
-                    {sortedSkills.length > 12 && (
-                      <button className="pf-tag" onClick={() => nav("skills")}>
-                        +{sortedSkills.length - 12} more
+                    {/* Skill chips */}
+                    {hasSkills && (
+                      <div className="pf-skill-chips">
+                        {sortedSkills.slice(0, 12).map(s => (
+                          <span key={s._id} className="pf-tag">{s.name}</span>
+                        ))}
+                        {sortedSkills.length > 12 && (
+                          <button className="pf-tag" onClick={() => nav("skills")}>
+                            +{sortedSkills.length - 12} more
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quick navigation actions */}
+                  <div className="pf-home-actions">
+                    {hasPortfolio && (
+                      <button className="pf-home-action-btn" onClick={() => nav("portfolio")}>
+                        <Briefcase style={{ width: 13, height: 13 }} /> Portfolio
+                      </button>
+                    )}
+                    {hasEducation && (
+                      <button className="pf-home-action-btn" onClick={() => nav("education")}>
+                        <GraduationCap style={{ width: 13, height: 13 }} /> Education
+                      </button>
+                    )}
+                    {hasSkills && (
+                      <button className="pf-home-action-btn" onClick={() => nav("skills")}>
+                        <Wrench style={{ width: 13, height: 13 }} /> Skills
+                      </button>
+                    )}
+                    {hasDemos && (
+                      <button className="pf-home-action-btn" onClick={() => nav("discover")}>
+                        <Zap style={{ width: 13, height: 13 }} /> Demos
+                      </button>
+                    )}
+                    {showContact && (
+                      <button className="pf-home-action-btn" onClick={() => nav("contact")}>
+                        <Mail style={{ width: 13, height: 13 }} /> Contact
                       </button>
                     )}
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* Stats */}
-              {(stats.totalTechnologies > 0 || stats.yearsExperience > 0) && (
-                <div className="pf-stats">
-                  {stats.totalTechnologies > 0 && (
-                    <div className="pf-stat-card">
-                      <div className="pf-stat-value">{stats.totalTechnologies}+</div>
-                      <div className="pf-stat-label">Skills</div>
+                {/* Right: avatar + stats */}
+                <div className="pf-home-right">
+                  {profile.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={profile.avatarUrl} alt={profile.displayName || profile.slug} className="pf-home-avatar" />
+                  ) : (
+                    <div className="pf-home-avatar-placeholder">
+                      <User style={{ width: 52, height: 52, color: theme.accentColor, opacity: 0.5 }} />
                     </div>
                   )}
-                  {stats.yearsExperience > 0 && (
-                    <div className="pf-stat-card">
-                      <div className="pf-stat-value">{stats.yearsExperience}+</div>
-                      <div className="pf-stat-label">Yrs Experience</div>
-                    </div>
-                  )}
-                  {stats.demoCount > 0 && (
-                    <div className="pf-stat-card">
-                      <div className="pf-stat-value">{stats.demoCount}</div>
-                      <div className="pf-stat-label">Demos</div>
-                    </div>
-                  )}
-                  {stats.certCount > 0 && (
-                    <div className="pf-stat-card">
-                      <div className="pf-stat-value">{stats.certCount}</div>
-                      <div className="pf-stat-label">Certifications</div>
+
+                  {(stats.totalTechnologies > 0 || stats.yearsExperience > 0) && (
+                    <div className="pf-home-stats-col">
+                      {stats.totalTechnologies > 0 && (
+                        <div className="pf-stat-card">
+                          <div className="pf-stat-value">{stats.totalTechnologies}+</div>
+                          <div className="pf-stat-label">Skills</div>
+                        </div>
+                      )}
+                      {stats.yearsExperience > 0 && (
+                        <div className="pf-stat-card">
+                          <div className="pf-stat-value">{stats.yearsExperience}+</div>
+                          <div className="pf-stat-label">Yrs Exp</div>
+                        </div>
+                      )}
+                      {stats.demoCount > 0 && (
+                        <div className="pf-stat-card">
+                          <div className="pf-stat-value">{stats.demoCount}</div>
+                          <div className="pf-stat-label">Demos</div>
+                        </div>
+                      )}
+                      {stats.certCount > 0 && (
+                        <div className="pf-stat-card">
+                          <div className="pf-stat-value">{stats.certCount}</div>
+                          <div className="pf-stat-label">Certs</div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
+              </div>
 
               {/* Skills + Radar side-by-side */}
               {(topSkills.length > 0 || (hasSkills && skillCategories.length >= 3)) && (
@@ -2256,6 +2394,17 @@ export default function PortfolioRenderer({
                             <p style={{ fontSize: "0.88rem", lineHeight: 1.75, color: theme.subtextColor }}>
                               {e.fieldOfStudy}
                             </p>
+                          </div>
+                        )}
+
+                        {e.relevantCoursework && (
+                          <div className="pf-work-detail-section">
+                            <h5>📚 Relevant Coursework</h5>
+                            <div className="pf-tags" style={{ marginTop: 0 }}>
+                              {e.relevantCoursework.split(/[,;|\n]+/).map(c => c.trim()).filter(Boolean).map((course, idx) => (
+                                <span key={idx} className="pf-tag">{course}</span>
+                              ))}
+                            </div>
                           </div>
                         )}
 

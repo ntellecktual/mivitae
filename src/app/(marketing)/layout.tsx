@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { ScrollSpy } from "@/components/marketing/scroll-spy";
+import { usePathname } from "next/navigation";
 
 export default function MarketingLayout({
   children,
@@ -14,6 +16,8 @@ export default function MarketingLayout({
   const { isSignedIn } = useAuth();
   const { signOut } = useClerk();
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === "/";
 
   useEffect(() => {
     const onScroll = () => {
@@ -47,7 +51,12 @@ export default function MarketingLayout({
             paddingRight: scrolled ? "1.5rem" : "1rem",
           }}
         >
-          <Link href="/" className="flex items-center transition-opacity hover:opacity-80">
+          {isHome ? (
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="flex items-center transition-opacity hover:opacity-80"
+              aria-label="Scroll to top"
+            >
             <Image
               src="/logo-light.png"
               alt="mivitae"
@@ -64,7 +73,27 @@ export default function MarketingLayout({
               className="hidden dark:block"
               priority
             />
-          </Link>
+            </button>
+          ) : (
+            <Link href="/" className="flex items-center transition-opacity hover:opacity-80">
+              <Image
+                src="/logo-light.png"
+                alt="mivitae"
+                width={120}
+                height={36}
+                className="block dark:hidden"
+                priority
+              />
+              <Image
+                src="/logo-dark.png"
+                alt="mivitae"
+                width={120}
+                height={36}
+                className="hidden dark:block"
+                priority
+              />
+            </Link>
+          )}
           <nav className="flex items-center gap-1 sm:gap-2">
             <Link
               href="/#features"
@@ -125,6 +154,7 @@ export default function MarketingLayout({
           </nav>
         </div>
       </header>
+      {isHome && <ScrollSpy />}
       <main className="flex-1 animate-fade-in">{children}</main>
       <footer className="border-t border-border/40 py-12">
         <div className="mx-auto max-w-6xl px-4 lg:px-6">

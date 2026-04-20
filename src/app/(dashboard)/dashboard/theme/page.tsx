@@ -389,8 +389,8 @@ function PresetsPanel({
         ))}
       </div>
 
-      {/* Horizontal preset carousel */}
-      <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory">
+      {/* Vertical preset grid */}
+      <div className="grid grid-cols-2 gap-2.5">
         {filtered.map((preset) => {
           const bg =
             preset.config.bgType === "gradient"
@@ -406,7 +406,7 @@ function PresetsPanel({
               key={preset.id}
               onClick={() => onSelect(preset.config)}
               className={cn(
-                "group relative shrink-0 snap-center overflow-hidden rounded-xl border-2 transition-all w-32",
+                "group relative overflow-hidden rounded-xl border-2 transition-all w-full",
                 isActive
                   ? "border-white shadow-lg shadow-white/20 scale-105"
                   : "border-white/10 hover:border-white/40 hover:scale-[1.02]"
@@ -748,7 +748,7 @@ function FontsPanel({
       </div>
 
       {mode === "pairings" ? (
-        <div className="space-y-1.5 max-h-64 overflow-y-auto scrollbar-none">
+        <div className="space-y-1.5">
           {FONT_PAIRINGS.map((pair) => {
             const isActive = theme.headingFont === pair.heading && theme.bodyFont === pair.body;
             return (
@@ -860,7 +860,7 @@ function LayoutPanel({
       {/* Hero Layout */}
       <div>
         <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Hero Layout</p>
-        <div className="grid grid-cols-2 gap-1.5 max-h-60 overflow-y-auto scrollbar-none">
+        <div className="grid grid-cols-2 gap-1.5">
           {HERO_LAYOUTS.map((layout) => {
             const active = (theme.heroLayout ?? "centered") === layout.id;
             return (
@@ -919,7 +919,7 @@ function LayoutPanel({
       {/* Card Style */}
       <div>
         <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Card Template</p>
-        <div className="grid grid-cols-2 gap-1.5 max-h-52 overflow-y-auto scrollbar-none">
+        <div className="grid grid-cols-2 gap-1.5">
           {CARD_TEMPLATES.map((card) => {
             const active = (theme.cardStyle ?? "default") === card.id;
             return (

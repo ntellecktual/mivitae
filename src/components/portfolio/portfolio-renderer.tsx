@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/lib/convex";
 import {
@@ -38,6 +38,44 @@ function sanitizeCss(css: string): string {
   s = s.replace(/-moz-binding\s*:/gi, "blocked:");
   s = s.replace(/behavior\s*:/gi, "blocked:");
   return s;
+}
+
+// ── Dominant Color Extraction ──────────────────────────────────────────────
+
+function extractDominantColor(imgSrc: string): Promise<[number, number, number]> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const size = 10;
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { resolve([59, 130, 246]); return; }
+      ctx.drawImage(img, 0, 0, size, size);
+      const data = ctx.getImageData(0, 0, size, size).data;
+      let rT = 0, gT = 0, bT = 0, count = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        // skip near-white and near-black pixels for better results
+        const r = data[i], g = data[i + 1], b = data[i + 2];
+        const brightness = (r + g + b) / 3;
+        if (brightness > 20 && brightness < 240) {
+          rT += r; gT += g; bT += b; count++;
+        }
+      }
+      if (count === 0) { resolve([59, 130, 246]); return; }
+      resolve([Math.round(rT / count), Math.round(gT / count), Math.round(bT / count)]);
+    };
+    img.onerror = () => resolve([59, 130, 246]);
+    img.src = imgSrc;
+  });
+}
+
+function rgbToGradient(r: number, g: number, b: number): string {
+  // Create a rich gradient: saturated version → darker → near-black
+  const darken = (v: number, f: number) => Math.round(v * f);
+  return `linear-gradient(150deg, rgb(${r},${g},${b}) 0%, rgb(${darken(r, 0.5)},${darken(g, 0.5)},${darken(b, 0.5)}) 55%, rgb(${darken(r, 0.1)},${darken(g, 0.1)},${darken(b, 0.1)}) 100%)`;
 }
 
 // ── Prop Types ─────────────────────────────────────────────────────────────
@@ -811,76 +849,229 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       #${id} .pf-work-card--featured { aspect-ratio: 3/4; }
     }
 
-    /* ── Education Cards (panel style) ────────────────────── */
+    /* ── Education Cards (thenumerix image-card style) ───── */
+    #${id} .pf-edu-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.1rem;
+      max-width: 100%;
+    }
     #${id} .pf-edu-card {
-      ${cardCss};
+      position: relative;
       overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border-radius: 20px;
+      cursor: pointer;
+      aspect-ratio: 3/4;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
     }
     #${id} .pf-edu-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px ${hexToRgba(theme.cardBorder, 0.35)};
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 28px 70px rgba(0,0,0,0.22), 0 0 0 1px ${hexToRgba(theme.accentColor, 0.2)};
     }
-    #${id} .pf-edu-card-img {
-      position: relative;
-      height: 180px;
-      overflow: hidden;
-      background: linear-gradient(145deg, ${hexToRgba(theme.accentColor, 0.55)}, ${hexToRgba(theme.accentColor, 0.12)});
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    #${id} .pf-edu-card.active {
+      box-shadow: 0 0 0 3px ${theme.accentColor}, 0 28px 70px ${hexToRgba(theme.accentColor, 0.25)};
+      transform: translateY(-4px) scale(1.01);
     }
-    #${id} .pf-edu-card-img img {
+    #${id} .pf-edu-card-bg {
       position: absolute;
       inset: 0;
-      display: block;
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      padding: 22px;
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
     }
-    #${id} .pf-edu-card-img-placeholder {
+    #${id} .pf-edu-card:hover .pf-edu-card-bg {
+      transform: scale(1.06);
+    }
+    #${id} .pf-edu-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(0deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.06) 100%);
+      transition: background 0.3s;
+    }
+    #${id} .pf-edu-card:hover .pf-edu-card-overlay {
+      background: linear-gradient(0deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.04) 100%);
+    }
+    #${id} .pf-edu-card-logo-wrap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 38%;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: ${hexToRgba(theme.accentColor, 0.3)};
+      z-index: 1;
     }
-    #${id} .pf-edu-card-overlay {
+    #${id} .pf-edu-card-logo {
+      width: 108px;
+      height: 108px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 24px rgba(0,0,0,0.55));
+      transition: transform 0.4s ease, filter 0.4s;
+    }
+    #${id} .pf-edu-card:hover .pf-edu-card-logo {
+      transform: scale(1.08);
+      filter: drop-shadow(0 8px 32px rgba(0,0,0,0.7)) brightness(1.1);
+    }
+    #${id} .pf-edu-card-logo-placeholder {
+      width: 108px;
+      height: 108px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.3;
+      color: rgba(255,255,255,0.6);
+      filter: drop-shadow(0 4px 24px rgba(0,0,0,0.3));
+    }
+    #${id} .pf-edu-card-content {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      padding: 10px 14px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.72));
+      padding: 1.6rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      z-index: 2;
     }
     #${id} .pf-edu-card-badge {
-      display: inline-block;
-      font-size: 0.58rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      width: fit-content;
+      font-size: 0.62rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.09em;
-      padding: 2px 8px;
-      border-radius: 4px;
-      background: rgba(255,255,255,0.18);
+      letter-spacing: 0.06em;
+      padding: 0.25rem 0.8rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       color: rgba(255,255,255,0.9);
-      margin-bottom: 3px;
+      border: 1px solid rgba(255,255,255,0.12);
     }
     #${id} .pf-edu-card-name {
       color: #fff;
       font-family: '${theme.headingFont}', sans-serif;
-      font-weight: 700;
-      font-size: 1.05rem;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.5);
-      line-height: 1.25;
+      font-weight: 800;
+      font-size: 1.35rem;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+      line-height: 1.2;
+      letter-spacing: -0.015em;
     }
-    #${id} .pf-edu-card-body {
-      padding: 14px 18px 18px;
+    #${id} .pf-edu-card-degree {
+      color: rgba(255,255,255,0.75);
+      font-size: 0.8rem;
+      font-weight: 500;
+      line-height: 1.3;
     }
-    #${id} .pf-edu-card-body h3 {
-      margin: 0 0 2px;
-      font-family: '${theme.headingFont}', sans-serif;
-      font-weight: 600;
+    #${id} .pf-edu-card-arrow {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 0.7rem;
+      opacity: 0;
+      transform: translate(-4px, 4px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    #${id} .pf-edu-card:hover .pf-edu-card-arrow {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+
+    /* ── Education Detail Panel ───────────────────────────── */
+    #${id} .pf-edu-detail {
+      margin-top: 1.5rem;
+    }
+    #${id} .pf-edu-detail-card {
+      ${cardCss};
+      overflow: hidden;
+      animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #${id} .pf-edu-detail-header {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid ${hexToRgba(theme.cardBorder, 0.3)};
+    }
+    #${id} .pf-edu-detail-logo {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      border-radius: 14px;
+      border: 1px solid ${hexToRgba(theme.cardBorder, 0.3)};
+      background: ${theme.cardBg};
+      padding: 6px;
+      flex-shrink: 0;
+    }
+    #${id} .pf-edu-detail-info h2 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin: 0 0 0.2rem;
       color: ${theme.textColor};
+      font-family: '${theme.headingFont}', sans-serif;
+    }
+    #${id} .pf-edu-detail-info p {
+      font-size: 0.82rem;
+      color: ${theme.subtextColor};
+      margin: 0;
+    }
+    #${id} .pf-edu-detail-close {
+      margin-left: auto;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid ${hexToRgba(theme.cardBorder, 0.3)};
+      background: transparent;
+      color: ${theme.subtextColor};
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    #${id} .pf-edu-detail-close:hover {
+      background: rgba(239,68,68,0.08);
+      border-color: rgba(239,68,68,0.2);
+      color: #ef4444;
+    }
+    #${id} .pf-edu-detail-body {
+      padding: 1.5rem 2rem 2rem;
+    }
+    #${id} .pf-edu-detail-body .pf-edu-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0.25rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-right: 0.4rem;
+      margin-bottom: 0.7rem;
+      background: ${hexToRgba(theme.accentColor, 0.06)};
+      border: 1px solid ${hexToRgba(theme.accentColor, 0.1)};
+      color: ${theme.accentColor};
     }
 
     #${id} .pf-cat-tabs {
@@ -1234,6 +1425,7 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       #${id} .pf-prof-years { display: none; }
       #${id} .pf-demo-grid { grid-template-columns: 1fr; }
       #${id} .pf-work-grid { grid-template-columns: 1fr; }
+      #${id} .pf-edu-grid { grid-template-columns: 1fr; }
       #${id} .pf-stats { grid-template-columns: repeat(2, 1fr); }
       #${id} .pf-home-2col { grid-template-columns: 1fr; gap: 16px; }
     }
@@ -1267,6 +1459,7 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
       #${id} .pf-prof-years { display: none; }
       #${id} .pf-demo-grid { grid-template-columns: 1fr; }
       #${id} .pf-work-grid { grid-template-columns: 1fr; }
+      #${id} .pf-edu-grid { grid-template-columns: 1fr; }
       #${id} .pf-stats { grid-template-columns: repeat(2, 1fr); }
       #${id} .pf-home-2col { grid-template-columns: 1fr; gap: 16px; }
     }
@@ -1320,6 +1513,8 @@ export default function PortfolioRenderer({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedDemo, setExpandedDemo] = useState<string | null>(null);
   const [expandedWork, setExpandedWork] = useState<string | null>(null);
+  const [expandedEdu, setExpandedEdu] = useState<string | null>(null);
+  const [eduColors, setEduColors] = useState<Record<string, string>>({});
   const [selectedDemoTag, setSelectedDemoTag] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [demoSearch, setDemoSearch] = useState("");
@@ -1340,6 +1535,25 @@ export default function PortfolioRenderer({
       document.querySelector(`link[data-mivitae-font]`)?.remove();
     };
   }, [theme.headingFont, theme.bodyFont, preview]);
+
+  // Extract dominant colors from education images
+  const extractEduColors = useCallback(async () => {
+    const entries = [...education].filter(e => e.imageUrl);
+    if (entries.length === 0) return;
+    const colors: Record<string, string> = {};
+    await Promise.all(entries.map(async (e) => {
+      if (!e.imageUrl) return;
+      try {
+        const [r, g, b] = await extractDominantColor(e.imageUrl);
+        colors[e._id] = rgbToGradient(r, g, b);
+      } catch {
+        colors[e._id] = rgbToGradient(59, 130, 246);
+      }
+    }));
+    setEduColors(colors);
+  }, [education]);
+
+  useEffect(() => { extractEduColors(); }, [extractEduColors]);
 
   const previewFontUrl = preview ? getGoogleFontsUrl(theme.headingFont, theme.bodyFont) : null;
 
@@ -1962,42 +2176,107 @@ export default function PortfolioRenderer({
               <div className="pf-divider" />
 
               {sortedEducation.length > 0 && (
-                <div className="pf-work-grid" style={{ marginBottom: sortedCertificates.length > 0 ? 32 : 0 }}>
+                <div className="pf-edu-grid" style={{ marginBottom: sortedCertificates.length > 0 ? 32 : 0 }}>
                   {sortedEducation.map(e => (
-                    <div key={e._id} className="pf-edu-card">
-                      <div className="pf-edu-card-img">
+                    <div
+                      key={e._id}
+                      className={`pf-edu-card ${expandedEdu === e._id ? "active" : ""}`}
+                      onClick={() => setExpandedEdu(expandedEdu === e._id ? null : e._id)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); setExpandedEdu(expandedEdu === e._id ? null : e._id); }}}
+                    >
+                      <div
+                        className="pf-edu-card-bg"
+                        style={{
+                          background: eduColors[e._id]
+                            ?? `linear-gradient(150deg, ${hexToRgba(theme.accentColor, 0.8)} 0%, ${hexToRgba(theme.accentColor, 0.3)} 55%, rgba(0,0,0,0.9) 100%)`,
+                        }}
+                      />
+                      <div className="pf-edu-card-overlay" />
+                      <div className="pf-edu-card-logo-wrap">
                         {e.imageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={e.imageUrl} alt={e.institution} />
+                          <img src={e.imageUrl} alt={e.institution} className="pf-edu-card-logo" />
                         ) : (
-                          <div className="pf-edu-card-img-placeholder">
-                            <GraduationCap style={{ width: 64, height: 64, opacity: 0.2 }} />
+                          <div className="pf-edu-card-logo-placeholder">
+                            <GraduationCap style={{ width: 64, height: 64 }} />
                           </div>
                         )}
-                        <div className="pf-edu-card-overlay">
-                          {e.degree && <div className="pf-edu-card-badge">{e.degree}</div>}
-                          <div className="pf-edu-card-name">{e.institution}</div>
-                        </div>
                       </div>
-                      <div className="pf-edu-card-body">
-                        <p className="pf-card-sub">
-                          {e.fieldOfStudy ?? e.degree}
-                        </p>
-                        <p className="pf-card-meta" style={{ marginTop: 2 }}>
-                          {e.startYear} — {e.endYear ?? "Present"}
-                        </p>
-                        {e.gpa && <p className="pf-card-meta" style={{ marginTop: 4 }}>GPA: {e.gpa}</p>}
-                        {e.honors && <p className="pf-card-meta" style={{ marginTop: 4, fontStyle: "italic" }}>{e.honors}</p>}
-                        {e.activities && e.activities.length > 0 && (
-                          <p className="pf-card-meta" style={{ marginTop: 8 }}>
-                            {e.activities.join(" · ")}
-                          </p>
-                        )}
+                      <div className="pf-edu-card-arrow">→</div>
+                      <div className="pf-edu-card-content">
+                        {e.degree && <span className="pf-edu-card-badge">🎓 {e.degree}</span>}
+                        <span className="pf-edu-card-name">{e.institution}</span>
+                        <span className="pf-edu-card-degree">
+                          {e.fieldOfStudy ?? e.degree}{e.fieldOfStudy && e.degree && e.fieldOfStudy !== e.degree ? ` · ${e.degree}` : ""}
+                        </span>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
+
+              {/* Education detail panel */}
+              {expandedEdu && (() => {
+                const e = sortedEducation.find(ed => ed._id === expandedEdu);
+                if (!e) return null;
+                return (
+                  <div className="pf-edu-detail">
+                    <div className="pf-edu-detail-card">
+                      <div className="pf-edu-detail-header">
+                        {e.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={e.imageUrl} alt={e.institution} className="pf-edu-detail-logo" />
+                        ) : (
+                          <div style={{ width: 56, height: 56, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", background: hexToRgba(theme.accentColor, 0.1), flexShrink: 0 }}>
+                            <GraduationCap style={{ width: 24, height: 24, opacity: 0.5 }} />
+                          </div>
+                        )}
+                        <div className="pf-edu-detail-info">
+                          <h2>{e.institution}</h2>
+                          <p>{e.fieldOfStudy ?? e.degree} · 📅 {e.startYear} — {e.endYear ?? "Present"}</p>
+                        </div>
+                        <button
+                          className="pf-edu-detail-close"
+                          onClick={(ev) => { ev.stopPropagation(); setExpandedEdu(null); }}
+                          aria-label="Close"
+                        >
+                          <X style={{ width: 14, height: 14 }} />
+                        </button>
+                      </div>
+                      <div className="pf-edu-detail-body">
+                        {e.degree && <span className="pf-edu-badge">🎓 {e.degree}</span>}
+                        {e.gpa && <span className="pf-edu-badge">📊 GPA: {e.gpa}</span>}
+                        {e.honors && <span className="pf-edu-badge">🏆 {e.honors}</span>}
+
+                        {e.fieldOfStudy && (
+                          <div className="pf-work-detail-section">
+                            <h5>📋 Field of Study</h5>
+                            <p style={{ fontSize: "0.88rem", lineHeight: 1.75, color: theme.subtextColor }}>
+                              {e.fieldOfStudy}
+                            </p>
+                          </div>
+                        )}
+
+                        {e.activities && e.activities.length > 0 && (
+                          <div className="pf-work-detail-section">
+                            <h5>🎯 Activities &amp; Involvement</h5>
+                            <ul>
+                              {e.activities.map((a, idx) => (
+                                <li key={idx}>
+                                  <span style={{ flexShrink: 0, fontSize: "0.75rem" }}>✅</span>
+                                  {a}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Certificates */}
               {showCertificates && sortedCertificates.length > 0 && (

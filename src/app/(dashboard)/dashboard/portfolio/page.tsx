@@ -319,21 +319,20 @@ export default function PortfolioPage() {
                 <div key={section._id} className="relative pl-14">
                   {/* Timeline dot */}
                   <div className="absolute left-[14px] top-5 h-3 w-3 rounded-full border-2 border-primary bg-background" />
-                  <Card className="card-hover overflow-hidden">
-                    <CardContent className="p-0">
-                      <ImageUploader
-                        shape="panel"
-                        maxSize={15_000_000}
-                        imageUrl={section.imageUrl ?? null}
-                        generateUploadUrlRef={api.portfolioSections.generateImageUploadUrl}
-                        updateImageRef={api.portfolioSections.updateImage}
-                        removeImageRef={api.portfolioSections.removeImage}
-                        updateArgs={{ sectionId: section._id }}
-                        removeArgs={{ sectionId: section._id }}
-                        className="[&>div]:rounded-none [&>div]:border-0 [&>div]:border-b [&>div]:rounded-none [&>button]:rounded-none [&>button]:border-0 [&>button]:border-b"
-                      />
-                      <div className="p-5">
-                        <div className="flex items-start justify-between gap-2">
+                  <Card className="card-hover">
+                    <CardContent className="p-5">
+                      <div className="flex items-start gap-4">
+                        <ImageUploader
+                          maxSize={15_000_000}
+                          imageUrl={section.imageUrl ?? null}
+                          generateUploadUrlRef={api.portfolioSections.generateImageUploadUrl}
+                          updateImageRef={api.portfolioSections.updateImage}
+                          removeImageRef={api.portfolioSections.removeImage}
+                          updateArgs={{ sectionId: section._id }}
+                          removeArgs={{ sectionId: section._id }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
                             <div className="flex flex-wrap items-center gap-2 min-w-0">
                               <h3 className="font-semibold leading-tight">{section.role}</h3>
                               {!section.endDate && (
@@ -479,6 +478,7 @@ export default function PortfolioPage() {
                             )}
                           </div>
                         </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </div>

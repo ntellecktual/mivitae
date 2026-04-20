@@ -532,8 +532,9 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     /* ── Work History Grid ─────────────────────────────────── */
     #${id} .pf-work-grid {
       display: grid;
-      gap: 16px;
+      gap: 1.1rem;
       grid-template-columns: repeat(3, 1fr);
+      max-width: 100%;
     }
     #${id} .pf-work-card--featured {
       grid-column: span 2;
@@ -541,38 +542,41 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
 
     #${id} .pf-work-card {
       position: relative;
-      border-radius: 16px;
+      border-radius: 20px;
       overflow: hidden;
       cursor: pointer;
-      aspect-ratio: 3/2;
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      aspect-ratio: 3/4;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
     }
     #${id} .pf-work-card--featured {
-      aspect-ratio: 4/3;
+      aspect-ratio: 16/9;
     }
     #${id} .pf-work-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 28px 70px rgba(0,0,0,0.22), 0 0 0 1px ${hexToRgba(theme.accentColor, 0.2)};
     }
     #${id} .pf-work-card.active {
-      outline: 2px solid ${theme.accentColor};
-      outline-offset: -2px;
+      box-shadow: 0 0 0 3px ${theme.accentColor}, 0 28px 70px ${hexToRgba(theme.accentColor, 0.25)};
+      transform: translateY(-4px) scale(1.01);
     }
 
     #${id} .pf-work-card-img {
       position: absolute;
       inset: 0;
-      overflow: hidden;
+      width: 100%;
+      height: 100%;
     }
     #${id} .pf-work-card-img img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       object-position: center;
-      transition: transform 0.4s ease;
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s;
     }
     #${id} .pf-work-card:hover .pf-work-card-img img {
-      transform: scale(1.06);
+      transform: scale(1.08);
+      filter: brightness(1.05);
     }
     #${id} .pf-work-card-img-placeholder {
       width: 100%;
@@ -586,64 +590,70 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     #${id} .pf-work-card-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(transparent 40%, rgba(0,0,0,0.75));
+      background: linear-gradient(0deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.06) 100%);
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      padding: 16px 18px;
+      padding: 1.6rem 1.5rem;
       transition: background 0.3s ease;
     }
     #${id} .pf-work-card:hover .pf-work-card-overlay {
-      background: linear-gradient(transparent 30%, rgba(0,0,0,0.85));
+      background: linear-gradient(0deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.04) 100%);
     }
 
     #${id} .pf-work-card-domain {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      font-size: 0.6rem;
+      width: fit-content;
+      font-size: 0.62rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 3px 9px;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(4px);
+      letter-spacing: 0.06em;
+      padding: 0.25rem 0.8rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       color: rgba(255,255,255,0.9);
-      margin-bottom: 6px;
-      align-self: flex-start;
+      border: 1px solid rgba(255,255,255,0.12);
+      margin-bottom: 0.4rem;
     }
     #${id} .pf-work-card-company {
       color: #fff;
       font-family: '${theme.headingFont}', sans-serif;
-      font-weight: 700;
-      font-size: 1.15rem;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      font-weight: 800;
+      font-size: 1.35rem;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.4);
       line-height: 1.2;
+      letter-spacing: -0.015em;
     }
     #${id} .pf-work-card-role {
       color: rgba(255,255,255,0.75);
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       font-weight: 500;
       margin-top: 2px;
+      line-height: 1.3;
     }
     #${id} .pf-work-card-arrow {
       position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
+      top: 1rem;
+      right: 1rem;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
       background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.15);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: rgba(255,255,255,0.6);
-      font-size: 0.8rem;
+      color: #fff;
+      font-size: 0.7rem;
       opacity: 0;
-      transform: translate(4px, -4px);
-      transition: all 0.25s ease;
+      transform: translate(-4px, 4px);
+      transition: opacity 0.3s, transform 0.3s;
     }
     #${id} .pf-work-card:hover .pf-work-card-arrow {
       opacity: 1;
@@ -793,12 +803,12 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     @container portfolio (max-width: 900px) {
       #${id} .pf-work-grid { grid-template-columns: repeat(2, 1fr); }
       #${id} .pf-work-card--featured { grid-column: span 1; }
-      #${id} .pf-work-card--featured { aspect-ratio: 3/2; }
+      #${id} .pf-work-card--featured { aspect-ratio: 3/4; }
     }
     @media (max-width: 900px) {
       #${id} .pf-work-grid { grid-template-columns: repeat(2, 1fr); }
       #${id} .pf-work-card--featured { grid-column: span 1; }
-      #${id} .pf-work-card--featured { aspect-ratio: 3/2; }
+      #${id} .pf-work-card--featured { aspect-ratio: 3/4; }
     }
 
     /* ── Education Cards (panel style) ────────────────────── */

@@ -3,11 +3,63 @@
 // and CSS generation helpers. Used by the portfolio renderer + theme editor.
 
 export type BgType = "solid" | "gradient" | "pattern";
-export type HeroLayout = "centered" | "left";
-export type CardStyle = "default" | "glass" | "bordered" | "flat" | "elevated";
-export type PatternType = "dots" | "grid" | "lines" | "none";
+export type HeroLayout = "centered" | "left" | "split" | "floating" | "banner" | "stacked" | "minimal" | "magazine" | "card" | "diagonal";
+export type CardStyle = "default" | "glass" | "bordered" | "flat" | "elevated" | "minimal" | "neon" | "retro" | "shadow-pop" | "outline";
+export type PatternType = "dots" | "grid" | "lines" | "cross" | "waves" | "hexagons" | "none";
 export type ContainerWidth = "narrow" | "default" | "wide";
-export type AnimationStyle = "none" | "subtle" | "bold" | "playful";
+export type AnimationStyle = "none" | "subtle" | "bold" | "playful" | "cinematic" | "stagger";
+export type GradientType = "linear" | "radial" | "conic";
+export type HoverEffect = "none" | "lift" | "glow" | "tilt" | "scale";
+export type PageTransition = "none" | "fade" | "slide" | "morph";
+export type NavVariant = "default" | "minimal" | "pills" | "underline";
+export type NavPosition = "left" | "right";
+export type NavIconStyle = "default" | "outline" | "rounded" | "square";
+export type SectionDivider = "none" | "wave" | "angle" | "curve" | "zigzag";
+export type ButtonStyle = "default" | "rounded" | "pill" | "outline" | "ghost" | "glow";
+export type ImageFilter = "none" | "grayscale" | "sepia" | "saturate" | "contrast" | "brightness";
+export type SectionSpacing = "compact" | "comfortable" | "spacious";
+export type SocialIconStyle = "default" | "rounded" | "square" | "pill" | "outline" | "glow";
+export type ScrollProgressPosition = "top" | "bottom";
+export type SplashStyle = "fade" | "slide-up" | "zoom" | "blur";
+export type FontScale = "small" | "medium" | "large";
+
+export interface DarkPalette {
+  bgPrimary: string;
+  bgSecondary: string;
+  textColor: string;
+  subtextColor: string;
+  cardBg: string;
+  cardBorder: string;
+  accentColor: string;
+}
+
+export interface DarkModeConfig {
+  enabled: boolean;
+  darkPalette?: DarkPalette;
+}
+
+export interface NavStyleConfig {
+  variant: NavVariant;
+  position: NavPosition;
+  width: "narrow" | "default" | "wide";
+  showLabels: boolean;
+  iconStyle?: NavIconStyle;
+}
+
+export interface ScrollProgressConfig {
+  enabled: boolean;
+  color?: string;
+  position?: ScrollProgressPosition;
+  height?: number; // px
+}
+
+export interface SplashScreenConfig {
+  enabled: boolean;
+  style?: SplashStyle;
+  duration?: number; // ms
+  bgColor?: string;
+  textColor?: string;
+}
 
 export interface ThemeConfig {
   // Background
@@ -42,6 +94,48 @@ export interface ThemeConfig {
   animationStyle?: AnimationStyle;
   // Advanced
   customCss?: string;
+
+  // ── Pro Features ──────────────────────────────────────────
+  // Gradient system
+  bgGradientType?: GradientType;
+  bgGrainOverlay?: boolean;
+  bgGrainOpacity?: number; // 0-100
+
+  // Animation & Motion
+  hoverEffects?: HoverEffect;
+  pageTransition?: PageTransition;
+  parallaxEnabled?: boolean;
+
+  // Dark/Light mode
+  darkMode?: DarkModeConfig;
+
+  // Navigation styling
+  navStyle?: NavStyleConfig;
+
+  // Section dividers
+  sectionDivider?: SectionDivider;
+  sectionDividerColor?: string;
+
+  // Button styling
+  buttonStyle?: ButtonStyle;
+
+  // Image filters
+  imageFilter?: ImageFilter;
+
+  // Section spacing
+  sectionSpacing?: SectionSpacing;
+
+  // Social icon styles
+  socialIconStyle?: SocialIconStyle;
+
+  // Scroll progress indicator
+  scrollProgress?: ScrollProgressConfig;
+
+  // Splash screen
+  splashScreen?: SplashScreenConfig;
+
+  // Typography scale
+  fontScale?: FontScale;
 }
 
 export const DEFAULT_THEME: ThemeConfig = {
@@ -609,7 +703,17 @@ export function getBackgroundStyle(theme: ThemeConfig): React.CSSProperties {
   const base: React.CSSProperties = {};
 
   if (theme.bgType === "gradient") {
-    base.background = `linear-gradient(${theme.bgAngle}deg, ${theme.bgPrimary}, ${theme.bgSecondary})`;
+    const gradType = theme.bgGradientType ?? "linear";
+    switch (gradType) {
+      case "radial":
+        base.background = `radial-gradient(circle at center, ${theme.bgPrimary}, ${theme.bgSecondary})`;
+        break;
+      case "conic":
+        base.background = `conic-gradient(from ${theme.bgAngle}deg, ${theme.bgPrimary}, ${theme.bgSecondary}, ${theme.bgPrimary})`;
+        break;
+      default:
+        base.background = `linear-gradient(${theme.bgAngle}deg, ${theme.bgPrimary}, ${theme.bgSecondary})`;
+    }
   } else {
     base.backgroundColor = theme.bgPrimary;
     if (theme.bgType === "pattern" && theme.patternType !== "none") {
@@ -630,6 +734,12 @@ export function getPatternCss(patternType: PatternType, patternColor: string): s
       return `repeating-linear-gradient(0deg, ${hexToRgba(patternColor, 0.15)} 0, ${hexToRgba(patternColor, 0.15)} 1px, transparent 0, transparent 100%), repeating-linear-gradient(90deg, ${hexToRgba(patternColor, 0.15)} 0, ${hexToRgba(patternColor, 0.15)} 1px, transparent 0, transparent 100%)`;
     case "lines":
       return `repeating-linear-gradient(45deg, ${hexToRgba(patternColor, 0.12)} 0, ${hexToRgba(patternColor, 0.12)} 1px, transparent 0, transparent 50%)`;
+    case "cross":
+      return `repeating-linear-gradient(0deg, ${hexToRgba(patternColor, 0.12)} 0, ${hexToRgba(patternColor, 0.12)} 1px, transparent 0, transparent 100%), repeating-linear-gradient(90deg, ${hexToRgba(patternColor, 0.12)} 0, ${hexToRgba(patternColor, 0.12)} 1px, transparent 0, transparent 100%), repeating-linear-gradient(45deg, ${hexToRgba(patternColor, 0.06)} 0, ${hexToRgba(patternColor, 0.06)} 1px, transparent 0, transparent 100%), repeating-linear-gradient(-45deg, ${hexToRgba(patternColor, 0.06)} 0, ${hexToRgba(patternColor, 0.06)} 1px, transparent 0, transparent 100%)`;
+    case "waves":
+      return `url("data:image/svg+xml,%3Csvg width='100' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 Q25 0 50 10 T100 10' fill='none' stroke='${encodeURIComponent(hexToRgba(patternColor, 0.15))}' stroke-width='1'/%3E%3C/svg%3E")`;
+    case "hexagons":
+      return `url("data:image/svg+xml,%3Csvg width='28' height='49' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M14 0 L28 8.5 L28 24.5 L14 33 L0 24.5 L0 8.5 Z M14 16.5 L28 25 L28 41 L14 49 L0 41 L0 25 Z' fill='none' stroke='${encodeURIComponent(hexToRgba(patternColor, 0.12))}' stroke-width='0.5'/%3E%3C/svg%3E")`;
     default:
       return "none";
   }
@@ -640,6 +750,9 @@ export function getPatternSize(patternType: PatternType): string {
     case "dots": return "20px 20px";
     case "grid": return "32px 32px";
     case "lines": return "12px 12px";
+    case "cross": return "24px 24px";
+    case "waves": return "100px 20px";
+    case "hexagons": return "28px 49px";
     default: return "auto";
   }
 }
@@ -682,6 +795,45 @@ export function getCardStyle(theme: ThemeConfig): React.CSSProperties {
         backgroundColor: theme.cardBg,
         border: "none",
         boxShadow: `0 20px 60px ${hexToRgba(theme.textColor, 0.12)}, 0 4px 16px ${hexToRgba(theme.textColor, 0.08)}`,
+      };
+    case "minimal":
+      return {
+        ...base,
+        backgroundColor: "transparent",
+        border: "none",
+        borderBottom: `1px solid ${hexToRgba(theme.cardBorder, 0.3)}`,
+        borderRadius: "0",
+        padding: "20px 0",
+      };
+    case "neon":
+      return {
+        ...base,
+        backgroundColor: hexToRgba(theme.cardBg, 0.4),
+        border: `1px solid ${hexToRgba(theme.accentColor, 0.5)}`,
+        boxShadow: `0 0 20px ${hexToRgba(theme.accentColor, 0.15)}, 0 0 60px ${hexToRgba(theme.accentColor, 0.05)}, inset 0 0 20px ${hexToRgba(theme.accentColor, 0.05)}`,
+      };
+    case "retro":
+      return {
+        ...base,
+        backgroundColor: theme.cardBg,
+        border: `3px solid ${theme.textColor}`,
+        borderRadius: "4px",
+        boxShadow: `6px 6px 0 ${theme.textColor}`,
+      };
+    case "shadow-pop":
+      return {
+        ...base,
+        backgroundColor: theme.cardBg,
+        border: `1px solid ${hexToRgba(theme.cardBorder, 0.5)}`,
+        boxShadow: `0 25px 80px ${hexToRgba(theme.accentColor, 0.15)}, 0 10px 30px ${hexToRgba(theme.textColor, 0.08)}`,
+      };
+    case "outline":
+      return {
+        ...base,
+        backgroundColor: "transparent",
+        border: `1px solid ${hexToRgba(theme.cardBorder, 0.5)}`,
+        borderRadius: "12px",
+        boxShadow: "none",
       };
     default:
       return {
@@ -830,7 +982,400 @@ export function getAnimationCss(id: string, style: AnimationStyle = "subtle"): s
       #${id} section:nth-child(2) { animation-delay: 0.15s; }
       #${id} section:nth-child(3) { animation-delay: 0.3s; }
     `,
+    cinematic: `
+      @keyframes pf-cinema-in {
+        0%   { opacity: 0; transform: translateY(60px) scale(0.92); filter: blur(8px); }
+        60%  { filter: blur(0); }
+        100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      }
+      #${id} .pf-animate { animation: pf-cinema-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+      #${id} section:nth-child(1) { animation-delay: 0s; }
+      #${id} section:nth-child(2) { animation-delay: 0.2s; }
+      #${id} section:nth-child(3) { animation-delay: 0.4s; }
+      #${id} .pf-card { animation: pf-cinema-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    `,
+    stagger: `
+      @keyframes pf-stagger-in {
+        from { opacity: 0; transform: translateX(-30px); }
+        to   { opacity: 1; transform: translateX(0); }
+      }
+      #${id} .pf-animate { animation: pf-stagger-in 0.5s ease both; }
+      #${id} section:nth-child(1) { animation-delay: 0s; }
+      #${id} section:nth-child(2) { animation-delay: 0.1s; }
+      #${id} section:nth-child(3) { animation-delay: 0.2s; }
+      #${id} .pf-card:nth-child(1) { animation: pf-stagger-in 0.4s ease 0.1s both; }
+      #${id} .pf-card:nth-child(2) { animation: pf-stagger-in 0.4s ease 0.2s both; }
+      #${id} .pf-card:nth-child(3) { animation: pf-stagger-in 0.4s ease 0.3s both; }
+      #${id} .pf-card:nth-child(4) { animation: pf-stagger-in 0.4s ease 0.4s both; }
+      #${id} .pf-card:nth-child(5) { animation: pf-stagger-in 0.4s ease 0.5s both; }
+      #${id} .pf-card:nth-child(6) { animation: pf-stagger-in 0.4s ease 0.6s both; }
+    `,
   };
 
   return variants[style];
 }
+
+// ── Pro Feature CSS Helpers ────────────────────────────────────────────────
+
+export function getGrainOverlayCss(id: string, opacity: number = 40): string {
+  return `
+    #${id} .pf-content::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: ${opacity / 100};
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 256px 256px;
+    }
+  `;
+}
+
+export function getHoverEffectsCss(id: string, effect: HoverEffect): string {
+  switch (effect) {
+    case "lift":
+      return `
+        #${id} .pf-card:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+      `;
+    case "glow":
+      return `
+        #${id} .pf-card { transition: box-shadow 0.3s ease, transform 0.3s ease; }
+        #${id} .pf-card:hover { box-shadow: 0 0 30px rgba(var(--pf-accent-rgb, 99,102,241), 0.25), 0 0 60px rgba(var(--pf-accent-rgb, 99,102,241), 0.1); transform: translateY(-2px); }
+      `;
+    case "tilt":
+      return `
+        #${id} .pf-card { transition: transform 0.3s ease; transform-style: preserve-3d; }
+        #${id} .pf-card:hover { transform: perspective(1000px) rotateX(-2deg) rotateY(3deg) translateY(-4px); }
+      `;
+    case "scale":
+      return `
+        #${id} .pf-card { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        #${id} .pf-card:hover { transform: scale(1.03); }
+      `;
+    default:
+      return "";
+  }
+}
+
+export function getPageTransitionCss(id: string, transition: PageTransition): string {
+  switch (transition) {
+    case "fade":
+      return `
+        @keyframes pf-page-fade { from { opacity: 0; } to { opacity: 1; } }
+        #${id} { animation: pf-page-fade 0.6s ease both; }
+      `;
+    case "slide":
+      return `
+        @keyframes pf-page-slide { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        #${id} { animation: pf-page-slide 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+      `;
+    case "morph":
+      return `
+        @keyframes pf-page-morph {
+          0% { opacity: 0; transform: scale(0.98); filter: blur(4px); }
+          100% { opacity: 1; transform: scale(1); filter: blur(0); }
+        }
+        #${id} { animation: pf-page-morph 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+      `;
+    default:
+      return "";
+  }
+}
+
+export function getParallaxCss(id: string): string {
+  return `
+    #${id} .pf-content { perspective: 1px; overflow-y: auto; overflow-x: hidden; }
+    #${id} .pf-hero-section { transform: translateZ(-0.5px) scale(1.5); transform-origin: center top; }
+    #${id} .pf-section-title { transform: translateZ(0); }
+  `;
+}
+
+export function getSectionDividerCss(id: string, divider: SectionDivider, color: string): string {
+  const encodedColor = encodeURIComponent(color);
+  switch (divider) {
+    case "wave":
+      return `
+        #${id} section + section::before {
+          content: '';
+          display: block;
+          width: 100%;
+          height: 40px;
+          margin-bottom: 20px;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 40'%3E%3Cpath d='M0 20 Q300 0 600 20 T1200 20 V40 H0 Z' fill='${encodedColor}'/%3E%3C/svg%3E");
+          background-size: 100% 100%;
+          background-repeat: no-repeat;
+        }
+      `;
+    case "angle":
+      return `
+        #${id} section + section::before {
+          content: '';
+          display: block;
+          width: 100%;
+          height: 40px;
+          margin-bottom: 20px;
+          background: linear-gradient(to right bottom, transparent 49.5%, ${color} 49.5%, ${color} 50.5%, transparent 50.5%);
+        }
+      `;
+    case "curve":
+      return `
+        #${id} section + section::before {
+          content: '';
+          display: block;
+          width: 100%;
+          height: 40px;
+          margin-bottom: 20px;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 40'%3E%3Cpath d='M0 40 Q600 -20 1200 40 Z' fill='${encodedColor}'/%3E%3C/svg%3E");
+          background-size: 100% 100%;
+          background-repeat: no-repeat;
+        }
+      `;
+    case "zigzag":
+      return `
+        #${id} section + section::before {
+          content: '';
+          display: block;
+          width: 100%;
+          height: 20px;
+          margin-bottom: 20px;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 20'%3E%3Cpath d='M0 20 L20 0 L40 20 L60 0 L80 20 L100 0 L120 20' fill='none' stroke='${encodedColor}' stroke-width='2'/%3E%3C/svg%3E");
+          background-size: 120px 20px;
+          background-repeat: repeat-x;
+        }
+      `;
+    default:
+      return "";
+  }
+}
+
+export function getButtonStyleCss(id: string, style: ButtonStyle, accentColor: string): string {
+  const base = `#${id} .pf-btn, #${id} a.pf-cert-badge`;
+  switch (style) {
+    case "rounded":
+      return `${base} { border-radius: 12px; }`;
+    case "pill":
+      return `${base} { border-radius: 999px; padding-left: 20px; padding-right: 20px; }`;
+    case "outline":
+      return `${base} { background: transparent; border: 2px solid ${accentColor}; color: ${accentColor}; }
+              ${base}:hover { background: ${accentColor}; color: white; }`;
+    case "glow":
+      return `${base} { background: ${accentColor}; border: none; color: white; box-shadow: 0 4px 20px ${hexToRgba(accentColor, 0.4)}; }
+              ${base}:hover { box-shadow: 0 6px 28px ${hexToRgba(accentColor, 0.6)}; }`;
+    case "ghost":
+      return `${base} { background: transparent; border: none; color: ${accentColor}; text-decoration: underline; text-underline-offset: 3px; }
+              ${base}:hover { text-decoration-thickness: 2px; }`;
+    default:
+      return "";
+  }
+}
+
+export function getImageFilterCss(id: string, filter: ImageFilter): string {
+  const filterMap: Record<Exclude<ImageFilter, "none">, string> = {
+    "grayscale": "grayscale(100%)",
+    "sepia": "sepia(80%)",
+    "contrast": "contrast(1.3) saturate(1.2)",
+    "saturate": "saturate(1.5)",
+    "brightness": "brightness(1.15) contrast(1.05)",
+  };
+  if (filter === "none") return "";
+  return `
+    #${id} .pf-work-card-img img,
+    #${id} .pf-sidebar-avatar,
+    #${id} .pf-edu-logo { filter: ${filterMap[filter]}; transition: filter 0.3s ease; }
+    #${id} .pf-work-card:hover .pf-work-card-img img { filter: ${filterMap[filter]} brightness(1.05); }
+  `;
+}
+
+export function getSectionSpacingCss(id: string, spacing: SectionSpacing): string {
+  const values: Record<SectionSpacing, { section: string; cardGap: string; contentPad: string }> = {
+    compact: { section: "24px", cardGap: "12px", contentPad: "16px 16px" },
+    comfortable: { section: "40px", cardGap: "18px", contentPad: "28px 24px" },
+    spacious: { section: "64px", cardGap: "24px", contentPad: "48px 32px" },
+  };
+  const v = values[spacing];
+  return `
+    #${id} section + section { margin-top: ${v.section}; }
+    #${id} .pf-work-grid { gap: ${v.cardGap}; }
+    #${id} .pf-content-inner { padding: ${v.contentPad}; }
+  `;
+}
+
+export function getSocialIconStyleCss(id: string, style: SocialIconStyle, accentColor: string): string {
+  const base = `#${id} .pf-sidebar-footer a, #${id} .pf-social-link`;
+  switch (style) {
+    case "rounded":
+      return `${base} { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: ${accentColor}; color: white !important; }`;
+    case "square":
+      return `${base} { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: ${accentColor}; color: white !important; }`;
+    case "outline":
+      return `${base} { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 2px solid ${accentColor}; color: ${accentColor} !important; background: transparent; }`;
+    case "pill":
+      return `${base} { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; background: ${hexToRgba(accentColor, 0.1)}; color: ${accentColor} !important; font-size: 0.75rem; }`;
+    case "glow":
+      return `${base} { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: ${hexToRgba(accentColor, 0.1)}; color: ${accentColor} !important; box-shadow: 0 4px 12px ${hexToRgba(accentColor, 0.15)}; transition: transform 0.2s, box-shadow 0.2s; }
+            ${base}:hover { transform: translateY(-2px); box-shadow: 0 8px 24px ${hexToRgba(accentColor, 0.25)}; }`;
+    default:
+      return "";
+  }
+}
+
+export function getScrollProgressCss(id: string, config: ScrollProgressConfig): string {
+  if (!config.enabled) return "";
+  return `
+    #${id} .pf-scroll-progress {
+      position: fixed;
+      ${config.position ?? "top"}: 0;
+      left: 0;
+      width: 0%;
+      height: ${config.height ?? 3}px;
+      background: ${config.color ?? "#3b82f6"};
+      z-index: 9999;
+      transition: width 0.1s linear;
+    }
+  `;
+}
+
+export function getSplashScreenCss(config: SplashScreenConfig): string {
+  if (!config.enabled) return "";
+  const dur = (config.duration ?? 2000) / 1000;
+  const bg = config.bgColor ?? "#000000";
+  const txt = config.textColor ?? "#ffffff";
+  const style = config.style ?? "fade";
+  return `
+    .pf-splash {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: ${bg};
+      color: ${txt};
+      animation: pf-splash-out 0.5s ease ${dur}s forwards;
+    }
+    .pf-splash-inner {
+      text-align: center;
+      animation: pf-splash-${style} ${dur * 0.7}s ease both;
+    }
+    @keyframes pf-splash-out {
+      to { opacity: 0; pointer-events: none; visibility: hidden; }
+    }
+    @keyframes pf-splash-fade {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    @keyframes pf-splash-slide-up {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pf-splash-zoom {
+      0% { opacity: 0; transform: scale(0.7); }
+      50% { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes pf-splash-blur {
+      0% { opacity: 0; filter: blur(20px); transform: scale(1.1); }
+      100% { opacity: 1; filter: blur(0); transform: scale(1); }
+    }
+  `;
+}
+
+export function getFontScaleCss(id: string, scale: FontScale): string {
+  const multipliers: Record<FontScale, number> = {
+    small: 0.875,
+    medium: 1,
+    large: 1.15,
+  };
+  const m = multipliers[scale];
+  return `
+    #${id} .pf-section-title { font-size: ${1.5 * m}rem; }
+    #${id} .pf-card h3 { font-size: ${1 * m}rem; }
+    #${id} .pf-card-desc,
+    #${id} .pf-card-sub { font-size: ${0.875 * m}rem; }
+    #${id} .pf-sidebar-name { font-size: ${1.05 * m}rem; }
+    #${id} .pf-stat-value { font-size: ${1.5 * m}rem; }
+    #${id} .pf-tag { font-size: ${0.75 * m}rem; }
+  `;
+}
+
+export function getNavStyleCss(id: string, navStyle: NavStyleConfig, theme: ThemeConfig): string {
+  let css = "";
+
+  // Nav width
+  const widthMap = { narrow: "200px", default: "236px", wide: "280px" };
+  css += `#${id} .pf-sidebar { width: ${widthMap[navStyle.width]}; }\n`;
+
+  // Position
+  if (navStyle.position === "right") {
+    css += `#${id} { flex-direction: row-reverse; }\n`;
+    css += `#${id} .pf-sidebar { border-right: none; border-left: 1px solid ${theme.cardBorder}; }\n`;
+  }
+
+  // Variant
+  switch (navStyle.variant) {
+    case "minimal":
+      css += `#${id} .pf-sidebar { background: transparent; border-color: transparent; width: 64px !important; }\n`;
+      css += `#${id} .pf-sidebar-profile { padding: 16px 8px; }\n`;
+      css += `#${id} .pf-sidebar-name, #${id} .pf-sidebar-headline { display: none; }\n`;
+      css += `#${id} .pf-nav-item span:not(.pf-nav-icon) { display: none; }\n`;
+      css += `#${id} .pf-nav-item { justify-content: center; padding: 12px; }\n`;
+      css += `#${id} .pf-sidebar-label { display: none; }\n`;
+      break;
+    case "pills":
+      css += `#${id} .pf-nav-item { border-radius: 999px; }\n`;
+      css += `#${id} .pf-nav-item.active { background: ${theme.accentColor}; color: white !important; }\n`;
+      break;
+    case "underline":
+      css += `#${id} .pf-nav-item { border-radius: 0; border-left: 3px solid transparent; }\n`;
+      css += `#${id} .pf-nav-item.active { border-left-color: ${theme.accentColor}; background: ${hexToRgba(theme.accentColor, 0.08)}; border-radius: 0; }\n`;
+      break;
+  }
+
+  // Icon style
+  if (navStyle.iconStyle === "outline") {
+    css += `#${id} .pf-nav-item svg { stroke-width: 1.5; fill: none; }\n`;
+  } else if (navStyle.iconStyle === "square") {
+    css += `#${id} .pf-nav-item svg { fill: currentColor; stroke: none; }\n`;
+  } else if (navStyle.iconStyle === "rounded") {
+    css += `#${id} .pf-nav-item svg { stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }\n`;
+  }
+
+  // Label visibility
+  if (!navStyle.showLabels) {
+    css += `#${id} .pf-sidebar-label { display: none; }\n`;
+  }
+
+  return css;
+}
+
+// ── Card template metadata (for theme studio picker) ──────────────────────
+
+export const CARD_TEMPLATES: { id: CardStyle; name: string; description: string }[] = [
+  { id: "default", name: "Classic", description: "Clean card with subtle border" },
+  { id: "glass", name: "Glass", description: "Frosted glassmorphism with blur" },
+  { id: "bordered", name: "Bordered", description: "Bold accent-colored border" },
+  { id: "flat", name: "Flat", description: "Borderless with left accent line" },
+  { id: "elevated", name: "Elevated", description: "Floating with deep shadow" },
+  { id: "minimal", name: "Minimal", description: "Clean divider-only separation" },
+  { id: "neon", name: "Neon", description: "Glowing accent border with halo" },
+  { id: "retro", name: "Retro", description: "Bold border with offset shadow" },
+  { id: "shadow-pop", name: "Shadow Pop", description: "Dramatic colored shadow" },
+  { id: "outline", name: "Outline", description: "Subtle transparent card" },
+];
+
+// ── Hero layout metadata ──────────────────────────────────────────────────
+
+export const HERO_LAYOUTS: { id: HeroLayout; name: string; description: string }[] = [
+  { id: "centered", name: "Centered", description: "Name and headline centered" },
+  { id: "left", name: "Left Aligned", description: "Content pushed to the left" },
+  { id: "split", name: "Split", description: "Photo left, info right" },
+  { id: "floating", name: "Floating", description: "Info left, photo right" },
+  { id: "banner", name: "Banner", description: "Edge-to-edge dramatic hero" },
+  { id: "stacked", name: "Stacked", description: "Large photo above, text below" },
+  { id: "minimal", name: "Minimal", description: "Just name, nothing else" },
+  { id: "magazine", name: "Magazine", description: "Oversized name, small details" },
+  { id: "card", name: "Card", description: "Info inside a floating card" },
+  { id: "diagonal", name: "Diagonal", description: "Angled split with photo" },
+];

@@ -60,9 +60,9 @@ const PLANS = [
     features: [
       "Unlimited portfolios",
       "Unlimited demo cards",
-      "Full Theme Studio",
-      "Custom slug",
-      "Profile analytics",
+      "Full Theme Studio (8 panels)",
+      "Motion, animations & effects",
+      "Custom slug & analytics",
       "Priority support",
     ],
   },

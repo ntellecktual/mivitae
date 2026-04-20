@@ -46,7 +46,7 @@ const categories = [
     articles: [
       {
         q: "How do I change my portfolio theme?",
-        a: "Go to Dashboard → Theme. Choose from 6 presets or set custom colors for background, text, accent, and more.",
+        a: "Go to Dashboard → Theme. Choose from 18 presets or use the full Theme Studio with 8 design panels: colors & gradients, fonts, layouts, motion, styling, sections, and custom CSS.",
       },
       {
         q: "Can I use a custom domain?",

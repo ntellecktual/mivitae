@@ -16,9 +16,28 @@ import {
   type PatternType,
   type ContainerWidth,
   type AnimationStyle,
+  type GradientType,
+  type HoverEffect,
+  type PageTransition,
+  type NavVariant,
+  type NavPosition,
+  type NavIconStyle,
+  type SectionDivider,
+  type ButtonStyle,
+  type ImageFilter,
+  type SectionSpacing,
+  type SocialIconStyle,
+  type FontScale,
+  type SplashStyle,
+  type DarkModeConfig,
+  type NavStyleConfig,
+  type ScrollProgressConfig,
+  type SplashScreenConfig,
   THEME_PRESETS,
   HEADING_FONTS,
   BODY_FONTS,
+  CARD_TEMPLATES,
+  HERO_LAYOUTS,
   resolveTheme,
 } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -49,6 +68,8 @@ import {
   Moon,
   ArrowLeft,
   Menu,
+  Zap,
+  Paintbrush,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -183,10 +204,12 @@ const FONT_PAIRINGS = [
 // ── Animation presets ────────────────────────────────────────────────────
 
 const ANIMATION_PRESETS = [
-  { id: "none", label: "None", desc: "No animations" },
-  { id: "subtle", label: "Subtle", desc: "Gentle fades & slides" },
-  { id: "bold", label: "Bold", desc: "Dramatic entrances" },
-  { id: "playful", label: "Playful", desc: "Bouncy & delightful" },
+  { id: "none", label: "None", desc: "No animations", pro: false },
+  { id: "subtle", label: "Subtle", desc: "Gentle fades & slides", pro: false },
+  { id: "bold", label: "Bold", desc: "Dramatic entrances", pro: false },
+  { id: "playful", label: "Playful", desc: "Bouncy & delightful", pro: false },
+  { id: "cinematic", label: "Cinematic", desc: "Blur-in reveals", pro: true },
+  { id: "stagger", label: "Stagger", desc: "Cascading card entries", pro: true },
 ] as const;
 
 // ── Device sizes ─────────────────────────────────────────────────────────
@@ -198,7 +221,7 @@ const DEVICE_SIZES = {
 } as const;
 
 type DeviceMode = keyof typeof DEVICE_SIZES;
-type ToolbarPanel = "presets" | "colors" | "fonts" | "layout" | "sections" | "advanced" | null;
+type ToolbarPanel = "presets" | "colors" | "fonts" | "layout" | "motion" | "style" | "sections" | "advanced" | null;
 
 // ── Undo/Redo stack ──────────────────────────────────────────────────────
 
@@ -553,12 +576,60 @@ function ColorsPanel({
                   { label: "Dots", value: "dots" },
                   { label: "Grid", value: "grid" },
                   { label: "Lines", value: "lines" },
+                  { label: "Cross", value: "cross" },
+                  { label: "Waves", value: "waves" },
+                  { label: "Hex", value: "hexagons" },
                 ]}
                 value={theme.patternType === "none" ? "dots" : theme.patternType}
                 onChange={(v) => update({ patternType: v as PatternType })}
               />
             </div>
           )}
+          {theme.bgType === "gradient" && (
+            <div className="col-span-2">
+              <p className="text-[10px] text-white/60 mb-1.5">Gradient Type</p>
+              <ToggleOption
+                options={[
+                  { label: "Linear", value: "linear" },
+                  { label: "Radial", value: "radial" },
+                  { label: "Conic", value: "conic" },
+                ]}
+                value={theme.bgGradientType ?? "linear"}
+                onChange={(v) => update({ bgGradientType: v as GradientType })}
+              />
+            </div>
+          )}
+          <div className="col-span-2">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] text-white/60">Grain Overlay</p>
+              <button
+                onClick={() => update({ bgGrainOverlay: !theme.bgGrainOverlay })}
+                className={cn(
+                  "relative h-5 w-9 rounded-full transition-colors",
+                  theme.bgGrainOverlay ? "bg-white/30" : "bg-white/10"
+                )}
+              >
+                <div className={cn(
+                  "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform",
+                  theme.bgGrainOverlay ? "translate-x-4" : "translate-x-0.5"
+                )} />
+              </button>
+            </div>
+            {theme.bgGrainOverlay && (
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  type="range"
+                  min={10}
+                  max={80}
+                  value={theme.bgGrainOpacity ?? 40}
+                  onChange={(e) => update({ bgGrainOpacity: Number(e.target.value) })}
+                  className="flex-1 accent-white"
+                  title="Grain opacity"
+                />
+                <span className="text-[10px] text-white/60 font-mono w-8">{theme.bgGrainOpacity ?? 40}%</span>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -589,6 +660,59 @@ function ColorsPanel({
           ))}
         </div>
       )}
+
+      {/* Dark Mode */}
+      <Separator className="bg-white/10" />
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            {theme.darkMode?.enabled ? <Moon className="h-3.5 w-3.5 text-white/60" /> : <Sun className="h-3.5 w-3.5 text-white/60" />}
+            <p className="text-[10px] text-white/60 uppercase tracking-wider">Dark Mode Toggle</p>
+          </div>
+          <button
+            onClick={() => {
+              const current = theme.darkMode ?? { enabled: false, defaultMode: "light" as const, darkPalette: { bgPrimary: "#0f172a", bgSecondary: "#1e293b", textColor: "#f1f5f9", subtextColor: "#94a3b8", cardBg: "#1e293b", cardBorder: "#334155", accentColor: theme.accentColor } };
+              update({ darkMode: { ...current, enabled: !current.enabled } });
+            }}
+            className={cn(
+              "relative h-5 w-9 rounded-full transition-colors",
+              theme.darkMode?.enabled ? "bg-white/30" : "bg-white/10"
+            )}
+          >
+            <div className={cn(
+              "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform",
+              theme.darkMode?.enabled ? "translate-x-4" : "translate-x-0.5"
+            )} />
+          </button>
+        </div>
+        {theme.darkMode?.enabled && (
+          <div className="space-y-2 rounded-lg border border-white/10 bg-white/5 p-3">
+            <p className="text-[10px] text-white/50 mb-2">Visitors can toggle between light and dark</p>
+            <div className="grid grid-cols-2 gap-2">
+              <ColorInput
+                label="Dark BG"
+                value={theme.darkMode.darkPalette?.bgPrimary ?? "#0f172a"}
+                onChange={(c) => update({ darkMode: { ...theme.darkMode!, darkPalette: { ...theme.darkMode!.darkPalette!, bgPrimary: c } } })}
+              />
+              <ColorInput
+                label="Dark Text"
+                value={theme.darkMode.darkPalette?.textColor ?? "#f1f5f9"}
+                onChange={(c) => update({ darkMode: { ...theme.darkMode!, darkPalette: { ...theme.darkMode!.darkPalette!, textColor: c } } })}
+              />
+              <ColorInput
+                label="Dark Card"
+                value={theme.darkMode.darkPalette?.cardBg ?? "#1e293b"}
+                onChange={(c) => update({ darkMode: { ...theme.darkMode!, darkPalette: { ...theme.darkMode!.darkPalette!, cardBg: c } } })}
+              />
+              <ColorInput
+                label="Dark Accent"
+                value={theme.darkMode.darkPalette?.accentColor ?? theme.accentColor}
+                onChange={(c) => update({ darkMode: { ...theme.darkMode!, darkPalette: { ...theme.darkMode!.darkPalette!, accentColor: c } } })}
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -708,10 +832,24 @@ function FontsPanel({
           </div>
         </div>
       )}
+
+      {/* Font Scale */}
+      <Separator className="bg-white/10" />
+      <div>
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Font Scale</p>
+        <ToggleOption
+          options={[
+            { label: "Small", value: "small" },
+            { label: "Medium", value: "medium" },
+            { label: "Large", value: "large" },
+          ]}
+          value={theme.fontScale ?? "medium"}
+          onChange={(v) => update({ fontScale: v as FontScale })}
+        />
+      </div>
     </div>
   );
 }
-
 function LayoutPanel({
   theme,
   update,
@@ -724,57 +862,84 @@ function LayoutPanel({
       {/* Hero Layout */}
       <div>
         <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Hero Layout</p>
-        <div className="grid grid-cols-2 gap-2">
-          {([
-            { value: "centered", label: "Centered", desc: "Name and bio centered" },
-            { value: "left", label: "Left Aligned", desc: "Content flows left" },
-          ] as const).map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => update({ heroLayout: opt.value })}
-              className={cn(
-                "rounded-lg border p-3 text-left transition-all",
-                theme.heroLayout === opt.value
-                  ? "border-white/40 bg-white/15"
-                  : "border-white/10 hover:border-white/25"
-              )}
-            >
-              {/* Mini layout illustration */}
-              <div className={cn("mb-2 flex flex-col gap-1", opt.value === "centered" ? "items-center" : "items-start")}>
-                <div className="h-1 w-8 rounded-full bg-white/40" />
-                <div className="h-1 w-12 rounded-full bg-white/20" />
-                <div className="h-1 w-6 rounded-full bg-white/20" />
-              </div>
-              <p className="text-[11px] font-semibold text-white">{opt.label}</p>
-            </button>
-          ))}
+        <div className="grid grid-cols-2 gap-1.5 max-h-60 overflow-y-auto scrollbar-none">
+          {HERO_LAYOUTS.map((layout) => {
+            const active = (theme.heroLayout ?? "centered") === layout.id;
+            return (
+              <button
+                key={layout.id}
+                onClick={() => update({ heroLayout: layout.id })}
+                className={cn(
+                  "rounded-lg border p-2.5 text-left transition-all",
+                  active
+                    ? "border-white/40 bg-white/15 ring-1 ring-white/20"
+                    : "border-white/10 hover:border-white/25 hover:bg-white/5"
+                )}
+              >
+                {/* Mini layout illustration */}
+                <div className={cn(
+                  "mb-1.5 flex gap-1",
+                  layout.id === "centered" || layout.id === "stacked" || layout.id === "magazine" ? "flex-col items-center" :
+                  layout.id === "floating" ? "flex-row-reverse items-center" :
+                  "flex-col items-start"
+                )}>
+                  {(layout.id === "split" || layout.id === "floating") ? (
+                    <>
+                      <div className="h-6 w-6 rounded bg-white/20" />
+                      <div className="flex flex-col gap-0.5">
+                        <div className="h-1 w-8 rounded-full bg-white/40" />
+                        <div className="h-1 w-6 rounded-full bg-white/20" />
+                      </div>
+                    </>
+                  ) : layout.id === "magazine" ? (
+                    <>
+                      <div className="h-2 w-16 rounded-full bg-white/40" />
+                      <div className="h-0.5 w-8 rounded-full bg-white/15" />
+                    </>
+                  ) : layout.id === "minimal" ? (
+                    <div className="h-1 w-10 rounded-full bg-white/30" />
+                  ) : layout.id === "card" ? (
+                    <div className="rounded border border-white/20 p-1.5">
+                      <div className="h-1 w-8 rounded-full bg-white/40" />
+                      <div className="mt-0.5 h-0.5 w-6 rounded-full bg-white/20" />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="h-1 w-8 rounded-full bg-white/40" />
+                      <div className="h-1 w-12 rounded-full bg-white/20" />
+                      <div className="h-1 w-6 rounded-full bg-white/20" />
+                    </>
+                  )}
+                </div>
+                <p className="text-[10px] font-semibold text-white leading-tight">{layout.name}</p>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Card Style */}
       <div>
-        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Card Style</p>
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
-          {([
-            { value: "default", label: "Default" },
-            { value: "glass", label: "Glass" },
-            { value: "bordered", label: "Bordered" },
-            { value: "flat", label: "Flat" },
-            { value: "elevated", label: "Elevated" },
-          ] as const).map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => update({ cardStyle: opt.value })}
-              className={cn(
-                "shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-all border",
-                theme.cardStyle === opt.value
-                  ? "border-white/40 bg-white/20 text-white"
-                  : "border-white/10 text-white/60 hover:text-white hover:border-white/25"
-              )}
-            >
-              {opt.label}
-            </button>
-          ))}
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Card Template</p>
+        <div className="grid grid-cols-2 gap-1.5 max-h-52 overflow-y-auto scrollbar-none">
+          {CARD_TEMPLATES.map((card) => {
+            const active = (theme.cardStyle ?? "default") === card.id;
+            return (
+              <button
+                key={card.id}
+                onClick={() => update({ cardStyle: card.id })}
+                className={cn(
+                  "rounded-lg border p-2 text-left transition-all",
+                  active
+                    ? "border-white/40 bg-white/15 ring-1 ring-white/20"
+                    : "border-white/10 hover:border-white/25 hover:bg-white/5"
+                )}
+              >
+                <p className="text-[10px] font-semibold text-white">{card.name}</p>
+                <p className="text-[8px] text-white/40 leading-snug">{card.description}</p>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -792,6 +957,68 @@ function LayoutPanel({
         />
       </div>
 
+      {/* Section Spacing */}
+      <div>
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Section Spacing</p>
+        <ToggleOption
+          options={[
+            { label: "Compact", value: "compact" },
+            { label: "Comfortable", value: "comfortable" },
+            { label: "Spacious", value: "spacious" },
+          ]}
+          value={theme.sectionSpacing ?? "comfortable"}
+          onChange={(v) => update({ sectionSpacing: v as SectionSpacing })}
+        />
+      </div>
+
+      {/* Section Dividers */}
+      <div>
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Section Divider</p>
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
+          {([
+            { value: "none", label: "None" },
+            { value: "wave", label: "Wave" },
+            { value: "angle", label: "Angle" },
+            { value: "curve", label: "Curve" },
+            { value: "zigzag", label: "Zigzag" },
+          ] as const).map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => update({ sectionDivider: opt.value })}
+              className={cn(
+                "shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-all border",
+                (theme.sectionDivider ?? "none") === opt.value
+                  ? "border-white/40 bg-white/20 text-white"
+                  : "border-white/10 text-white/60 hover:text-white hover:border-white/25"
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {theme.sectionDivider && theme.sectionDivider !== "none" && (
+          <div className="mt-2">
+            <ColorInput
+              label="Divider Color"
+              value={theme.sectionDividerColor ?? theme.accentColor}
+              onChange={(c) => update({ sectionDividerColor: c })}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MotionPanel({
+  theme,
+  update,
+}: {
+  theme: ThemeConfig;
+  update: (p: Partial<ThemeConfig>) => void;
+}) {
+  return (
+    <div className="space-y-4">
       {/* Animation Style */}
       <div>
         <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Animation Style</p>
@@ -810,12 +1037,378 @@ function LayoutPanel({
                     : "border-white/10 hover:border-white/25 hover:bg-white/5",
                 )}
               >
-                <p className="text-[11px] font-semibold text-white">{anim.label}</p>
+                <div className="flex items-center gap-1">
+                  <p className="text-[11px] font-semibold text-white">{anim.label}</p>
+                  {anim.pro && (
+                    <Crown className="h-2.5 w-2.5 text-amber-400" />
+                  )}
+                </div>
                 <p className="text-[9px] text-white/50">{anim.desc}</p>
               </button>
             );
           })}
         </div>
+      </div>
+
+      {/* Hover Effects */}
+      <div>
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Card Hover Effect</p>
+        <div className="flex gap-1.5 flex-wrap">
+          {([
+            { value: "none", label: "None" },
+            { value: "lift", label: "Lift" },
+            { value: "glow", label: "Glow" },
+            { value: "tilt", label: "Tilt" },
+            { value: "scale", label: "Scale" },
+          ] as const).map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => update({ hoverEffects: opt.value })}
+              className={cn(
+                "rounded-lg px-3 py-1.5 text-xs font-medium transition-all border",
+                (theme.hoverEffects ?? "none") === opt.value
+                  ? "border-white/40 bg-white/20 text-white"
+                  : "border-white/10 text-white/60 hover:text-white hover:border-white/25"
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Page Transition */}
+      <div>
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Page Transition</p>
+        <ToggleOption
+          options={[
+            { label: "None", value: "none" },
+            { label: "Fade", value: "fade" },
+            { label: "Slide", value: "slide" },
+            { label: "Morph", value: "morph" },
+          ]}
+          value={theme.pageTransition ?? "none"}
+          onChange={(v) => update({ pageTransition: v as PageTransition })}
+        />
+      </div>
+
+      {/* Parallax */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[10px] text-white/60 uppercase tracking-wider">Parallax Scrolling</p>
+          <p className="text-[9px] text-white/40">Hero depth effect on scroll</p>
+        </div>
+        <button
+          onClick={() => update({ parallaxEnabled: !theme.parallaxEnabled })}
+          className={cn(
+            "relative h-5 w-9 rounded-full transition-colors",
+            theme.parallaxEnabled ? "bg-white/30" : "bg-white/10"
+          )}
+        >
+          <div className={cn(
+            "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform",
+            theme.parallaxEnabled ? "translate-x-4" : "translate-x-0.5"
+          )} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function StylePanel({
+  theme,
+  update,
+}: {
+  theme: ThemeConfig;
+  update: (p: Partial<ThemeConfig>) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      {/* Nav Style */}
+      <div>
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Nav Variant</p>
+        <div className="flex gap-1.5 flex-wrap">
+          {([
+            { value: "default", label: "Default" },
+            { value: "minimal", label: "Minimal" },
+            { value: "pills", label: "Pills" },
+            { value: "underline", label: "Underline" },
+          ] as const).map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => {
+                const current = theme.navStyle ?? { variant: "default" as NavVariant, position: "left" as NavPosition, width: "default" as const, showLabels: true, iconStyle: "default" as NavIconStyle };
+                update({ navStyle: { ...current, variant: opt.value } });
+              }}
+              className={cn(
+                "rounded-lg px-2.5 py-1.5 text-[10px] font-medium transition-all border",
+                (theme.navStyle?.variant ?? "default") === opt.value
+                  ? "border-white/40 bg-white/20 text-white"
+                  : "border-white/10 text-white/60 hover:text-white hover:border-white/25"
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        {/* Nav Position */}
+        <div>
+          <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Nav Position</p>
+          <ToggleOption
+            options={[
+              { label: "Left", value: "left" },
+              { label: "Right", value: "right" },
+            ]}
+            value={theme.navStyle?.position ?? "left"}
+            onChange={(v) => {
+              const current = theme.navStyle ?? { variant: "default" as NavVariant, position: "left" as NavPosition, width: "default" as const, showLabels: true, iconStyle: "default" as NavIconStyle };
+              update({ navStyle: { ...current, position: v as NavPosition } });
+            }}
+          />
+        </div>
+        {/* Nav Width */}
+        <div>
+          <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Nav Width</p>
+          <ToggleOption
+            options={[
+              { label: "Slim", value: "narrow" },
+              { label: "Default", value: "default" },
+              { label: "Wide", value: "wide" },
+            ]}
+            value={theme.navStyle?.width ?? "default"}
+            onChange={(v) => {
+              const current = theme.navStyle ?? { variant: "default" as NavVariant, position: "left" as NavPosition, width: "default" as const, showLabels: true, iconStyle: "default" as NavIconStyle };
+              update({ navStyle: { ...current, width: v as "narrow" | "default" | "wide" } });
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Nav Labels Toggle */}
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] text-white/60 uppercase tracking-wider">Show Nav Labels</p>
+        <button
+          onClick={() => {
+            const current = theme.navStyle ?? { variant: "default" as NavVariant, position: "left" as NavPosition, width: "default" as const, showLabels: true, iconStyle: "default" as NavIconStyle };
+            update({ navStyle: { ...current, showLabels: !current.showLabels } });
+          }}
+          className={cn(
+            "relative h-5 w-9 rounded-full transition-colors",
+            (theme.navStyle?.showLabels ?? true) ? "bg-white/30" : "bg-white/10"
+          )}
+        >
+          <div className={cn(
+            "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform",
+            (theme.navStyle?.showLabels ?? true) ? "translate-x-4" : "translate-x-0.5"
+          )} />
+        </button>
+      </div>
+
+      <Separator className="bg-white/10" />
+
+      {/* Button Style */}
+      <div>
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Button Style</p>
+        <div className="flex gap-1.5 flex-wrap">
+          {([
+            { value: "default", label: "Default" },
+            { value: "rounded", label: "Rounded" },
+            { value: "pill", label: "Pill" },
+            { value: "outline", label: "Outline" },
+            { value: "ghost", label: "Ghost" },
+            { value: "glow", label: "Glow" },
+          ] as const).map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => update({ buttonStyle: opt.value })}
+              className={cn(
+                "rounded-lg px-2.5 py-1.5 text-[10px] font-medium transition-all border",
+                (theme.buttonStyle ?? "default") === opt.value
+                  ? "border-white/40 bg-white/20 text-white"
+                  : "border-white/10 text-white/60 hover:text-white hover:border-white/25"
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Social Icon Style */}
+      <div>
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Social Icons</p>
+        <div className="flex gap-1.5 flex-wrap">
+          {([
+            { value: "default", label: "Default" },
+            { value: "rounded", label: "Rounded" },
+            { value: "square", label: "Square" },
+            { value: "outline", label: "Outline" },
+            { value: "pill", label: "Pill" },
+            { value: "glow", label: "Glow" },
+          ] as const).map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => update({ socialIconStyle: opt.value })}
+              className={cn(
+                "rounded-lg px-2.5 py-1.5 text-[10px] font-medium transition-all border",
+                (theme.socialIconStyle ?? "default") === opt.value
+                  ? "border-white/40 bg-white/20 text-white"
+                  : "border-white/10 text-white/60 hover:text-white hover:border-white/25"
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Image Filter */}
+      <div>
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Image Filter</p>
+        <div className="flex gap-1.5 flex-wrap">
+          {([
+            { value: "none", label: "None" },
+            { value: "grayscale", label: "Grayscale" },
+            { value: "sepia", label: "Sepia" },
+            { value: "contrast", label: "Contrast" },
+            { value: "saturate", label: "Saturate" },
+            { value: "brightness", label: "Bright" },
+          ] as const).map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => update({ imageFilter: opt.value })}
+              className={cn(
+                "rounded-lg px-2.5 py-1.5 text-[10px] font-medium transition-all border",
+                (theme.imageFilter ?? "none") === opt.value
+                  ? "border-white/40 bg-white/20 text-white"
+                  : "border-white/10 text-white/60 hover:text-white hover:border-white/25"
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Scroll Progress */}
+      <Separator className="bg-white/10" />
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[10px] text-white/60 uppercase tracking-wider">Scroll Progress Bar</p>
+          <button
+            onClick={() => {
+              const current = theme.scrollProgress ?? { enabled: false, color: theme.accentColor, position: "top" as const, height: 3 };
+              update({ scrollProgress: { ...current, enabled: !current.enabled } });
+            }}
+            className={cn(
+              "relative h-5 w-9 rounded-full transition-colors",
+              theme.scrollProgress?.enabled ? "bg-white/30" : "bg-white/10"
+            )}
+          >
+            <div className={cn(
+              "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform",
+              theme.scrollProgress?.enabled ? "translate-x-4" : "translate-x-0.5"
+            )} />
+          </button>
+        </div>
+        {theme.scrollProgress?.enabled && (
+          <div className="space-y-2 rounded-lg border border-white/10 bg-white/5 p-3">
+            <ColorInput
+              label="Bar Color"
+              value={theme.scrollProgress.color ?? theme.accentColor}
+              onChange={(c) => update({ scrollProgress: { ...theme.scrollProgress!, color: c } })}
+            />
+            <ToggleOption
+              options={[
+                { label: "Top", value: "top" },
+                { label: "Bottom", value: "bottom" },
+              ]}
+              value={theme.scrollProgress.position ?? "top"}
+              onChange={(v) => update({ scrollProgress: { ...theme.scrollProgress!, position: v as "top" | "bottom" } })}
+            />
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] text-white/60">Height</p>
+              <input
+                type="range"
+                min={1}
+                max={8}
+                value={theme.scrollProgress.height ?? 3}
+                onChange={(e) => update({ scrollProgress: { ...theme.scrollProgress!, height: Number(e.target.value) } })}
+                className="flex-1 accent-white"
+                title="Bar height"
+              />
+              <span className="text-[10px] text-white/60 font-mono">{theme.scrollProgress.height ?? 3}px</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Splash Screen */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[10px] text-white/60 uppercase tracking-wider">Splash Screen</p>
+          <button
+            onClick={() => {
+              const current = theme.splashScreen ?? { enabled: false, style: "fade" as const, duration: 2000, bgColor: "#000000", textColor: "#ffffff" };
+              update({ splashScreen: { ...current, enabled: !current.enabled } });
+            }}
+            className={cn(
+              "relative h-5 w-9 rounded-full transition-colors",
+              theme.splashScreen?.enabled ? "bg-white/30" : "bg-white/10"
+            )}
+          >
+            <div className={cn(
+              "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform",
+              theme.splashScreen?.enabled ? "translate-x-4" : "translate-x-0.5"
+            )} />
+          </button>
+        </div>
+        {theme.splashScreen?.enabled && (
+          <div className="space-y-2 rounded-lg border border-white/10 bg-white/5 p-3">
+            <div>
+              <p className="text-[10px] text-white/60 mb-1.5">Style</p>
+              <ToggleOption
+                options={[
+                  { label: "Fade", value: "fade" },
+                  { label: "Slide", value: "slide-up" },
+                  { label: "Zoom", value: "zoom" },
+                  { label: "Blur", value: "blur" },
+                ]}
+                value={theme.splashScreen.style ?? "fade"}
+                onChange={(v) => update({ splashScreen: { ...theme.splashScreen!, style: v as SplashStyle } })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <ColorInput
+                label="Background"
+                value={theme.splashScreen.bgColor ?? "#000000"}
+                onChange={(c) => update({ splashScreen: { ...theme.splashScreen!, bgColor: c } })}
+              />
+              <ColorInput
+                label="Text"
+                value={theme.splashScreen.textColor ?? "#ffffff"}
+                onChange={(c) => update({ splashScreen: { ...theme.splashScreen!, textColor: c } })}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] text-white/60">Duration</p>
+              <input
+                type="range"
+                min={1000}
+                max={5000}
+                step={500}
+                value={theme.splashScreen.duration ?? 2000}
+                onChange={(e) => update({ splashScreen: { ...theme.splashScreen!, duration: Number(e.target.value) } })}
+                className="flex-1 accent-white"
+                title="Splash duration"
+              />
+              <span className="text-[10px] text-white/60 font-mono">{((theme.splashScreen.duration ?? 2000) / 1000).toFixed(1)}s</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1075,6 +1668,8 @@ export default function ThemePage() {
     { id: "colors", icon: Palette, label: "Colors", pro: true },
     { id: "fonts", icon: Type, label: "Fonts", pro: true },
     { id: "layout", icon: LayoutGrid, label: "Layout", pro: true },
+    { id: "motion", icon: Zap, label: "Motion", pro: true },
+    { id: "style", icon: Paintbrush, label: "Style", pro: true },
     { id: "sections", icon: Layers, label: "Sections", pro: true },
     { id: "advanced", icon: Code2, label: "CSS", pro: true },
   ];
@@ -1125,9 +1720,11 @@ export default function ThemePage() {
               Unlock {activePanel === "advanced" ? "Custom CSS" : activePanel.charAt(0).toUpperCase() + activePanel.slice(1)}
             </h3>
             <p className="text-sm text-white/50 mb-6 max-w-[240px]">
-              {activePanel === "colors" && "Custom color palettes, AI-powered palette generation, and granular control over every color in your portfolio."}
-              {activePanel === "fonts" && "Premium font pairings, advanced typography controls, and access to the full Google Fonts library."}
-              {activePanel === "layout" && "Hero layouts, card styles, container width controls, and animation presets."}
+              {activePanel === "colors" && "Custom color palettes, AI-powered palette generation, gradient types, grain textures, and dark mode toggle."}
+              {activePanel === "fonts" && "Premium font pairings, advanced typography controls, font scaling, and access to the full Google Fonts library."}
+              {activePanel === "layout" && "10 hero layouts, 10 card templates, section spacing, section dividers, and container width controls."}
+              {activePanel === "motion" && "Cinematic animations, hover effects, page transitions, and parallax scrolling."}
+              {activePanel === "style" && "Nav customization, button styles, social icon styles, image filters, scroll progress, and splash screens."}
               {activePanel === "sections" && "Toggle visibility of individual portfolio sections for a curated presentation."}
               {activePanel === "advanced" && "Inject custom CSS to fine-tune every pixel of your portfolio design."}
             </p>
@@ -1153,6 +1750,12 @@ export default function ThemePage() {
             )}
             {activePanel === "layout" && (
               <LayoutPanel theme={resolvedTheme} update={update} />
+            )}
+            {activePanel === "motion" && (
+              <MotionPanel theme={resolvedTheme} update={update} />
+            )}
+            {activePanel === "style" && (
+              <StylePanel theme={resolvedTheme} update={update} />
             )}
             {activePanel === "sections" && (
               <SectionsPanel theme={resolvedTheme} update={update} />

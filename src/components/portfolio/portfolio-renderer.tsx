@@ -18,6 +18,19 @@ import {
   hexToRgba,
   buildDemoIframeCss,
   getAnimationCss,
+  getGrainOverlayCss,
+  getHoverEffectsCss,
+  getPageTransitionCss,
+  getParallaxCss,
+  getSectionDividerCss,
+  getButtonStyleCss,
+  getImageFilterCss,
+  getSectionSpacingCss,
+  getSocialIconStyleCss,
+  getScrollProgressCss,
+  getSplashScreenCss,
+  getFontScaleCss,
+  getNavStyleCss,
 } from "@/lib/theme";
 import {
   calculateProficiency,
@@ -1471,6 +1484,20 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     }
     ${getAnimationCss(id, theme.animationStyle ?? "subtle")}
 
+    /* ── Pro Feature CSS ───────────────────────────────────── */
+    ${theme.bgGrainOverlay ? getGrainOverlayCss(id, theme.bgGrainOpacity) : ""}
+    ${theme.hoverEffects && theme.hoverEffects !== "none" ? getHoverEffectsCss(id, theme.hoverEffects) : ""}
+    ${theme.pageTransition && theme.pageTransition !== "none" ? getPageTransitionCss(id, theme.pageTransition) : ""}
+    ${theme.parallaxEnabled ? getParallaxCss(id) : ""}
+    ${theme.sectionDivider && theme.sectionDivider !== "none" ? getSectionDividerCss(id, theme.sectionDivider, theme.sectionDividerColor ?? theme.accentColor) : ""}
+    ${theme.buttonStyle && theme.buttonStyle !== "default" ? getButtonStyleCss(id, theme.buttonStyle, theme.accentColor) : ""}
+    ${theme.imageFilter && theme.imageFilter !== "none" ? getImageFilterCss(id, theme.imageFilter) : ""}
+    ${theme.sectionSpacing ? getSectionSpacingCss(id, theme.sectionSpacing) : ""}
+    ${theme.socialIconStyle && theme.socialIconStyle !== "default" ? getSocialIconStyleCss(id, theme.socialIconStyle, theme.accentColor) : ""}
+    ${theme.scrollProgress ? getScrollProgressCss(id, theme.scrollProgress) : ""}
+    ${theme.fontScale && theme.fontScale !== "medium" ? getFontScaleCss(id, theme.fontScale) : ""}
+    ${theme.navStyle ? getNavStyleCss(id, theme.navStyle, theme) : ""}
+
     /* ── Responsive (container query for preview support) ──── */
     @container portfolio (max-width: 768px) {
       #${id} .pf-sidebar {
@@ -1626,6 +1653,19 @@ export default function PortfolioRenderer({
     };
   }, [theme.headingFont, theme.bodyFont, preview]);
 
+  // Scroll progress bar
+  useEffect(() => {
+    if (preview || !theme.scrollProgress?.enabled) return;
+    const el = document.querySelector(`#${scopeId} .pf-scroll-progress`) as HTMLElement | null;
+    if (!el) return;
+    const handleScroll = () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      if (h > 0) el.style.width = `${(window.scrollY / h) * 100}%`;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [preview, theme.scrollProgress?.enabled, scopeId]);
+
   // Extract dominant colors from education images
   const extractEduColors = useCallback(async () => {
     const entries = [...education].filter(e => e.imageUrl);
@@ -1721,6 +1761,25 @@ export default function PortfolioRenderer({
 
       {theme.customCss && !preview && (
         <style dangerouslySetInnerHTML={{ __html: sanitizeCss(theme.customCss) }} />
+      )}
+
+      {/* Splash Screen */}
+      {theme.splashScreen?.enabled && !preview && (
+        <>
+          <style dangerouslySetInnerHTML={{ __html: getSplashScreenCss(theme.splashScreen) }} />
+          <div className="pf-splash">
+            <div className="pf-splash-inner">
+              <p style={{ fontSize: "2rem", fontWeight: 700, fontFamily: `'${theme.headingFont}', sans-serif` }}>
+                {profile.displayName || profile.slug}
+              </p>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Scroll Progress Bar */}
+      {theme.scrollProgress?.enabled && !preview && (
+        <div className="pf-scroll-progress" />
       )}
 
       {/* Mobile hamburger — hidden in preview (theme studio) */}

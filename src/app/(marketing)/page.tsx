@@ -247,7 +247,7 @@ export default function HomePage() {
             <FeatureCard
               icon={Palette}
               title="Theme Studio"
-              description="Full visual editor: background (solid/gradient/pattern), colors, typography (curated Google Fonts), layout options, card styles (glass/bordered/flat/elevated), and custom CSS injection."
+              description="Full visual editor with 8 design panels: colors & gradients, typography, 10 hero layouts, 10 card templates, motion & animation, nav styling, button & social icon styles, scroll progress bars, splash screens, and custom CSS."
               whyItMatters="Your portfolio reflects your brand, not a generic template. More Webflow-lite than cookie-cutter."
             />
             <FeatureCard
@@ -526,13 +526,14 @@ export default function HomePage() {
                   "Unlimited demo cards",
                   "Unlimited portfolios",
                   "Analytics dashboard & referrer tracking",
-                  "Full Theme Studio: colors, fonts, layouts, sections & custom CSS",
-                  "AI-powered color palettes",
-                  "50 work history sections",
-                  "20 education entries",
+                  "Full Theme Studio: 10 hero layouts, 10 card styles, gradients & grain",
+                  "Motion system: 6 animations, hover effects, page transitions",
+                  "Nav, button, social icon & image filter customization",
+                  "Scroll progress bar, splash screens & dark mode",
+                  "AI-powered color palettes & custom CSS",
+                  "50 work history sections · 20 education entries",
                   `AI r\u00e9sum\u00e9 parsing (10 parses/day)`,
-                  "Profile strength scoring",
-                  "Custom profile slug",
+                  "Profile strength scoring & custom slug",
                   "Priority support",
                 ]}
                 cta="Start Free Trial"
@@ -615,7 +616,7 @@ export default function HomePage() {
             />
             <FaqItem
               question="What happens to my portfolio if I cancel?"
-              answer="Your public portfolio at mivitae.org/u/yourname stays live on the free plan forever. You keep your profile, work history, and education. Pro features like unlimited demos, analytics, and full Theme Studio customization (colors, fonts, layouts, custom CSS) are paused until you re-subscribe."
+              answer="Your public portfolio at mivitae.org/u/yourname stays live on the free plan forever. You keep your profile, work history, and education. Pro features like unlimited demos, analytics, and full Theme Studio customization (motion, layouts, effects, custom CSS) are paused until you re-subscribe."
             />
             <FaqItem
               question={`How does the AI r\u00e9sum\u00e9 parsing work?`}

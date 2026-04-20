@@ -30,6 +30,7 @@ import {
   Sparkles,
   HelpCircle,
   Crown,
+  Search,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,12 @@ const navSections = [
     items: [
       { href: "/dashboard/demos", label: "Demos", icon: Zap },
       { href: "/dashboard/github", label: "GitHub Import", icon: GitBranch },
+    ],
+  },
+  {
+    label: "Career",
+    items: [
+      { href: "/dashboard/jobs", label: "Job Search", icon: Search },
     ],
   },
   {

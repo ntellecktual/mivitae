@@ -6,6 +6,7 @@ import { Id } from "./_generated/dataModel";
 // subscription status. Add additional IDs here to grant creator access.
 export const CREATOR_CLERK_IDS = new Set([
   "user_3CQM2bLQWM1PMcueoShBM22ie1w",
+  "user_3CW4IYOWilTTTrhF3vnAQMZ9tkx", // superadmin
 ]);
 
 // ── Founding Users ───────────────────────────────────────────────────────────

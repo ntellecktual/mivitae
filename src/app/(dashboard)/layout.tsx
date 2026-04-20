@@ -31,6 +31,7 @@ import {
   HelpCircle,
   Crown,
   Search,
+  Rocket,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
@@ -265,6 +266,26 @@ function SidebarContent({
               />
               Admin
             </Link>
+            <Link
+              href="/dashboard/onboarding"
+              onClick={onNavigate}
+              className={cn(
+                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                pathname === "/dashboard/onboarding"
+                  ? "bg-primary/10 text-primary shadow-sm"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              )}
+            >
+              <Rocket
+                className={cn(
+                  "h-4 w-4 shrink-0 transition-colors duration-200",
+                  pathname === "/dashboard/onboarding"
+                    ? "text-primary"
+                    : "text-muted-foreground/60 group-hover:text-foreground"
+                )}
+              />
+              Preview Onboarding
+            </Link>
           </div>
         )}
       </nav>
@@ -357,9 +378,13 @@ export default function DashboardLayout({
   // Clerk's token hasn't propagated yet, which would cause a spurious redirect
   // to /dashboard/onboarding (and then back to /dashboard) on every refresh.
   const isOnboarding = pathname === "/dashboard/onboarding";
+  const { user } = useUser();
+  const isSuperAdmin = user?.id === "user_3CW4IYOWilTTTrhF3vnAQMZ9tkx";
   useEffect(() => {
     // Don't redirect while auth is still initializing
     if (isAuthLoading || !isAuthenticated) return;
+    // Superadmin can visit any route without being gated by onboarding
+    if (isSuperAdmin) return;
 
     if (
       onboardingState !== undefined &&
@@ -373,7 +398,7 @@ export default function DashboardLayout({
     if (onboardingState === null && !isOnboarding) {
       router.replace("/dashboard/onboarding");
     }
-  }, [onboardingState, isOnboarding, router, isAuthenticated, isAuthLoading]);
+  }, [onboardingState, isOnboarding, router, isAuthenticated, isAuthLoading, isSuperAdmin]);
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
@@ -395,8 +420,9 @@ export default function DashboardLayout({
   }
 
   const showOnboardingLayout =
-    isOnboarding ||
-    (isAuthenticated && onboardingState !== undefined && !onboardingState?.isComplete);
+    !isSuperAdmin &&
+    (isOnboarding ||
+      (isAuthenticated && onboardingState !== undefined && !onboardingState?.isComplete));
   if (showOnboardingLayout) {
     return (
       <div className="min-h-screen bg-background">

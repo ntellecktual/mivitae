@@ -44,6 +44,8 @@ const STEPS = [
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { user } = useUser();
+  const isSuperAdmin = user?.id === "user_3CW4IYOWilTTTrhF3vnAQMZ9tkx";
   const state = useQuery(api.onboarding.getSelf);
   const initializeSelf = useMutation(api.onboarding.initializeSelf);
   const advanceSelf = useMutation(api.onboarding.advanceSelf);
@@ -66,12 +68,12 @@ export default function OnboardingPage() {
     }
   }, [state]);
 
-  // Redirect once completed
+  // Redirect once completed — but not for superadmin (they are previewing)
   useEffect(() => {
-    if (state?.isComplete) {
+    if (state?.isComplete && !isSuperAdmin) {
       router.replace("/dashboard");
     }
-  }, [state?.isComplete, router]);
+  }, [state?.isComplete, isSuperAdmin, router]);
 
   const advance = useCallback(async () => {
     await advanceSelf({ completedStep: step, nextStep: step + 1 });

@@ -14,12 +14,10 @@ export type PageTransition = "none" | "fade" | "slide" | "morph";
 export type NavVariant = "default" | "minimal" | "pills" | "underline";
 export type NavPosition = "left" | "right";
 export type NavIconStyle = "default" | "outline" | "rounded" | "square";
-export type SectionDivider = "none" | "wave" | "angle" | "curve" | "zigzag";
 export type ButtonStyle = "default" | "rounded" | "pill" | "outline" | "ghost" | "glow";
 export type ImageFilter = "none" | "grayscale" | "sepia" | "saturate" | "contrast" | "brightness";
 export type SectionSpacing = "compact" | "comfortable" | "spacious";
 export type SocialIconStyle = "default" | "rounded" | "square" | "pill" | "outline" | "glow";
-export type ScrollProgressPosition = "top" | "bottom";
 export type SplashStyle = "fade" | "slide-up" | "zoom" | "blur";
 export type FontScale = "small" | "medium" | "large";
 
@@ -44,13 +42,6 @@ export interface NavStyleConfig {
   width: "narrow" | "default" | "wide";
   showLabels: boolean;
   iconStyle?: NavIconStyle;
-}
-
-export interface ScrollProgressConfig {
-  enabled: boolean;
-  color?: string;
-  position?: ScrollProgressPosition;
-  height?: number; // px
 }
 
 export interface SplashScreenConfig {
@@ -112,10 +103,6 @@ export interface ThemeConfig {
   // Navigation styling
   navStyle?: NavStyleConfig;
 
-  // Section dividers
-  sectionDivider?: SectionDivider;
-  sectionDividerColor?: string;
-
   // Button styling
   buttonStyle?: ButtonStyle;
 
@@ -127,9 +114,6 @@ export interface ThemeConfig {
 
   // Social icon styles
   socialIconStyle?: SocialIconStyle;
-
-  // Scroll progress indicator
-  scrollProgress?: ScrollProgressConfig;
 
   // Splash screen
   splashScreen?: SplashScreenConfig;
@@ -1065,11 +1049,13 @@ export function getPageTransitionCss(id: string, transition: PageTransition): st
       return `
         @keyframes pf-page-fade { from { opacity: 0; } to { opacity: 1; } }
         #${id} { animation: pf-page-fade 0.6s ease both; }
+        #${id} .pf-content-inner section { animation: pf-page-fade 0.4s ease both; }
       `;
     case "slide":
       return `
         @keyframes pf-page-slide { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         #${id} { animation: pf-page-slide 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        #${id} .pf-content-inner section { animation: pf-page-slide 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
       `;
     case "morph":
       return `
@@ -1078,6 +1064,7 @@ export function getPageTransitionCss(id: string, transition: PageTransition): st
           100% { opacity: 1; transform: scale(1); filter: blur(0); }
         }
         #${id} { animation: pf-page-morph 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        #${id} .pf-content-inner section { animation: pf-page-morph 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
       `;
     default:
       return "";
@@ -1087,84 +1074,27 @@ export function getPageTransitionCss(id: string, transition: PageTransition): st
 export function getParallaxCss(id: string): string {
   return `
     #${id} .pf-content { perspective: 1px; overflow-y: auto; overflow-x: hidden; }
-    #${id} .pf-hero-section { transform: translateZ(-0.5px) scale(1.5); transform-origin: center top; }
+    #${id} .pf-home-split,
+    #${id} .pf-home-hero { transform: translateZ(-0.5px) scale(1.5); transform-origin: center top; }
     #${id} .pf-section-title { transform: translateZ(0); }
   `;
 }
 
-export function getSectionDividerCss(id: string, divider: SectionDivider, color: string): string {
-  const encodedColor = encodeURIComponent(color);
-  switch (divider) {
-    case "wave":
-      return `
-        #${id} section + section::before {
-          content: '';
-          display: block;
-          width: 100%;
-          height: 40px;
-          margin-bottom: 20px;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 40'%3E%3Cpath d='M0 20 Q300 0 600 20 T1200 20 V40 H0 Z' fill='${encodedColor}'/%3E%3C/svg%3E");
-          background-size: 100% 100%;
-          background-repeat: no-repeat;
-        }
-      `;
-    case "angle":
-      return `
-        #${id} section + section::before {
-          content: '';
-          display: block;
-          width: 100%;
-          height: 40px;
-          margin-bottom: 20px;
-          background: linear-gradient(to right bottom, transparent 49.5%, ${color} 49.5%, ${color} 50.5%, transparent 50.5%);
-        }
-      `;
-    case "curve":
-      return `
-        #${id} section + section::before {
-          content: '';
-          display: block;
-          width: 100%;
-          height: 40px;
-          margin-bottom: 20px;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 40'%3E%3Cpath d='M0 40 Q600 -20 1200 40 Z' fill='${encodedColor}'/%3E%3C/svg%3E");
-          background-size: 100% 100%;
-          background-repeat: no-repeat;
-        }
-      `;
-    case "zigzag":
-      return `
-        #${id} section + section::before {
-          content: '';
-          display: block;
-          width: 100%;
-          height: 20px;
-          margin-bottom: 20px;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 20'%3E%3Cpath d='M0 20 L20 0 L40 20 L60 0 L80 20 L100 0 L120 20' fill='none' stroke='${encodedColor}' stroke-width='2'/%3E%3C/svg%3E");
-          background-size: 120px 20px;
-          background-repeat: repeat-x;
-        }
-      `;
-    default:
-      return "";
-  }
-}
-
 export function getButtonStyleCss(id: string, style: ButtonStyle, accentColor: string): string {
-  const base = `#${id} .pf-btn, #${id} a.pf-cert-badge`;
+  const base = `#${id} .pf-home-action-btn, #${id} a.pf-cert-badge, #${id} .pf-demo-link, #${id} .pf-view-all`;
   switch (style) {
     case "rounded":
       return `${base} { border-radius: 12px; }`;
     case "pill":
       return `${base} { border-radius: 999px; padding-left: 20px; padding-right: 20px; }`;
     case "outline":
-      return `${base} { background: transparent; border: 2px solid ${accentColor}; color: ${accentColor}; }
-              ${base}:hover { background: ${accentColor}; color: white; }`;
+      return `${base} { background: transparent !important; border: 2px solid ${accentColor} !important; color: ${accentColor} !important; }
+              ${base}:hover { background: ${accentColor} !important; color: white !important; }`;
     case "glow":
-      return `${base} { background: ${accentColor}; border: none; color: white; box-shadow: 0 4px 20px ${hexToRgba(accentColor, 0.4)}; }
+      return `${base} { background: ${accentColor} !important; border: none !important; color: white !important; box-shadow: 0 4px 20px ${hexToRgba(accentColor, 0.4)}; }
               ${base}:hover { box-shadow: 0 6px 28px ${hexToRgba(accentColor, 0.6)}; }`;
     case "ghost":
-      return `${base} { background: transparent; border: none; color: ${accentColor}; text-decoration: underline; text-underline-offset: 3px; }
+      return `${base} { background: transparent !important; border: none !important; color: ${accentColor} !important; text-decoration: underline; text-underline-offset: 3px; }
               ${base}:hover { text-decoration-thickness: 2px; }`;
     default:
       return "";
@@ -1183,7 +1113,7 @@ export function getImageFilterCss(id: string, filter: ImageFilter): string {
   return `
     #${id} .pf-work-card-img img,
     #${id} .pf-sidebar-avatar,
-    #${id} .pf-edu-logo { filter: ${filterMap[filter]}; transition: filter 0.3s ease; }
+    #${id} .pf-edu-card-logo { filter: ${filterMap[filter]}; transition: filter 0.3s ease; }
     #${id} .pf-work-card:hover .pf-work-card-img img { filter: ${filterMap[filter]} brightness(1.05); }
   `;
 }
@@ -1203,7 +1133,7 @@ export function getSectionSpacingCss(id: string, spacing: SectionSpacing): strin
 }
 
 export function getSocialIconStyleCss(id: string, style: SocialIconStyle, accentColor: string): string {
-  const base = `#${id} .pf-sidebar-footer a, #${id} .pf-social-link`;
+  const base = `#${id} .pf-home-meta a`;
   switch (style) {
     case "rounded":
       return `${base} { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: ${accentColor}; color: white !important; }`;
@@ -1219,22 +1149,6 @@ export function getSocialIconStyleCss(id: string, style: SocialIconStyle, accent
     default:
       return "";
   }
-}
-
-export function getScrollProgressCss(id: string, config: ScrollProgressConfig): string {
-  if (!config.enabled) return "";
-  return `
-    #${id} .pf-scroll-progress {
-      position: fixed;
-      ${config.position ?? "top"}: 0;
-      left: 0;
-      width: 0%;
-      height: ${config.height ?? 3}px;
-      background: ${config.color ?? "#3b82f6"};
-      z-index: 9999;
-      transition: width 0.1s linear;
-    }
-  `;
 }
 
 export function getSplashScreenCss(config: SplashScreenConfig): string {
@@ -1319,9 +1233,12 @@ export function getNavStyleCss(id: string, navStyle: NavStyleConfig, theme: Them
       css += `#${id} .pf-sidebar { background: transparent; border-color: transparent; width: 64px !important; }\n`;
       css += `#${id} .pf-sidebar-profile { padding: 16px 8px; }\n`;
       css += `#${id} .pf-sidebar-name, #${id} .pf-sidebar-headline { display: none; }\n`;
-      css += `#${id} .pf-nav-item span:not(.pf-nav-icon) { display: none; }\n`;
-      css += `#${id} .pf-nav-item { justify-content: center; padding: 12px; }\n`;
+      css += `#${id} .pf-nav-text, #${id} .pf-nav-badge { display: none; }\n`;
+      css += `#${id} .pf-nav-item { justify-content: center; padding: 12px; gap: 0; }\n`;
       css += `#${id} .pf-sidebar-label { display: none; }\n`;
+      css += `#${id} .pf-nav-divider { display: none; }\n`;
+      css += `#${id} .pf-sidebar-footer { font-size: 0; }\n`;
+      css += `#${id} .pf-sidebar-footer a { font-size: 0; }\n`;
       break;
     case "pills":
       css += `#${id} .pf-nav-item { border-radius: 999px; }\n`;

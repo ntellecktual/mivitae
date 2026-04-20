@@ -261,12 +261,17 @@ const themeConfigValidator = v.object({
   hoverEffects: v.optional(v.union(v.literal("none"), v.literal("lift"), v.literal("glow"), v.literal("tilt"), v.literal("scale"))),
   pageTransition: v.optional(v.union(v.literal("none"), v.literal("fade"), v.literal("slide"), v.literal("morph"))),
   parallaxEnabled: v.optional(v.boolean()),
+  showCertificates: v.optional(v.boolean()),
+  showContact: v.optional(v.boolean()),
   darkMode: v.optional(v.object({
     enabled: v.boolean(),
     darkPalette: v.optional(v.object({
       bgPrimary: v.string(),
+      bgSecondary: v.string(),
       textColor: v.string(),
+      subtextColor: v.string(),
       cardBg: v.string(),
+      cardBorder: v.string(),
       accentColor: v.string(),
     })),
   })),
@@ -277,18 +282,12 @@ const themeConfigValidator = v.object({
     showLabels: v.boolean(),
     iconStyle: v.optional(v.union(v.literal("default"), v.literal("rounded"), v.literal("square"), v.literal("outline"))),
   })),
-  sectionDivider: v.optional(v.union(v.literal("none"), v.literal("wave"), v.literal("angle"), v.literal("curve"), v.literal("zigzag"))),
-  sectionDividerColor: v.optional(v.string()),
+
   buttonStyle: v.optional(v.union(v.literal("default"), v.literal("rounded"), v.literal("pill"), v.literal("outline"), v.literal("ghost"), v.literal("glow"))),
   imageFilter: v.optional(v.union(v.literal("none"), v.literal("grayscale"), v.literal("sepia"), v.literal("saturate"), v.literal("contrast"), v.literal("brightness"))),
   sectionSpacing: v.optional(v.union(v.literal("compact"), v.literal("comfortable"), v.literal("spacious"))),
   socialIconStyle: v.optional(v.union(v.literal("default"), v.literal("rounded"), v.literal("square"), v.literal("pill"), v.literal("outline"), v.literal("glow"))),
-  scrollProgress: v.optional(v.object({
-    enabled: v.boolean(),
-    color: v.optional(v.string()),
-    position: v.optional(v.union(v.literal("top"), v.literal("bottom"))),
-    height: v.optional(v.number()),
-  })),
+
   splashScreen: v.optional(v.object({
     enabled: v.boolean(),
     style: v.optional(v.union(v.literal("fade"), v.literal("slide-up"), v.literal("zoom"), v.literal("blur"))),

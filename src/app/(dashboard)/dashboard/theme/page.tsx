@@ -22,7 +22,6 @@ import {
   type NavVariant,
   type NavPosition,
   type NavIconStyle,
-  type SectionDivider,
   type ButtonStyle,
   type ImageFilter,
   type SectionSpacing,
@@ -31,7 +30,6 @@ import {
   type SplashStyle,
   type DarkModeConfig,
   type NavStyleConfig,
-  type ScrollProgressConfig,
   type SplashScreenConfig,
   THEME_PRESETS,
   HEADING_FONTS,
@@ -970,42 +968,6 @@ function LayoutPanel({
           onChange={(v) => update({ sectionSpacing: v as SectionSpacing })}
         />
       </div>
-
-      {/* Section Dividers */}
-      <div>
-        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Section Divider</p>
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
-          {([
-            { value: "none", label: "None" },
-            { value: "wave", label: "Wave" },
-            { value: "angle", label: "Angle" },
-            { value: "curve", label: "Curve" },
-            { value: "zigzag", label: "Zigzag" },
-          ] as const).map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => update({ sectionDivider: opt.value })}
-              className={cn(
-                "shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-all border",
-                (theme.sectionDivider ?? "none") === opt.value
-                  ? "border-white/40 bg-white/20 text-white"
-                  : "border-white/10 text-white/60 hover:text-white hover:border-white/25"
-              )}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-        {theme.sectionDivider && theme.sectionDivider !== "none" && (
-          <div className="mt-2">
-            <ColorInput
-              label="Divider Color"
-              value={theme.sectionDividerColor ?? theme.accentColor}
-              onChange={(c) => update({ sectionDividerColor: c })}
-            />
-          </div>
-        )}
-      </div>
     </div>
   );
 }
@@ -1052,7 +1014,8 @@ function MotionPanel({
 
       {/* Hover Effects */}
       <div>
-        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Card Hover Effect</p>
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-0.5">Card Hover Effect</p>
+        <p className="text-[9px] text-white/30 mb-1.5">Hover over any card in the preview to see</p>
         <div className="flex gap-1.5 flex-wrap">
           {([
             { value: "none", label: "None" },
@@ -1079,7 +1042,8 @@ function MotionPanel({
 
       {/* Page Transition */}
       <div>
-        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Page Transition</p>
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-0.5">Page Transition</p>
+        <p className="text-[9px] text-white/30 mb-1.5">Animates content when switching nav sections</p>
         <ToggleOption
           options={[
             { label: "None", value: "none" },
@@ -1211,7 +1175,8 @@ function StylePanel({
 
       {/* Button Style */}
       <div>
-        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Button Style</p>
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-0.5">Button Style</p>
+        <p className="text-[9px] text-white/30 mb-1.5">Affects action buttons in home &amp; portfolio sections</p>
         <div className="flex gap-1.5 flex-wrap">
           {([
             { value: "default", label: "Default" },
@@ -1239,7 +1204,8 @@ function StylePanel({
 
       {/* Social Icon Style */}
       <div>
-        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Social Icons</p>
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-0.5">Social Icons</p>
+        <p className="text-[9px] text-white/30 mb-1.5">Styles social links in the home hero section</p>
         <div className="flex gap-1.5 flex-wrap">
           {([
             { value: "default", label: "Default" },
@@ -1267,7 +1233,8 @@ function StylePanel({
 
       {/* Image Filter */}
       <div>
-        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1.5">Image Filter</p>
+        <p className="text-[10px] text-white/60 uppercase tracking-wider mb-0.5">Image Filter</p>
+        <p className="text-[9px] text-white/30 mb-1.5">Applied to profile photo &amp; portfolio images</p>
         <div className="flex gap-1.5 flex-wrap">
           {([
             { value: "none", label: "None" },
@@ -1291,59 +1258,6 @@ function StylePanel({
             </button>
           ))}
         </div>
-      </div>
-
-      {/* Scroll Progress */}
-      <Separator className="bg-white/10" />
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-[10px] text-white/60 uppercase tracking-wider">Scroll Progress Bar</p>
-          <button
-            onClick={() => {
-              const current = theme.scrollProgress ?? { enabled: false, color: theme.accentColor, position: "top" as const, height: 3 };
-              update({ scrollProgress: { ...current, enabled: !current.enabled } });
-            }}
-            className={cn(
-              "relative h-5 w-9 rounded-full transition-colors",
-              theme.scrollProgress?.enabled ? "bg-white/30" : "bg-white/10"
-            )}
-          >
-            <div className={cn(
-              "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform",
-              theme.scrollProgress?.enabled ? "translate-x-4" : "translate-x-0.5"
-            )} />
-          </button>
-        </div>
-        {theme.scrollProgress?.enabled && (
-          <div className="space-y-2 rounded-lg border border-white/10 bg-white/5 p-3">
-            <ColorInput
-              label="Bar Color"
-              value={theme.scrollProgress.color ?? theme.accentColor}
-              onChange={(c) => update({ scrollProgress: { ...theme.scrollProgress!, color: c } })}
-            />
-            <ToggleOption
-              options={[
-                { label: "Top", value: "top" },
-                { label: "Bottom", value: "bottom" },
-              ]}
-              value={theme.scrollProgress.position ?? "top"}
-              onChange={(v) => update({ scrollProgress: { ...theme.scrollProgress!, position: v as "top" | "bottom" } })}
-            />
-            <div className="flex items-center gap-2">
-              <p className="text-[10px] text-white/60">Height</p>
-              <input
-                type="range"
-                min={1}
-                max={8}
-                value={theme.scrollProgress.height ?? 3}
-                onChange={(e) => update({ scrollProgress: { ...theme.scrollProgress!, height: Number(e.target.value) } })}
-                className="flex-1 accent-white"
-                title="Bar height"
-              />
-              <span className="text-[10px] text-white/60 font-mono">{theme.scrollProgress.height ?? 3}px</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Splash Screen */}
@@ -1603,7 +1517,14 @@ export default function ThemePage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await saveThemeMutation({ themeConfig: resolvedTheme });
+      // Strip deleted feature fields before saving
+      const { sectionDivider, sectionDividerColor, scrollProgress, ...cleanTheme } = resolvedTheme as ThemeConfig & {
+        sectionDivider?: unknown;
+        sectionDividerColor?: unknown;
+        scrollProgress?: unknown;
+      };
+      void sectionDivider; void sectionDividerColor; void scrollProgress;
+      await saveThemeMutation({ themeConfig: cleanTheme });
       setSavedAt(Date.now());
       toast.success("Theme published!");
     } catch {

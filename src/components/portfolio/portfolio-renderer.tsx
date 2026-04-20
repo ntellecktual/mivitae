@@ -22,12 +22,10 @@ import {
   getHoverEffectsCss,
   getPageTransitionCss,
   getParallaxCss,
-  getSectionDividerCss,
   getButtonStyleCss,
   getImageFilterCss,
   getSectionSpacingCss,
   getSocialIconStyleCss,
-  getScrollProgressCss,
   getSplashScreenCss,
   getFontScaleCss,
   getNavStyleCss,
@@ -1489,12 +1487,10 @@ function buildPortfolioCss(id: string, theme: ThemeConfig): string {
     ${theme.hoverEffects && theme.hoverEffects !== "none" ? getHoverEffectsCss(id, theme.hoverEffects) : ""}
     ${theme.pageTransition && theme.pageTransition !== "none" ? getPageTransitionCss(id, theme.pageTransition) : ""}
     ${theme.parallaxEnabled ? getParallaxCss(id) : ""}
-    ${theme.sectionDivider && theme.sectionDivider !== "none" ? getSectionDividerCss(id, theme.sectionDivider, theme.sectionDividerColor ?? theme.accentColor) : ""}
     ${theme.buttonStyle && theme.buttonStyle !== "default" ? getButtonStyleCss(id, theme.buttonStyle, theme.accentColor) : ""}
     ${theme.imageFilter && theme.imageFilter !== "none" ? getImageFilterCss(id, theme.imageFilter) : ""}
     ${theme.sectionSpacing ? getSectionSpacingCss(id, theme.sectionSpacing) : ""}
     ${theme.socialIconStyle && theme.socialIconStyle !== "default" ? getSocialIconStyleCss(id, theme.socialIconStyle, theme.accentColor) : ""}
-    ${theme.scrollProgress ? getScrollProgressCss(id, theme.scrollProgress) : ""}
     ${theme.fontScale && theme.fontScale !== "medium" ? getFontScaleCss(id, theme.fontScale) : ""}
     ${theme.navStyle ? getNavStyleCss(id, theme.navStyle, theme) : ""}
 
@@ -1653,19 +1649,6 @@ export default function PortfolioRenderer({
     };
   }, [theme.headingFont, theme.bodyFont, preview]);
 
-  // Scroll progress bar
-  useEffect(() => {
-    if (preview || !theme.scrollProgress?.enabled) return;
-    const el = document.querySelector(`#${scopeId} .pf-scroll-progress`) as HTMLElement | null;
-    if (!el) return;
-    const handleScroll = () => {
-      const h = document.documentElement.scrollHeight - window.innerHeight;
-      if (h > 0) el.style.width = `${(window.scrollY / h) * 100}%`;
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [preview, theme.scrollProgress?.enabled, scopeId]);
-
   // Extract dominant colors from education images
   const extractEduColors = useCallback(async () => {
     const entries = [...education].filter(e => e.imageUrl);
@@ -1737,8 +1720,8 @@ export default function PortfolioRenderer({
   const hasDemos = theme.showDemos && publicDemos.length > 0;
   const hasSkills = theme.showSkills && sortedSkills.length > 0;
   const hasVolunteering = theme.showVolunteering && sortedVolunteering.length > 0;
-  const showContact = (theme as ThemeConfig & { showContact?: boolean }).showContact !== false && !preview;
-  const showCertificates = (theme as ThemeConfig & { showCertificates?: boolean }).showCertificates !== false;
+  const showContact = theme.showContact !== false && !preview;
+  const showCertificates = theme.showCertificates !== false;
 
   // Navigate helper
   function nav(section: ActiveSection) {
@@ -1764,7 +1747,7 @@ export default function PortfolioRenderer({
       )}
 
       {/* Splash Screen */}
-      {theme.splashScreen?.enabled && !preview && (
+      {theme.splashScreen?.enabled && (
         <>
           <style dangerouslySetInnerHTML={{ __html: getSplashScreenCss(theme.splashScreen) }} />
           <div className="pf-splash">
@@ -1775,11 +1758,6 @@ export default function PortfolioRenderer({
             </div>
           </div>
         </>
-      )}
-
-      {/* Scroll Progress Bar */}
-      {theme.scrollProgress?.enabled && !preview && (
-        <div className="pf-scroll-progress" />
       )}
 
       {/* Mobile hamburger — hidden in preview (theme studio) */}
@@ -1822,7 +1800,7 @@ export default function PortfolioRenderer({
         {/* Navigation */}
         <nav className="pf-sidebar-nav">
           <button className={`pf-nav-item ${activeSection === "home" ? "active" : ""}`} onClick={() => nav("home")}>
-            <Home size={16} /> Home
+            <Home size={16} /> <span className="pf-nav-text">Home</span>
           </button>
 
           <div className="pf-nav-divider" />
@@ -1832,13 +1810,13 @@ export default function PortfolioRenderer({
           )}
           {hasPortfolio && (
             <button className={`pf-nav-item ${activeSection === "portfolio" ? "active" : ""}`} onClick={() => nav("portfolio")}>
-              <Briefcase size={16} /> Portfolio
+              <Briefcase size={16} /> <span className="pf-nav-text">Portfolio</span>
               <span className="pf-nav-badge">{sortedSections.length}</span>
             </button>
           )}
           {hasEducation && (
             <button className={`pf-nav-item ${activeSection === "education" ? "active" : ""}`} onClick={() => nav("education")}>
-              <GraduationCap size={16} /> Education
+              <GraduationCap size={16} /> <span className="pf-nav-text">Education</span>
               <span className="pf-nav-badge">{sortedEducation.length + (showCertificates ? sortedCertificates.length : 0)}</span>
             </button>
           )}
@@ -1848,7 +1826,7 @@ export default function PortfolioRenderer({
               <div className="pf-nav-divider" />
               <div className="pf-sidebar-label">Demos ({publicDemos.length})</div>
               <button className={`pf-nav-item ${activeSection === "discover" ? "active" : ""}`} onClick={() => nav("discover")}>
-                <Compass size={16} /> Discover
+                <Compass size={16} /> <span className="pf-nav-text">Discover</span>
               </button>
             </>
           )}
@@ -1857,7 +1835,7 @@ export default function PortfolioRenderer({
             <>
               <div className="pf-nav-divider" />
               <button className={`pf-nav-item ${activeSection === "skills" ? "active" : ""}`} onClick={() => nav("skills")}>
-                <Wrench size={16} /> Skills
+                <Wrench size={16} /> <span className="pf-nav-text">Skills</span>
                 <span className="pf-nav-badge">{sortedSkills.length}</span>
               </button>
             </>
@@ -1867,7 +1845,7 @@ export default function PortfolioRenderer({
             <>
               <div className="pf-nav-divider" />
               <button className={`pf-nav-item ${activeSection === "volunteering" ? "active" : ""}`} onClick={() => nav("volunteering")}>
-                <Heart size={16} /> Volunteering
+                <Heart size={16} /> <span className="pf-nav-text">Volunteering</span>
               </button>
             </>
           )}
@@ -1876,7 +1854,7 @@ export default function PortfolioRenderer({
             <>
               <div className="pf-nav-divider" />
               <button className={`pf-nav-item ${activeSection === "contact" ? "active" : ""}`} onClick={() => nav("contact")}>
-                <Mail size={16} /> Contact
+                <Mail size={16} /> <span className="pf-nav-text">Contact</span>
               </button>
             </>
           )}
